@@ -5,7 +5,7 @@ Shared policy for every contributor and every assistant client. Project knowledg
 ## Hard Rules
 - Forks and other repository owners are supported; there is no owner or remote-URL allowlist.
 - Use the branch and remote intended for the current checkout and task. Do not assume direct access to the upstream repository or require commits on `main`.
-- Commit or push only within the user's current authorization. Before an authorized push, inspect all actual push URLs of the selected remote and the source/destination branches. Confirm they match the intended destination; do not silently change remotes or push to another target.
+- Never commit or push on your own initiative. Save to Git only when the user explicitly asks for it or invokes `wrap`; that permission covers the one request, not later work. Finishing a task, a passing build or a user's "ok" is not a request to commit. Before an authorized push, inspect all actual push URLs of the selected remote and the source/destination branches. Confirm they match the intended destination; do not silently change remotes or push to another target.
 - Use GitHub CLI (`gh`) for repository-facing commit/push workflows where practical.
 - Do not use GitHub Issues for project planning. Keep the backlog in `.wiki/backlog.md`.
 

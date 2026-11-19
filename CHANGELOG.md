@@ -2,6 +2,11 @@
 
 User-visible changes by version, newest first. Current behavior is documented in the [wiki](.wiki/README.md).
 
+## 0.8.6 — test build
+
+- Tapping an effect in the library unfolds its description and parameters; ▶ plays with these values and changes are heard in the running loop. Values are not stored.
+- Track and master dialogs use the screen width, and expanded effect controls start at the left edge, giving sliders more room on phones.
+
 ## 0.8.5 — first public source release
 
 - Source published under the MIT license; third-party notices and full license texts are in `licenses/` and in About → Open-source licenses.

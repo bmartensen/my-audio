@@ -15,7 +15,7 @@ Branch, remote and push rules are in [AGENTS.md](../AGENTS.md). Update the wiki 
 .\build.ps1 -Target Windows
 ```
 
-Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build.
+Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build. Each version gets an annotated tag `v<versionName>` (e.g. `v0.8.6`) on the commit it was built from, pushed together with that commit.
 
 ```powershell
 .\tools\build_desktop_native.ps1

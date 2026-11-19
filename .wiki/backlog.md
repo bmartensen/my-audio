@@ -8,7 +8,7 @@ Only outstanding work belongs here. Agreed scope is in [requirements](app-requir
 - Add selected real product screenshots to the store assets under `branding/`.
 - Exercise single-track import on a physical Android device with MP3 and a messaging-app voice recording.
 - Validate a real multitrack ZIP on Android for duration, names and alignment; backup/export has been exercised, full acceptance remains open.
-- Use 0.8.5 in real Android recording sessions, including overdubbing and sharing project ZIPs through Google Drive.
+- Use 0.8.6 in real Android recording sessions, including overdubbing and sharing project ZIPs through Google Drive.
 - Establish Microsoft Store submission access and choose a signed MSI/MSIX distribution route.
 - Accept effect preview on Windows and Android: library, track/master dialogs, A/B, parameter changes during looping and empty-project fallback; measure slow six-slot chains on Android (`MyAudioPreview` logs).
 - Test stereo preservation and the reported crackle with a fresh import of the original stereo test material (not in the repository) on Windows and Android. See [audio import](audio-import.md).

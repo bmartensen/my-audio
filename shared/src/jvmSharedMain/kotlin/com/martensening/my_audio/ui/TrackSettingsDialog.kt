@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.NormalizeEffect
@@ -65,6 +66,10 @@ fun formatGainDb(gain: Float): String {
 }
 
 private fun Float.roundTo(step: Float) = (this / step).roundToInt() * step
+
+/** Effect dialogs use the screen width (Material still caps a dialog at 560 dp) so sliders get room on phones. */
+private val effectDialogProperties = DialogProperties(usePlatformDefaultWidth = false)
+private val effectDialogModifier = Modifier.padding(horizontal = 16.dp)
 
 /** Formats a pan position as "L 40", "Centre" or "R 40". */
 @Composable
@@ -111,6 +116,8 @@ fun TrackSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = effectDialogModifier,
+        properties = effectDialogProperties,
         title = {
             if (editingName) {
                 OutlinedTextField(
@@ -216,6 +223,8 @@ fun MasterSettingsDialog(
     val audition = rememberEffectAudition(auditionSource)
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = effectDialogModifier,
+        properties = effectDialogProperties,
         title = { Text(stringResource(Res.string.master_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

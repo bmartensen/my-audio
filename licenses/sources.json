@@ -97,7 +97,7 @@
   {
     "file": "runtime-components.txt",
     "source": "Gradle debugRuntimeClasspath and jvmRuntimeClasspath external artifact inventory",
-    "sha256": "e765960da53342d40a477733fe89a1ab1e5d1813ade7836844e9da3a9e4f425f"
+    "sha256": "6880e99fc61ad7fe90015a7a8cc695164955801775e320a0e016383b02ecbd85"
   },
   {
     "file": "skia-LICENSE.txt",

@@ -196,7 +196,8 @@ fun EffectChainEditor(
                     }
                 )
                 if (expanded == item.key) {
-                    Column(modifier = Modifier.padding(start = 32.dp, bottom = 4.dp)) {
+                    // Full width, also below the drag handle: parameter sliders need the room on phones.
+                    Column(modifier = Modifier.padding(bottom = 4.dp)) {
                         if (audition != null) {
                             AuditionControls(
                                 playing = audition.playing == item.key,
@@ -207,11 +208,7 @@ fun EffectChainEditor(
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
-                        when (val effect = item.slot.effect) {
-                            is ChainEffect.Tone -> ToneControls(effect) { replace(item.key, item.slot.copy(effect = it)) }
-                            is ChainEffect.Reverb -> ReverbControls(effect) { replace(item.key, item.slot.copy(effect = it)) }
-                            is ChainEffect.Airwindows -> AirwindowsControls(effect) { replace(item.key, item.slot.copy(effect = it)) }
-                        }
+                        EffectControls(item.slot.effect) { replace(item.key, item.slot.copy(effect = it)) }
                         TextButton(
                             onClick = {
                                 slots.removeAll { it.key == item.key }
@@ -311,6 +308,19 @@ private fun AddEffectButton(full: Boolean, choices: List<EffectChoice>, onAdd: (
 
 private fun Float.roundTo(step: Float) = (this / step).roundToInt() * step
 
+/**
+ * The parameter controls of one effect, shared by chain slots and the library audition.
+ * [showDescription] is off where the Airwindows description is already visible.
+ */
+@Composable
+internal fun EffectControls(effect: ChainEffect, showDescription: Boolean = true, onChange: (ChainEffect) -> Unit) {
+    when (effect) {
+        is ChainEffect.Tone -> ToneControls(effect, onChange)
+        is ChainEffect.Reverb -> ReverbControls(effect, onChange)
+        is ChainEffect.Airwindows -> AirwindowsControls(effect, showDescription, onChange)
+    }
+}
+
 /** „EQ (My Audio)“: one preset sets EQ and compressor together; each part keeps its own switch. */
 @Composable
 private fun ToneControls(tone: ChainEffect.Tone, onChange: (ChainEffect.Tone) -> Unit) {
@@ -399,7 +409,7 @@ private fun ReverbControls(effect: ChainEffect.Reverb, onChange: (ChainEffect.Re
  * effect's parameter name and its own display text, e.g. "-3.0 dB".
  */
 @Composable
-private fun AirwindowsControls(effect: ChainEffect.Airwindows, onChange: (ChainEffect.Airwindows) -> Unit) {
+private fun AirwindowsControls(effect: ChainEffect.Airwindows, showDescription: Boolean, onChange: (ChainEffect.Airwindows) -> Unit) {
     val names = remember(effect.name) { AirwindowsCatalog.parameterNames(effect.name) }
     if (names.isEmpty()) {
         Text(
@@ -411,7 +421,7 @@ private fun AirwindowsControls(effect: ChainEffect.Airwindows, onChange: (ChainE
     }
     val values = remember(effect) { AirwindowsCatalog.complete(effect.name, effect.values) }
     val texts = remember(effect) { AirwindowsCatalog.display(effect.name, values) }
-    AirwindowsCatalog.find(effect.name)?.let { known ->
+    if (showDescription) AirwindowsCatalog.find(effect.name)?.let { known ->
         Text(
             airwindowsDescription(known),
             style = MaterialTheme.typography.bodySmall,

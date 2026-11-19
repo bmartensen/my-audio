@@ -2,6 +2,12 @@
 
 Newest dated group first. Entries describe choices that currently govern the project; detailed behavior belongs in requirements and topic pages.
 
+## 2026-11-20
+
+- **Saving to Git:** assistants commit or push only on an explicit request or through `wrap`; the public repository must not receive accidental commits.
+- **Version tags:** every version gets an annotated tag `v<versionName>` on the commit it was built from, so published installers map to exact source.
+- **Effect editing:** library auditions expose the effect's parameters without storing them, so effects can be judged beyond their conservative defaults. Effect dialogs use the full phone width.
+
 ## 2026-11-19
 
 - **Product:** a studio from the smartphone for spontaneous musical ideas, multitrack sketches and demos with effects. A direct recording workflow takes priority over competing with professional DAWs; Windows complements the phone.

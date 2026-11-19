@@ -17,6 +17,7 @@ These rules apply to everyone working on My Audio, with or without an assistant.
 ## Assistants
 
 - Assistants are tools. The human contributor reviews every change and is responsible for it.
+- Assistants commit or push only when explicitly asked or through the `wrap` workflow, never on their own initiative.
 - Product code, documentation and commit messages carry no agent/model authorship credits.
 
 ## Privacy and honesty

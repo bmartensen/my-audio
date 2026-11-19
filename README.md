@@ -6,7 +6,7 @@
 
 My Audio records musical ideas as multitrack sketches on Android and Windows: record a melody, add a guitar part or a second voice over it, try effects and share the mix. It focuses on a direct path from idea to demo, not on competing with professional audio workstations.
 
-**Version 0.8.5** for Android (API 29+) and Windows x64. Hardware acceptance and known limitations are tracked in [current work](.wiki/current-work.md) and the [backlog](.wiki/backlog.md).
+**Version 0.8.6** for Android (API 29+) and Windows x64. Hardware acceptance and known limitations are tracked in [current work](.wiki/current-work.md) and the [backlog](.wiki/backlog.md).
 
 ## Features
 

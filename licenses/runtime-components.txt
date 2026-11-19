@@ -1,4 +1,4 @@
-# Resolved runtime coordinates (Android debug and Windows, 0.8.5)
+# Resolved runtime coordinates (Android debug and Windows)
 # Debug tooling is included; release packaging can omit it.
 :app androidx.activity:activity-compose:1.13.0
 :app androidx.activity:activity-ktx:1.13.0

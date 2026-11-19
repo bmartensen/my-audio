@@ -1,6 +1,6 @@
 # Product requirements
 
-Agreed current behavior for My Audio 0.8.5. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
+Agreed current behavior for My Audio 0.8.6. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
 
 ## Purpose, identity and platforms
 
@@ -58,11 +58,11 @@ Signal order: click removal → bleed removal → normalization → up to six or
 
 Stereo has one track card and a waveform showing the maximum channel magnitude per time bucket. Normalization and compression link channel gain; EQ/reverb preserve channel paths. Mix, playback and mix export are stereo.
 
-The library exposes 478 embedded Airwindows effects plus My Audio EQ/compressor and reverb, with search, categories and localized descriptions. Local selection controls the add-effect menu; only the library adds new choices. Existing project slots remain usable when deselected from the library. Slots reorder by handle, bypass without losing parameters and expand one editor at a time. Track dialog sections are input, effects and channel. Master has the same chain without cleanup, normalization or channel controls. Airwindows loudness matching defaults on (BS.1770, maximum ±24 dB), with per-slot opt-out for intentional level changes. No per-track reverb sends.
+The library exposes 478 embedded Airwindows effects plus My Audio EQ/compressor and reverb, with search, categories and localized descriptions. Local selection controls the add-effect menu; only the library adds new choices. Existing project slots remain usable when deselected from the library. Slots reorder by handle, bypass without losing parameters and expand one editor at a time. Track and master dialogs use the screen width with 16 dp side margins (at most 560 dp), and an expanded slot's controls span the full dialog width, starting below the drag handle. Track dialog sections are input, effects and channel. Master has the same chain without cleanup, normalization or channel controls. Airwindows loudness matching defaults on (BS.1770, maximum ±24 dB), with per-slot opt-out for intentional level changes. No per-track reverb sends.
 
 ## Effect audition
 
-Library effects can be auditioned before selection using defaults. Expanded track/master slots offer looping playback through the complete chain and A/B with/without that slot. Use roughly six seconds from the track or pre-master mix, preferring the loop range, otherwise playback position. Empty projects/library use the credited 7.2 s CC0 “Short Jazzy Tune No.1” clip by painted-panda (48 kHz PCM16 stereo, about −18.2 LUFS, peak −1.4 dBFS).
+Library effects can be auditioned before selection. Tapping an entry unfolds its full description and parameters, one entry at a time, starting from the defaults; ▶ plays with the current values and changes are heard in the running loop. Values are discarded when the entry folds, so they never change the library selection or projects. Expanded track/master slots offer looping playback through the complete chain and A/B with/without that slot. Use roughly six seconds from the track or pre-master mix, preferring the loop range, otherwise playback position. Empty projects/library use the credited 7.2 s CC0 “Short Jazzy Tune No.1” clip by painted-panda (48 kHz PCM16 stereo, about −18.2 LUFS, peak −1.4 dBFS).
 
 Parameter changes rerender after roughly 150 ms idle, preserving playback position; level matching applies. Preview does not commit project changes. The native offline path includes reverb tails, and a separate player loops the result. Android performance and selected-device routing remain explicit acceptance work. Live input monitoring with effects is separate planned work.
 

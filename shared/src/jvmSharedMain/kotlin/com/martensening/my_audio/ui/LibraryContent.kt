@@ -31,10 +31,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.martensening.my_audio.audio.AirwindowsCatalog
+import com.martensening.my_audio.data.ChainEffect
 import com.martensening.my_audio.data.EffectLibrary
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.resources.*
@@ -76,7 +76,7 @@ private sealed interface LibraryFilter {
     data class Category(val name: String) : LibraryFilter
 }
 
-/** [original] is Airwindows' own English text, shown unfolded when it differs from [description]. */
+/** [original] is Airwindows' own English text; it stays searchable but is not shown. */
 private class LibraryEntry(
     val id: String,
     val name: String,
@@ -93,17 +93,47 @@ private class LibraryEntry(
 @Composable
 fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
     val selection by library.selection.collectAsState()
-    // Every effect can be heard with its default settings on the bundled sample, also before selecting it.
+    // Every effect can be heard on the bundled sample, also before selecting it. One entry at a time
+    // unfolds its parameters; they start from the defaults, are heard while playing and never stored.
     val audition = rememberEffectAudition(SampleAuditionSource)
+    var expandedId by remember { mutableStateOf<String?>(null) }
+    var tuned by remember { mutableStateOf<ChainEffect?>(null) }
+    fun expand(id: String) {
+        if (expandedId == id) return
+        expandedId = id
+        tuned = EffectChoice(id).create()
+    }
     @Composable
     fun EntryRow(entry: LibraryEntry) = LibraryRow(
         entry = entry,
+        expanded = expandedId == entry.id,
+        onToggleExpanded = {
+            if (expandedId == entry.id) {
+                expandedId = null
+                tuned = null
+                if (audition.playing == entry.id) audition.stop()
+            } else {
+                expand(entry.id)
+            }
+        },
         selected = entry.id in selection,
         onSelect = { library.setSelected(entry.id, it) },
         playing = audition.playing == entry.id,
         bypassed = audition.bypassed,
-        onPlay = { audition.toggle(entry.id, listOf(EffectSlot(EffectChoice(entry.id).create())), emptyList()) },
-        onBypass = audition::setBypass
+        onPlay = {
+            expand(entry.id)
+            val effect = tuned ?: EffectChoice(entry.id).create()
+            audition.toggle(entry.id, listOf(EffectSlot(effect)), emptyList())
+        },
+        onBypass = audition::setBypass,
+        controls = {
+            tuned?.let { effect ->
+                EffectControls(effect, showDescription = false) { changed ->
+                    tuned = changed
+                    audition.update(entry.id, listOf(EffectSlot(changed)), emptyList())
+                }
+            }
+        }
     )
     var query by rememberSaveable { mutableStateOf("") }
     var filterKey by rememberSaveable { mutableStateOf("") }
@@ -231,24 +261,26 @@ private fun LibraryHeader(title: String) {
 }
 
 /**
- * One effect: name, category and description; a tap unfolds a long description, ▶ plays it on the
- * sample (with the A/B switch while it plays), the box selects it.
+ * One effect: name, category and description; a tap unfolds the full description and the effect's
+ * [controls], ▶ plays it on the sample (with the A/B switch while it plays), the box selects it.
  */
 @Composable
 private fun LibraryRow(
     entry: LibraryEntry,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit,
     selected: Boolean,
     onSelect: (Boolean) -> Unit,
     playing: Boolean,
     bypassed: Boolean,
     onPlay: () -> Unit,
-    onBypass: (Boolean) -> Unit
+    onBypass: (Boolean) -> Unit,
+    controls: @Composable () -> Unit
 ) {
-    var expanded by rememberSaveable(entry.id) { mutableStateOf(false) }
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable { expanded = !expanded }.padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 6.dp)
+            modifier = Modifier.clickable(onClick = onToggleExpanded).padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 6.dp)
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -269,16 +301,6 @@ private fun LibraryRow(
                     maxLines = if (expanded) Int.MAX_VALUE else 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                val original = entry.original
-                if (expanded && original != null && original != entry.description) {
-                    Text(
-                        formatResource(Res.string.library_original, original),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
                 if (playing) Box(Modifier.padding(top = 6.dp)) { AuditionABSwitch(bypassed, onBypass) }
             }
             IconButton(onClick = onPlay) {
@@ -290,6 +312,7 @@ private fun LibraryRow(
             }
             Checkbox(checked = selected, onCheckedChange = onSelect)
         }
+        if (expanded) Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) { controls() }
         HorizontalDivider(modifier = Modifier.padding(start = 16.dp))
     }
 }

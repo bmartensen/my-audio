@@ -157,7 +157,6 @@
     <string name="library_filter_selected">Selected</string>
     <string name="library_section_own">My Audio</string>
     <string name="library_section_airwindows">Airwindows</string>
-    <string name="library_original">Original: %1$s</string>
     <string name="library_empty">No effects found</string>
     <string name="library_credit">Airwindows effects by Chris Johnson (airwindows.com), consolidated by Paul Walker (Airwin Consolidated), MIT License.</string>
     <string name="library_tone_description">Equalizer and compressor with presets for vocals, guitar and piano.</string>

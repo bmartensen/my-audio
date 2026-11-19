@@ -91,7 +91,7 @@ For an update, the signing identity must match the installed app. Keep your key 
 .\gradlew.bat :desktop:run
 ```
 
-The native build discovers Visual Studio and the pinned CMake/Ninja installation; JNI comes from the selected JDK. `:desktop:packageMsi` creates a per-user installer under `desktop/build/compose/binaries/main/msi`. `tools/release_desktop.ps1` copies it and its hash into `.work`. No code-signing certificate is required; the MSI is unsigned and may trigger Windows reputation prompts. Projects live in Documents/My Audio and are retained on uninstall. Windows installs a new MSI over an older version but not over the identical version, so every distributed build needs a new version.
+The native build discovers Visual Studio and the pinned CMake/Ninja installation; JNI comes from the selected JDK. `:desktop:packageMsi` creates a per-user installer under `desktop/build/compose/binaries/main/msi`. `tools/release_desktop.ps1` copies it and its hash into `.work`. No code-signing certificate is required; the MSI is unsigned and may trigger Windows reputation prompts. Projects live in Documents/My Audio and are retained on uninstall. Windows installs a new MSI over an older version but not over the identical version, so every distributed build needs a new version. To test a rebuilt MSI locally under the same version, uninstall the installed build first, then install; a repair install (`REINSTALL=ALL`) does not reliably replace the application files. Projects in Documents/My Audio are kept.
 
 ## Distribution and licenses
 
