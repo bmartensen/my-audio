@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo: a stylised "S" as in most DAWs. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M16.6,7.6C16.1,5.9 14.3,4.8 12,4.8C9.4,4.8 7.4,6.1 7.4,8.3C7.4,10.6 9.6,11.3 12,11.9C14.6,12.5 16.8,13.3 16.8,15.7C16.8,17.9 14.7,19.2 12,19.2C9.6,19.2 7.6,18.1 7.1,16.2"
+        android:strokeWidth="2.6"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+</vector>

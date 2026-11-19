@@ -1,0 +1,122 @@
+[
+  {
+    "file": "CC0-1.0.txt",
+    "source": "https://raw.githubusercontent.com/spdx/license-list-data/v3.27.0/text/CC0-1.0.txt",
+    "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+  },
+  {
+    "file": "airwin-consolidated-MIT.txt",
+    "source": "app/src/main/cpp/third_party/airwindows/LICENSE.md (airwin2rack 59a227eba3c8b3070abd7f86a28c54685dfa3b76)",
+    "sha256": "9680f6e05df1c2c7fede4a63bfe7fd7ec9263159e2362c4925270ca302db29f1"
+  },
+  {
+    "file": "android-llvm-NOTICE.txt",
+    "source": "Android NDK 30.0.16248370/toolchains/llvm/prebuilt/windows-x86_64/NOTICE",
+    "sha256": "f96f763beb66a7ba7a667647fc64c0226ace875e590c831fdd9579ec1c1d91e1"
+  },
+  {
+    "file": "core-license-texts.txt",
+    "source": "Component license texts: Airwindows, stb_vorbis, miniaudio, Opus, Skia, Apache-2.0",
+    "sha256": "99f8e000d8633df919563ca403d7314dad4a4d8aec3c11d4d38a4ed7d8cf7bf6"
+  },
+  {
+    "file": "d3d12allocator-LICENSE.txt.txt",
+    "source": "https://skia.googlesource.com/external/github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git/+/169895d529dfce00390a20e69c2f516066fe7a3b/LICENSE.txt?format=TEXT",
+    "sha256": "e078ee4f8c5ed0673f4d93b5318557eb8b4e0d7dbccef2ab45c763c7693f0f37"
+  },
+  {
+    "file": "expat-expat-COPYING.txt",
+    "source": "https://chromium.googlesource.com/external/github.com/libexpat/libexpat.git/+/6154446fccefbf3ca644894f598969113b0c7bcd/expat/COPYING?format=TEXT",
+    "sha256": "31b15de82aa19a845156169a17a5488bf597e561b2c318d159ed583139b25e87"
+  },
+  {
+    "file": "gradle-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/gradle/gradle/v9.4.1/LICENSE",
+    "sha256": "cf234c4188d773406f640bf89be680d9288f40ff96901c70d643fcea96ad46df"
+  },
+  {
+    "file": "harfbuzz-COPYING.txt",
+    "source": "https://chromium.googlesource.com/external/github.com/harfbuzz/harfbuzz.git/+/9cb1fee51069b206effb4736e443b038d230789d/COPYING?format=TEXT",
+    "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64"
+  },
+  {
+    "file": "icu-LICENSE.txt",
+    "source": "https://chromium.googlesource.com/chromium/deps/icu.git/+/364118a1d9da24bb5b770ac3d762ac144d6da5a4/LICENSE?format=TEXT",
+    "sha256": "17510cf7a58b4879b887ec05a45d72cf1b73544dd9ec7e72f20110ed104229ee"
+  },
+  {
+    "file": "jvm-artifact-notices.txt",
+    "source": "License entries extracted from resolved JAR/AAR artifacts listed in runtime-components.txt; identical texts grouped",
+    "sha256": "669fddf2a0fd14d16e0a6a1d0c3b01ae9cb90c3ff23a9d4f49b98be8323181e3"
+  },
+  {
+    "file": "libjpeg-turbo-LICENSE.md.txt",
+    "source": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/e14cbfaa85529d47f9f55b0f104a579c1061f9ad/LICENSE.md?format=TEXT",
+    "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430"
+  },
+  {
+    "file": "libjpeg-turbo-README.ijg.txt",
+    "source": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/e14cbfaa85529d47f9f55b0f104a579c1061f9ad/README.ijg?format=TEXT",
+    "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+  },
+  {
+    "file": "libpng-LICENSE.txt",
+    "source": "https://skia.googlesource.com/third_party/libpng.git/+/d5515b5b8be3901aac04e5bd8bd5c89f287bcd33/LICENSE?format=TEXT",
+    "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+  },
+  {
+    "file": "libwebp-COPYING.txt",
+    "source": "https://chromium.googlesource.com/webm/libwebp.git/+/845d5476a866141ba35ac133f856fa62f0b7445f/COPYING?format=TEXT",
+    "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf"
+  },
+  {
+    "file": "libwebp-PATENTS.txt",
+    "source": "https://chromium.googlesource.com/webm/libwebp.git/+/845d5476a866141ba35ac133f856fa62f0b7445f/PATENTS?format=TEXT",
+    "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c"
+  },
+  {
+    "file": "miniaudio-LICENSE.txt",
+    "source": "desktop/native/third_party/miniaudio/LICENSE (miniaudio 0.11.25)",
+    "sha256": "457f1b500e0adf6bc059edddfa78a2f62012e7c3bb43476c20e0bd23b25ba0eb"
+  },
+  {
+    "file": "oboe-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/google/oboe/1.11.0/LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "file": "openjdk-runtime-notices.txt",
+    "source": "Temurin 21.0.13+9 jlink runtime/legal, all 64 module notices, identical texts grouped",
+    "sha256": "e750d39541df43ff8cf18c86a140535ba64f29cd7869629eea1dd2d6b74656a1"
+  },
+  {
+    "file": "opus-COPYING.txt",
+    "source": "https://raw.githubusercontent.com/xiph/opus/v1.5.2/COPYING",
+    "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551"
+  },
+  {
+    "file": "runtime-components.txt",
+    "source": "Gradle debugRuntimeClasspath and jvmRuntimeClasspath external artifact inventory",
+    "sha256": "e765960da53342d40a477733fe89a1ab1e5d1813ade7836844e9da3a9e4f425f"
+  },
+  {
+    "file": "skia-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/JetBrains/skia/m150-a3f509bf52/LICENSE",
+    "sha256": "5f787c1dee3c56547f09ccc2906ab5f5293c4d8dd6c8654e573216c38e908dbd"
+  },
+  {
+    "file": "skiko-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/JetBrains/skiko/v0.150.2/LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  {
+    "file": "skiko-NOTICE.txt",
+    "source": "https://raw.githubusercontent.com/JetBrains/skiko/v0.150.2/NOTICE",
+    "sha256": "35dd077c24768b53625101cfcc0ad853ae7e2abc08bd2a111a0267760d1406d8"
+  },
+  {
+    "file": "zlib-LICENSE.txt",
+    "source": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/646b7f569718921d7d4b5b8e22572ff6c76f2596/LICENSE?format=TEXT",
+    "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c"
+  }
+]

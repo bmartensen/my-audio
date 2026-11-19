@@ -1,0 +1,14 @@
+# Store text with LF in the repository; checkouts follow each developer's settings.
+* text=auto
+# Shell entry points need LF, Windows batch files need CRLF regardless of local settings.
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# Binary assets.
+*.png binary
+*.ico binary
+*.jar binary
+*.wav binary
+# Preserve upstream license bytes/hashes, including their original whitespace.
+licenses/*.txt -text -whitespace

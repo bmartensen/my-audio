@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(myaudio LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(oboe REQUIRED CONFIG)
+
+# The Airwindows effects of the effect library, built as their own optimised static library.
+add_subdirectory(third_party/airwindows)
+
+add_library(myaudio SHARED
+        AirwindowsEffects.cpp
+        CalibrationSession.cpp
+        Correlation.cpp
+        JniBridge.cpp
+        Metronome.cpp
+        MultitrackEngine.cpp
+        EffectPreview.cpp
+        ProjectMix.cpp
+        TrackProcessing.cpp
+        BleedRemoval.cpp
+        Wav.cpp)
+
+target_compile_options(myaudio PRIVATE -Wall -Wextra)
+# Offline DSP must stay fast in debug builds too; it is pure arithmetic.
+set_source_files_properties(Correlation.cpp TrackProcessing.cpp BleedRemoval.cpp PROPERTIES COMPILE_OPTIONS "-O3;-ffast-math")
+
+target_link_libraries(myaudio oboe::oboe log airwindows)

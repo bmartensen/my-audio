@@ -1,0 +1,17 @@
+Turn an idea into music. My Audio helps you record personal music demos on your Android device: start with guitar or piano, then add vocals and more parts. Hear your existing tracks while you record the next one.
+
+RECORD AND KEEP PLAYING
+Start a project with the record button. My Audio measures the delay of your audio devices and aligns new takes accordingly. You can also use the built-in microphone and speaker. A metronome with a count-in helps you stay in time. Recording and playback continue with the screen off.
+
+SHAPE YOUR SOUND
+Adjust each track's volume and pan. Solo individual tracks, mute others, and shape their sound with EQ, compression and stereo reverb. Sound presets offer a starting point. Draw a volume envelope to bring passages forward or fade them out. Click and playback-bleed removal help clean up the mix.
+
+KEEP YOUR IDEAS IN VIEW
+Write lyrics, chords and playing notes in one shared text sheet per project. Show your notes during playback or recording and adjust the text size. The guitar tuner supports standard E–A–D–G–B–E tuning at 440 Hz, with automatic or manual string selection. Repeat a section with the practice loop.
+
+SHARE AND BACK UP
+Share your finished stereo mix as Ogg/Opus through the Android share menu. Export aligned individual WAV tracks for further work in your DAW, or back up the full project as a ZIP file. Project backups can be imported again.
+
+Projects are stored locally. No account or internet connection is needed to record. The interface supports English and German, portrait and landscape layouts.
+
+My Audio is designed for personal music demos. Calibrate the selected audio-device combination before your first recording. Sound quality and timing stability also depend on your microphone, speaker and audio hardware.

@@ -1,0 +1,9 @@
+# License texts and provenance
+
+These files accompany the [component inventory](THIRD_PARTY_NOTICES.md). They are incorporated into the application's About license view at build time, together with the project's [MIT license](../LICENSE). Upstream texts retain their original wording; runtime module notices and identical JAR/AAR notices are grouped without omitting distinct texts.
+
+`sources.json` records source locations and SHA-256 hashes. The Skiko version is 0.150.2; its build pins Skia m150-a3f509bf52. Native dependency revisions come from that exact Skia DEPS file, not a moving main branch. `runtime-components.txt` records the Android debug and Windows resolved runtime coordinates, including debug-only tooling. The selected JDK can vary by developer; preserve its installed runtime/legal and meet its corresponding-source terms before distribution.
+
+When updating dependencies, resolve the actual runtime graph, inspect nested JAR/AAR licenses and native static dependencies, refresh the pinned texts/hashes, and review About and package contents. Vendor headers and existing NOTICE files must remain intact. Do not infer a dependency's license solely from the project's MIT license.
+
+Key upstream references: [Skiko](https://github.com/JetBrains/skiko/tree/v0.150.2), [Skia DEPS](https://github.com/JetBrains/skia/blob/m150-a3f509bf52/DEPS), [Oboe](https://github.com/google/oboe/tree/1.11.0), [Opus](https://github.com/xiph/opus/tree/v1.5.2), [Airwin Consolidated](https://github.com/baconpaul/airwin2rack/tree/59a227eba3c8b3070abd7f86a28c54685dfa3b76), [preview music](https://freesound.org/people/painted-panda/sounds/609157/).

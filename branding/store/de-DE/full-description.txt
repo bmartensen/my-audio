@@ -1,0 +1,17 @@
+Aus einer Idee wird Musik. Mit My Audio hältst du eigene Musikdemos direkt auf deinem Android-Gerät fest: zuerst die Gitarre oder das Klavier, dann den Gesang und weitere Stimmen. Bei jeder neuen Aufnahme hörst du die bestehenden Spuren.
+
+AUFNEHMEN UND WEITERSPIELEN
+Starte ein Projekt mit der Aufnahmetaste. My Audio misst die Verzögerung deiner Audiogeräte und richtet neue Takes entsprechend aus. Das funktioniert auch mit dem eingebauten Mikrofon und Lautsprecher. Ein Metronom mit Vorzählen hilft dir, im Tempo zu bleiben. Aufnahme und Wiedergabe laufen auch bei ausgeschaltetem Bildschirm weiter.
+
+DEINEN KLANG GESTALTEN
+Regle Lautstärke und Panorama jeder Spur. Höre einzelne Spuren solo, schalte andere stumm und forme den Klang mit EQ, Kompressor und Stereo-Hall. Klangvorlagen erleichtern den Einstieg. Mit dem Lautstärkeverlauf kannst du einzelne Passagen anheben oder ausblenden. Klick- und Übersprech-Entfernung helfen, den Mix aufzuräumen.
+
+IDEEN IM BLICK BEHALTEN
+Notiere Songtexte, Akkorde und Spielhilfen in einem gemeinsamen Textfeld pro Projekt. Blende die Notizen beim Abspielen oder Aufnehmen ein und passe die Schriftgröße an. Das Gitarrenstimmgerät unterstützt die Standardstimmung E–A–D–G–H–E bei 440 Hz, mit automatischer oder manueller Saitenwahl. Wiederhole einen Abschnitt in der Übe-Schleife.
+
+TEILEN UND SICHERN
+Teile deinen fertigen Stereo-Mix als Ogg/Opus über das Android-Teilen-Menü. Exportiere ausgerichtete WAV-Einzelspuren für die Weiterarbeit in deiner DAW oder sichere das vollständige Projekt als ZIP. Projektsicherungen lassen sich wieder importieren.
+
+Deine Projekte werden lokal gespeichert. Für die Aufnahme brauchst du kein Konto und keine Internetverbindung. Die Oberfläche unterstützt Deutsch und Englisch sowie Hoch- und Querformat.
+
+My Audio ist für persönliche Musikdemos gedacht. Vor der ersten Aufnahme wird die verwendete Gerätekombination einmal eingemessen. Die Qualität und zeitliche Stabilität hängen auch von Mikrofon, Lautsprecher und Audiogerät ab.
