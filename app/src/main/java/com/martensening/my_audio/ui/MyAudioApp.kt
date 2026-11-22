@@ -64,7 +64,6 @@ fun MyAudioApp(requestedRoute: Route? = null, onRouteHandled: () -> Unit = {}) {
     when (val route = backStack.last()) {
         Route.Home -> HomeScreen(
             onOpenSettings = { navigate(Route.Settings) },
-            onOpenCalibration = { navigate(Route.Calibration) },
             onOpenLibrary = { navigate(Route.Library) },
             onOpenProject = { id, autoRecord -> navigate(Route.Project(id, autoRecord)) }
         )

@@ -6,6 +6,7 @@
 #include "AirwindowsEffects.h"
 #include "CalibrationSession.h"
 #include "EffectPreview.h"
+#include "LiveChain.h"
 #include "TransportEngine.h"
 
 namespace {
@@ -134,6 +135,28 @@ Java_com_martensening_my_1audio_audio_NativeAudio_startRecording(JNIEnv *env, jo
     return engine().startRecording(toString(env, path), toString(env, referencePath), countInFrames,
                                    outputDeviceId, inputDeviceId, handsFreeInput, bluetooth,
                                    myaudio::toInputChannel(inputChannel));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_startMonitoring(JNIEnv * /* env */, jobject /* this */,
+                                                                jint outputDeviceId, jint inputDeviceId,
+                                                                jboolean handsFreeInput, jboolean bluetooth,
+                                                                jint inputChannel) {
+    return engine().startMonitoring(outputDeviceId, inputDeviceId, handsFreeInput, bluetooth,
+                                    myaudio::toInputChannel(inputChannel));
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_setMonitorChain(JNIEnv *env, jobject /* this */, jfloatArray chain,
+                                                                jfloat gain, jfloat pan, jboolean enabled) {
+    // Built here, on the caller's thread: creating effects and estimating level matching must not run in the callback.
+    engine().setMonitorChain(std::make_unique<myaudio::LiveChain>(readChain(env, chain), gain, pan, !enabled,
+                                                                  myaudio::kProjectSampleRate));
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_setBufferSetting(JNIEnv * /* env */, jobject /* this */, jint setting) {
+    myaudio::setBufferSetting(setting);
 }
 
 extern "C" JNIEXPORT jintArray JNICALL

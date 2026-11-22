@@ -6,6 +6,7 @@
     <string name="action_play">Abspielen</string>
     <string name="action_stop">Stopp</string>
     <string name="action_delete">Löschen</string>
+    <string name="action_reset">Zurücksetzen</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
     <string name="action_discard">Verwerfen</string>
@@ -29,7 +30,7 @@
     <string name="audio_system_default">Systemstandard</string>
     <string name="audio_default_device">%1$s · %2$s</string>
     <string name="audio_device_unavailable">%1$s (nicht verbunden) · Verwendet: %2$s</string>
-    <string name="audio_calibration_required">Vor der Aufnahme diese Kombination aus Wiedergabegerät und Mikrofon einmessen.</string>
+    <string name="audio_recording_uncalibrated">Nicht eingemessen: Take ohne Latenzausgleich.</string>
     <string name="audio_not_calibrated">Für diese Geräte noch nicht eingemessen</string>
     <string name="audio_choose_output">Unter Einstellungen → Audio ein Wiedergabegerät wählen.</string>
     <string name="audio_route_changed">Die Audiogeräte haben sich geändert. Wiedergabe oder Aufnahme wurde gestoppt. Prüfe die Geräteauswahl und Einmessung.</string>
@@ -64,9 +65,24 @@
         <item quantity="one">%1$d Spur · %2$s</item>
         <item quantity="other">%1$d Spuren · %2$s</item>
     </plurals>
-    <string name="project_empty_hint">Tippe auf den Aufnahme-Button, um die erste Spur aufzunehmen.</string>
+    <string name="record_track_empty">Leer</string>
+    <string name="record_track_add">Leere Spur</string>
+    <string name="record_track_monitoring">Mithören</string>
+    <string name="live_start">Live</string>
+    <string name="live_stop">Live beenden</string>
+    <string name="live_hint">Mit Kopfhörern verwenden.</string>
+    <string name="live_no_permission">Live braucht Zugriff auf das Mikrofon. Erlaube ihn bei der ersten Aufnahme oder in den Systemeinstellungen.</string>
+    <string name="live_failed">Live konnte die Audiogeräte nicht öffnen. Beende andere Wiedergaben und versuche es erneut.</string>
+    <string name="live_warning_title">Live mithören?</string>
+    <string name="live_warning_speaker">Am Lautsprecher droht Rückkopplung.</string>
+    <string name="live_warning_bluetooth">Bluetooth verzögert den Klang deutlich.</string>
+    <string name="live_warning_continue">Trotzdem mithören</string>
+    <string name="audio_buffer_title">Audiopuffer</string>
+    <string name="audio_buffer_short">Kurz</string>
+    <string name="audio_buffer_long">Lang</string>
+    <string name="audio_buffer_automatic">Automatisch</string>
     <string name="project_recording_take">%1$s wird aufgenommen …</string>
-    <string name="project_calibration_hint">Diese Kombination aus Wiedergabegerät und Mikrofon muss vor der Aufnahme eingemessen werden.</string>
+    <string name="project_calibration_hint">Diese Kombination aus Wiedergabe und Mikrofon ist nicht eingemessen und kann verzögert sein.</string>
     <string name="project_calibration_action">Jetzt einmessen</string>
     <string name="project_error_missing">Das Projekt konnte nicht geladen werden.</string>
     <string name="project_error_audio">Die Audio-Streams konnten nicht gestartet werden. Andere Audio-Apps schließen und erneut versuchen.</string>
@@ -74,6 +90,11 @@
     <string name="track_default_name">Spur %1$d</string>
     <string name="track_delete_question">Spur löschen?</string>
     <string name="track_delete_info">„%1$s“ und die zugehörige Aufnahme werden gelöscht.</string>
+    <string name="track_recording_delete_question">Aufnahme löschen?</string>
+    <string name="track_recording_delete_info">Die Aufnahme von „%1$s“ wird gelöscht.</string>
+    <string name="track_reset_question">Zurücksetzen?</string>
+    <string name="track_reset_info">„%1$s“ wird zurückgesetzt.</string>
+    <string name="track_uncalibrated">Ohne Einmessung aufgenommen</string>
     <string name="track_solo">Solo</string>
     <string name="track_unsolo">Solo aus</string>
     <string name="loop_toggle">Schleife ein/aus</string>
@@ -148,6 +169,8 @@
     <string name="effect_chain_empty">Noch keine Effekte</string>
     <string name="effect_unavailable">Nicht verfügbar</string>
     <string name="effect_unavailable_summary">Diese App-Version kennt den Effekt nicht. Er bleibt gespeichert, klingt aber nicht.</string>
+    <string name="effect_requires_newer">Benötigt eine neuere Version</string>
+    <string name="effect_requires_newer_summary">Eine neuere Version von My Audio hat diesen Effekt hinzugefügt. Er bleibt gespeichert, klingt hier aber nicht. Aktualisiere die App, um ihn zu hören und einzustellen.</string>
     <string name="effect_choices_empty">Effekte in der Bibliothek auf der Startseite auswählen</string>
     <string name="effect_reset">Standardwerte</string>
     <string name="library_title">Effekt-Bibliothek</string>

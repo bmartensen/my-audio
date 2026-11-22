@@ -15,8 +15,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.martensening.my_audio.R
-import com.martensening.my_audio.audio.AudioDevices
-import com.martensening.my_audio.audio.CalibrationStore
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -24,7 +22,6 @@ import java.util.Date
 @Composable
 fun HomeScreen(
     onOpenSettings: () -> Unit,
-    onOpenCalibration: () -> Unit,
     onOpenLibrary: () -> Unit,
     onOpenProject: (id: Long, autoRecord: Boolean) -> Unit,
     viewModel: HomeViewModel = viewModel()
@@ -49,11 +46,7 @@ fun HomeScreen(
 
     val startNewRecording = rememberMicrophoneAccess(
         onGranted = {
-            // A new device pair is calibrated before its first take.
-            if (CalibrationStore(context).load(AudioDevices(context).route()) == null) {
-                onOpenCalibration()
-                return@rememberMicrophoneAccess
-            }
+            // Never blocked by a missing calibration; the project shows the banner and warns at the take.
             viewModel.createProject(defaultName()) { onOpenProject(it.id, true) }
         },
         onDenied = { scope.launch { snackbarHostState.showSnackbar(permissionMissing) } }

@@ -24,7 +24,11 @@ Bleed removal uses the immutable playback reference from that take, aligned by m
 
 ## Tone, effects and master
 
-Track input cleanup and normalization precede up to six effect slots, then volume/envelope/pan. The sum passes through the master chain, BS.1770 loudness normalization to −14 LUFS (at most +24 dB), and a −1 dBFS limiter. Metronome is added afterward. Airwindows slots optionally match output/input loudness within ±24 dB. The preview path renders short clips with the same processing; it is not live monitored input.
+Track input cleanup and normalization precede up to six effect slots, then volume/envelope/pan. The sum passes through the master chain, BS.1770 loudness normalization to −14 LUFS (at most +24 dB), and a −1 dBFS limiter. Metronome is added afterward. Airwindows slots optionally match output/input loudness within ±24 dB. The preview path renders short clips with the same processing.
+
+## Live monitoring
+
+`LiveChain` runs a track chain in the duplex callback: EQ/compressor, the shared FDN reverb (`Reverb.h`) and Airwindows instances created off the audio thread, then track volume and mono pan. Without level matching it is sample-identical to the rendered chain (`tools/live_chain_test.cpp`); Airwindows level matching uses a gain estimated on pink noise, and normalization/cleanup need the whole take and do not apply. Airwindows instances are seeded with a fixed `rand()` value, so renders are reproducible and match live. `LiveMonitor` swaps chains lock-free with a 20 ms crossfade and frees replaced chains on the control thread. The callback writes the dry microphone sample to the take FIFO before the monitor reads its own copy; the overdub reference is captured before the monitored signal is added. Live audition opens the same duplex streams as a take without playback or file. The global buffer setting sets the Oboe output buffer to 1 or 4 bursts or the miniaudio period to 128 or 512 frames (Short/Long) for calibration, takes and live alike, and calibrations are keyed per setting.
 
 My Audio reverb uses a 16-line feedback delay network with prime delay lengths scaled from 23–80 ms, Householder feedback and per-line absorption for low/high RT60. Pre-delay, eight early-reflection taps and four diffusion allpasses precede it. Room scale is sqrt(RT60/1.5 s), bounded to 0.5–2. Impulse-response energy normalization and equal-power dry/wet mixing keep levels predictable. Reverb tails extend tracks up to 12 s. Stereo channels retain separate input paths.
 

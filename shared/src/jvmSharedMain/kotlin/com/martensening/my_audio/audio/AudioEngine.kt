@@ -116,6 +116,8 @@ object AudioEngine {
                 (if (effect.levelMatch) EFFECT_AIRWINDOWS_LEVEL_MATCHED else EFFECT_AIRWINDOWS) to
                     listOf(known.index.toFloat()) + AirwindowsCatalog.complete(effect.name, effect.values)
             }
+            // Never audible; filtered above, listed for completeness.
+            is ChainEffect.Unknown -> return@flatMap emptyList()
         }
         listOf(type, values.size.toFloat()) + values
     }.toFloatArray()
@@ -199,6 +201,27 @@ object AudioEngine {
                     route.inputChannel?.code ?: InputChannel.DEVICE_CODE)
             }
         }
+
+    private val monitorLock = Mutex()
+
+    /**
+     * What the microphone is monitored through while recording or in live audition: [chain] (empty = dry),
+     * then [volume] and [pan]; null monitors nothing. Never changes what is recorded: takes stay dry.
+     */
+    suspend fun setMonitor(chain: List<EffectSlot>?, volume: Float = 1f, pan: Float = 0f) = monitorLock.withLock {
+        withContext(Dispatchers.Default) {
+            NativeAudio.setMonitorChain(encodeChain(chain.orEmpty()), volume, pan, chain != null)
+        }
+    }
+
+    /** Live audition on [route]: microphone through the monitor chain to the output; [stop] ends it. */
+    suspend fun startMonitoring(route: TransportRoute): Boolean = lock.withLock {
+        if (!route.ready) return@withLock false
+        withContext(Dispatchers.Default) {
+            NativeAudio.startMonitoring(route.outputId, route.inputId, route.communication, route.bluetooth,
+                route.inputChannel?.code ?: InputChannel.DEVICE_CODE)
+        }
+    }
 
     /** Stops the running stream; returns the recorded frames, or -1 when nothing was recorded. */
     suspend fun stop(): Long = lock.withLock { withContext(Dispatchers.Default) { NativeAudio.stop() } }

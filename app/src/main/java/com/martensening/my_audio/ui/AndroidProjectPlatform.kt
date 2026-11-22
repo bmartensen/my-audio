@@ -1,7 +1,11 @@
 package com.martensening.my_audio.ui
 
+import android.Manifest
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.media.AudioDeviceInfo
+import com.martensening.my_audio.audio.AudioSettings
 import android.net.Uri
 import com.martensening.my_audio.audio.AudioDeviceRoute
 import com.martensening.my_audio.audio.AudioDevices
@@ -20,8 +24,30 @@ import kotlin.math.roundToLong
 
 /** Android side of a [ProjectSession]: AudioManager routing, stored calibrations, foreground service, MediaCodec. */
 class AndroidProjectPlatform(private val application: Application) : ProjectPlatform {
+    init {
+        // The buffer choice must reach the engine before any stream opens.
+        AudioSettings.forRoot(application.filesDir)
+    }
+
     private val devices = AudioDevices(application)
     private val calibrationStore = CalibrationStore(application)
+
+    /** Live audition over the selected devices; warns for the loudspeaker (feedback) and Bluetooth (delay). */
+    fun liveInput(): LiveInput = PlatformLiveInput(
+        platform = this,
+        hasPermission = {
+            application.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        },
+        warningOf = { route ->
+            (route as? AudioDeviceRoute)?.output?.let { output ->
+                when {
+                    output.bluetooth -> LiveWarning.Bluetooth
+                    output.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> LiveWarning.Speaker
+                    else -> null
+                }
+            }
+        }
+    )
 
     override val repository = ProjectRepository.get(application)
     override val effectLibrary = EffectLibrary.forRoot(application.filesDir)

@@ -24,20 +24,35 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.martensening.my_audio.R
+import androidx.compose.runtime.collectAsState
+import com.martensening.my_audio.audio.AudioSettings
 import com.martensening.my_audio.audio.CalibrationStore
 import com.martensening.my_audio.ui.theme.MyAudioTheme
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit, onOpenCalibration: () -> Unit) {
     val route = rememberAudioRoute()
-    val calibration = CalibrationStore(LocalContext.current).load(route)
+    val filesDir = LocalContext.current.applicationContext.filesDir
+    val audioSettings = remember { AudioSettings.forRoot(filesDir) }
+    // Each buffer choice has its own calibration, so the summary follows it.
+    val buffer by audioSettings.buffer.collectAsState()
+    val store = CalibrationStore(LocalContext.current)
+    val calibration = buffer.let { store.load(route) }
     val summary = if (!route.ready) stringResource(R.string.audio_choose_output)
         else if (calibration == null) stringResource(R.string.audio_not_calibrated)
         else stringResource(R.string.calibration_latency_value, calibration.latencyMs)
     val context = LocalContext.current
     val version = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
     var aboutOpen by rememberSaveable { mutableStateOf(false) }
-    SettingsContent(onBack, onOpenCalibration, summary, version, onOpenAbout = { aboutOpen = true }) { AudioDevicePreferences() }
+    SettingsContent(onBack, onOpenCalibration, summary, version, onOpenAbout = { aboutOpen = true }) {
+        AudioDevicePreferences()
+        // Styled like the calibration entry: icon, title and the choice, no explanation (that is in the guide).
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.audio_buffer_title)) },
+            supportingContent = { AudioBufferChoice(audioSettings, modifier = Modifier.padding(top = 8.dp)) },
+            leadingContent = { Icon(painterResource(R.drawable.ic_timer), contentDescription = null) }
+        )
+    }
     if (aboutOpen) AboutDialog(version = version, onDismiss = { aboutOpen = false })
 }
 

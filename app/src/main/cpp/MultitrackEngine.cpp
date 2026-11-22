@@ -95,7 +95,64 @@ oboe::Result MultitrackEngine::openOutput(oboe::AudioStreamDataCallback *callbac
         mOutput.reset();
         return oboe::Result::ErrorUnavailable;
     }
+    // The global buffer choice (Settings); the calibration applies the same, so its latency fits.
+    if (result == oboe::Result::OK && bufferSetting() > 0) {
+        mOutput->setBufferSizeInFrames(mOutput->getFramesPerBurst() * bufferSetting());
+    }
     return result;
+}
+
+bool MultitrackEngine::openDuplex(int outputDeviceId, int inputDeviceId, bool handsFreeInput, InputChannel inputChannel) {
+    if (openOutput(this, outputDeviceId) != oboe::Result::OK) {
+        mOutput.reset();
+        return false;
+    }
+    // Same configuration as the calibration so the measured latency applies unchanged.
+    oboe::AudioStreamBuilder inputBuilder;
+    inputBuilder.setDirection(oboe::Direction::Input)
+            ->setDeviceId(inputDeviceId)
+            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+            ->setSharingMode(oboe::SharingMode::Exclusive)
+            ->setFormat(oboe::AudioFormat::Float)
+            // Mono conversion keeps only the first channel; two-channel devices pick it in the callback.
+            ->setChannelCount(inputChannel == InputChannel::Device ? oboe::ChannelCount::Mono : oboe::ChannelCount::Stereo)
+            ->setChannelConversionAllowed(true)
+            ->setSampleRate(kSampleRate)
+            ->setSampleRateConversionQuality(oboe::SampleRateConversionQuality::Medium)
+            ->setInputPreset(handsFreeInput ? oboe::InputPreset::VoiceRecognition : oboe::InputPreset::VoicePerformance)
+            ->setBufferCapacityInFrames(mOutput->getBufferCapacityInFrames() * 2)
+            ->setErrorCallback(this);
+    if (inputBuilder.openStream(mInput) != oboe::Result::OK || mInput->getDeviceId() != inputDeviceId) {
+        closeStreams();
+        return false;
+    }
+    // Room for any callback block: the full-duplex callback never delivers more than these capacities.
+    mMonitorInput.assign(static_cast<size_t>(std::max(mOutput->getBufferCapacityInFrames(),
+                                                      mInput->getBufferCapacityInFrames())), 0.0f);
+    return true;
+}
+
+bool MultitrackEngine::startMonitoring(int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
+                                       InputChannel inputChannel) {
+    std::lock_guard<std::mutex> guard(mLock);
+    if (mOutput) return false;
+    mInputPeak = 0.0f;
+    mInputChannel = inputChannel;
+    mWarmup.reset(bluetooth ? kSampleRate * StreamWarmup::kBluetoothSeconds : 0);
+    if (!openDuplex(outputDeviceId, inputDeviceId, handsFreeInput, inputChannel)) return false;
+    setSharedOutputStream(mOutput);
+    setSharedInputStream(mInput);
+    mMonitorOnly = true;
+    mActive = true;
+    if (start() != oboe::Result::OK || !waitForWarmup()) {
+        mActive = false;
+        mMonitorOnly = false;
+        closeStreams();
+        return false;
+    }
+    __android_log_print(ANDROID_LOG_INFO, kTag, "Live monitoring: burst %d, output buffer %d frames",
+                        mOutput->getFramesPerBurst(), mOutput->getBufferSizeInFrames());
+    return true;
 }
 
 bool MultitrackEngine::startPlayback(int outputDeviceId, bool bluetooth) {
@@ -130,28 +187,10 @@ bool MultitrackEngine::startRecording(const std::string &path, const std::string
     mInputPeak = 0.0f;
     mDroppedFrames = 0;
     mInputChannel = inputChannel;
+    mMonitorOnly = false;
     mWarmup.reset(bluetooth ? kSampleRate * StreamWarmup::kBluetoothSeconds : 0);
-    if (openOutput(this, outputDeviceId) != oboe::Result::OK) {
-        mOutput.reset();
-        return false;
-    }
-    // Same configuration as the calibration so the measured latency applies unchanged.
-    oboe::AudioStreamBuilder inputBuilder;
-    inputBuilder.setDirection(oboe::Direction::Input)
-            ->setDeviceId(inputDeviceId)
-            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-            ->setSharingMode(oboe::SharingMode::Exclusive)
-            ->setFormat(oboe::AudioFormat::Float)
-            // Mono conversion keeps only the first channel; two-channel devices pick it in the callback.
-            ->setChannelCount(inputChannel == InputChannel::Device ? oboe::ChannelCount::Mono : oboe::ChannelCount::Stereo)
-            ->setChannelConversionAllowed(true)
-            ->setSampleRate(kSampleRate)
-            ->setSampleRateConversionQuality(oboe::SampleRateConversionQuality::Medium)
-            ->setInputPreset(handsFreeInput ? oboe::InputPreset::VoiceRecognition : oboe::InputPreset::VoicePerformance)
-            ->setBufferCapacityInFrames(mOutput->getBufferCapacityInFrames() * 2)
-            ->setErrorCallback(this);
-    if (inputBuilder.openStream(mInput) != oboe::Result::OK ||
-        mInput->getDeviceId() != inputDeviceId || !mWav.open(path, kSampleRate)) {
+    if (!openDuplex(outputDeviceId, inputDeviceId, handsFreeInput, inputChannel)) return false;
+    if (!mWav.open(path, kSampleRate)) {
         closeStreams();
         mWav.finish();
         return false;
@@ -212,6 +251,7 @@ int64_t MultitrackEngine::stopTransport() {
     std::lock_guard<std::mutex> guard(mLock);
     mActive = false;
     closeStreams();
+    mMonitorOnly = false;
     if (!mRecording) return -1;
     mRecording = false;
     mWriterRunning = false;
@@ -284,23 +324,34 @@ oboe::DataCallbackResult MultitrackEngine::onBothStreamsReady(const void *inputD
                     numOutputFrames * getOutputStream()->getChannelCount(), 0.0f);
         return oboe::DataCallbackResult::Continue;
     }
-    const bool captureReference = mReferenceFifo != nullptr &&
-                                  numOutputFrames <= static_cast<int>(mReferenceScratch.size());
-    mix(static_cast<float *>(outputData), getOutputStream()->getChannelCount(), numOutputFrames,
-        captureReference ? mReferenceScratch.data() : nullptr);
-    if (captureReference && mReferenceFifo->write(mReferenceScratch.data(), numOutputFrames) != numOutputFrames) {
-        mDroppedFrames.fetch_add(numOutputFrames, std::memory_order_relaxed);
+    auto *output = static_cast<float *>(outputData);
+    const int outputChannels = getOutputStream()->getChannelCount();
+    if (mMonitorOnly) {
+        std::fill_n(output, numOutputFrames * outputChannels, 0.0f);
+    } else {
+        const bool captureReference = mReferenceFifo != nullptr &&
+                                      numOutputFrames <= static_cast<int>(mReferenceScratch.size());
+        // The reference is the playback alone: it is captured before the monitored microphone is added.
+        mix(output, outputChannels, numOutputFrames, captureReference ? mReferenceScratch.data() : nullptr);
+        if (captureReference && mReferenceFifo->write(mReferenceScratch.data(), numOutputFrames) != numOutputFrames) {
+            mDroppedFrames.fetch_add(numOutputFrames, std::memory_order_relaxed);
+        }
     }
 
     const auto *input = static_cast<const float *>(inputData);
     const int inputChannels = getInputStream()->getChannelCount();
+    const int monitored = std::min({numInputFrames, numOutputFrames, static_cast<int>(mMonitorInput.size())});
     float peak = mInputPeak.load(std::memory_order_relaxed);
     for (int frame = 0; frame < numInputFrames; ++frame) {
         const float sample = monoInputSample(input + frame * inputChannels, inputChannels, mInputChannel);
         peak = std::max(peak, std::fabs(sample));
-        if (mFifo->write(&sample, 1) != 1) mDroppedFrames.fetch_add(1, std::memory_order_relaxed);
+        // The take is always the dry microphone: written here, before and independent of any monitoring effect.
+        if (!mMonitorOnly && mFifo->write(&sample, 1) != 1) mDroppedFrames.fetch_add(1, std::memory_order_relaxed);
+        if (frame < monitored) mMonitorInput[frame] = sample;
     }
     mInputPeak.store(peak, std::memory_order_relaxed);
+    // Only the output hears the effects; the monitor reads its own copy of the input.
+    mMonitor.process(mMonitorInput.data(), output, outputChannels, monitored);
     return oboe::DataCallbackResult::Continue;
 }
 

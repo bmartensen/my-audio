@@ -24,6 +24,7 @@ import com.martensening.my_audio.data.ProjectArchive
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.Project
 import com.martensening.my_audio.data.ProjectRepository
+import com.martensening.my_audio.data.RecordTrack
 import com.martensening.my_audio.data.Track
 import com.martensening.my_audio.data.TrackEffects
 import kotlinx.coroutines.Dispatchers
@@ -93,6 +94,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     /** Name of the running take, resolved at its start because finishing may not suspend. */
     private var recordingTrackName: String? = null
     private var recordingLatencyFrames = 0L
+    /** False when the running take's device pair had no calibration; its offset then lacks the latency. */
+    private var recordingCalibrated = true
     /** Background track changes are written one after another, so the last tap wins on disk too. */
     @OptIn(ExperimentalCoroutinesApi::class)
     private val saveDispatcher = Dispatchers.IO.limitedParallelism(1)
@@ -136,8 +139,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
      * the home screen (the view model outlives the screen).
      */
     fun onEnter() {
-        _state.update { it.copy(latencyFrames = loadLatencyFrames(),
-            errorMessage = it.errorMessage.takeUnless { message -> message == Res.string.audio_calibration_required }) }
+        _state.update { it.copy(latencyFrames = loadLatencyFrames()) }
         if (_state.value.mode != TransportMode.Idle) return
         viewModelScope.launch {
             val project = withContext(Dispatchers.IO) { repository.load(projectId) } ?: return@launch
@@ -319,16 +321,9 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         startTransport(recording = true) {
             // A take started right after creation may arrive before the initial load finished.
             val project = awaitProject() ?: return@startTransport
-            val route = platform.route()
-            val latency = platform.latencyFrames(route)
-            if (latency == null) {
-                _state.update { it.copy(latencyFrames = null, errorMessage = Res.string.audio_calibration_required) }
-                return@startTransport
-            }
-            recordingLatencyFrames = latency
-            recordingTrackName = getString(Res.string.track_default_name, project.nextTrackNumber)
+            var route = platform.route()
+            recordingTrackName = project.nextTake.name ?: getString(Res.string.track_default_name, project.nextTrackNumber)
             transportRoute = route
-            _state.update { it.copy(latencyFrames = recordingLatencyFrames) }
             AudioEngine.prepare(project, repository)
             val file = withContext(Dispatchers.IO) { repository.newTrackFile(project.id, System.currentTimeMillis()) }
             AudioEngine.applyMetronome(project.metronome, recording = true)
@@ -342,11 +337,25 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                 file.delete()
                 return@startTransport
             }
-            if (!route.samePorts(platform.route())) {
-                file.delete()
-                _state.update { it.copy(latencyFrames = null, errorMessage = Res.string.audio_calibration_required) }
-                return@startTransport
+            // Devices may change during the pre-roll; the take uses what is connected now.
+            val current = platform.route()
+            if (!route.samePorts(current)) {
+                route = current
+                transportRoute = current
+                if (!platform.startRouting(current)) {
+                    file.delete()
+                    _state.update { it.copy(errorMessage = Res.string.project_error_audio) }
+                    return@startTransport
+                }
             }
+            // A missing calibration never prevents a take: it is stored without latency compensation and
+            // marked, while the banner and a warning say so.
+            val latency = platform.latencyFrames(route)
+            recordingLatencyFrames = latency ?: 0L
+            recordingCalibrated = latency != null
+            // An unmuted record track monitors the microphone through its chain; the take itself stays dry.
+            val take = project.nextTake
+            AudioEngine.setMonitor(take.effects.chain.takeUnless { take.muted }, take.volume, take.pan)
             if (AudioEngine.startRecording(file, ProjectRepository.referenceFileFor(file), countIn, route)) {
                 recordingFile = file
                 recordingMetronome = project.metronome.takeIf { it.enabled }
@@ -360,11 +369,13 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                         positionFrames = -countIn,
                         countInFrames = countIn,
                         recordingPeaks = emptyList(),
-                        errorMessage = null
+                        latencyFrames = latency,
+                        errorMessage = if (latency == null) Res.string.audio_recording_uncalibrated else null
                     )
                 }
                 startMonitor()
             } else {
+                AudioEngine.setMonitor(null)
                 file.delete()
                 ProjectRepository.referenceFileFor(file).delete()
                 _state.update { it.copy(errorMessage = Res.string.project_error_audio) }
@@ -413,6 +424,42 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     fun setMasterChain(chain: List<EffectSlot>) = changeProject { repository.setMasterChain(projectId, chain) }
 
     fun deleteTrack(track: Track) = changeProject { repository.deleteTrack(projectId, track.id) }
+
+    /** Deletes only the audio of the last take; its settings stay as the empty record track for a retake. */
+    fun deleteRecording(track: Track) = changeProject { repository.deleteRecording(projectId, track.id) }
+
+    /** Returns the empty record track to the state of a new track. */
+    fun resetRecordTrack() = changeProject { repository.resetRecordTrack(projectId) }
+
+    /** An empty record track after the last take, to prepare the next instrument. */
+    fun addEmptyTrack() = changeProject { repository.addEmptyTrack(projectId) }
+
+    /** Name, effects, volume and pan of the empty record track, from its settings dialog. */
+    fun setRecordTrackSettings(record: RecordTrack) = changeProject { repository.updateRecordTrack(projectId, record) }
+
+    /** Mute (which also decides whether its input is monitored) and solo of the empty record track. */
+    fun setRecordTrackMuted(muted: Boolean) = changeRecordTrackInBackground { it.copy(muted = muted) }
+
+    fun setRecordTrackSolo(solo: Boolean) = changeRecordTrackInBackground { it.copy(solo = solo) }
+
+    /** Like [changeTrackInBackground]: shows at once, saves and re-renders (a solo silences the others) in tap order. */
+    private fun changeRecordTrackInBackground(change: (RecordTrack) -> RecordTrack) {
+        if (_state.value.mode != TransportMode.Idle || starting || stopping) return
+        val project = _state.value.project ?: return
+        if (project.recordTrack == null && project.tracks.isNotEmpty()) return
+        val changed = change(project.nextTake)
+        val updated = project.copy(recordTrack = changed)
+        _state.update { it.copy(project = updated) }
+        viewModelScope.launch {
+            try {
+                withContext(saveDispatcher) { repository.updateRecordTrack(projectId, changed) }
+                AudioEngine.prepare(updated, repository)
+            } catch (error: Exception) {
+                Log.e(TAG, "Record track update failed", error)
+                _state.update { it.copy(errorMessage = Res.string.project_error_audio) }
+            }
+        }
+    }
 
     /** Tapping a waveform while playing continues playback there; takes are never moved. */
     fun seekTo(frame: Long) {
@@ -490,6 +537,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         stopRequested = true
         monitor?.cancel()
         val frames = AudioEngine.stopNow()
+        NativeAudio.setMonitorChain(FloatArray(0), 1f, 0f, false)
         platform.stopRouting()
         val project = recordingFile?.let { finishTake(it, frames) }
         recordingFile = null
@@ -715,6 +763,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             monitor?.cancel()
             monitor = null
             val frames = AudioEngine.stop()
+            if (mode == TransportMode.Recording) AudioEngine.setMonitor(null)
             val file = recordingFile
             recordingFile = null
             val project = if (mode == TransportMode.Recording && file != null) {
@@ -766,10 +815,12 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             recordedMetronome = metronome,
             countInFrames = countIn,
             // Only written when something was played; a WAV header alone means silence.
-            referenceFileName = reference.takeIf { it.length() > WAV_HEADER_BYTES }?.name
+            referenceFileName = reference.takeIf { it.length() > WAV_HEADER_BYTES }?.name,
+            latencyCalibrated = recordingCalibrated
         )
-        Log.i(TAG, "Saved take ${track.name}: $frames frames, offset ${track.offsetFrames}")
-        return repository.addTrack(projectId, track)
+        Log.i(TAG, "Saved take ${track.name}: $frames frames, offset ${track.offsetFrames}, calibrated $recordingCalibrated")
+        // The record track's settings (or those inherited from the last take) come with it; it is unmuted.
+        return repository.addTake(projectId, track)
     }
 
     /** Runs [change] while idle and re-renders the mix. False if refused. */

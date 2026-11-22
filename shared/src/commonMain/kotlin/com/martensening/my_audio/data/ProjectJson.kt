@@ -13,16 +13,51 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /**
- * `project.json`, versions 1 (mono), 2 (stereo) and 3 (effect chains); see the wiki page "Datenformat". Reading is
+ * `project.json`, versions 1 (mono), 2 (stereo) and 3 (effect chains); see the wiki page "Data format". Reading is
  * as lenient as the former org.json code: missing optional fields take their defaults, numbers may come as strings,
  * and a `null` value counts as missing. Writing leaves out fields whose value is null. Versions 1 and 2 stored EQ,
  * compressor and reverb as fixed fields; they are read as an equivalent chain.
+ *
+ * Exchange between app versions: new features are optional fields that older versions ignore, so the version only
+ * rises for a change of meaning. Fields this version does not know are kept in [UnknownFields] and written back,
+ * and an effect type it does not know stays as a silent [ChainEffect.Unknown] slot.
  */
 object ProjectJson {
     const val FORMAT_VERSION = 3
     private const val TONE = "myaudio.eq"
     private const val REVERB = "myaudio.reverb"
     private const val AIRWINDOWS = "airwindows."
+
+    // Keys each object level understands; everything else is preserved as unknown.
+    private val METRONOME_KEYS = setOf("enabled", "bpm", "volume", "duringPlayback")
+    private val PROJECT_KEYS = setOf(
+        "version", "id", "name", "notes", "notesTextSize", "notesScroll", "preRoll", "createdAtMillis", "sampleRate",
+        "nextTrackNumber", "metronome", "master", "loop", "tracks", "recordTrack"
+    )
+    private val PROJECT_NESTED = mapOf(
+        "notesScroll" to setOf("enabled", "secondsPerLine"),
+        "preRoll" to setOf("enabled", "seconds"),
+        "metronome" to METRONOME_KEYS,
+        "loop" to setOf("startFrames", "endFrames", "enabled"),
+        "master" to setOf("chain")
+    )
+    private val TRACK_KEYS = setOf(
+        "id", "name", "fileName", "channels", "offsetFrames", "lengthFrames", "volume", "muted", "solo", "pan",
+        "createdAtMillis", "recordedMetronome", "countInFrames", "referenceFileName", "effects", "volumeEnvelope",
+        "latencyCalibrated"
+    )
+    private val TRACK_NESTED = mapOf("recordedMetronome" to METRONOME_KEYS)
+    private val RECORD_TRACK_KEYS = setOf("name", "volume", "muted", "solo", "pan", "effects", "volumeEnvelope")
+    // "eq", "compressor" and "reverb" are the fixed effects of versions 1 and 2; they migrate into the chain.
+    private val EFFECTS_KEYS = setOf("removeMetronome", "removeBleed", "normalize", "chain", "eq", "compressor", "reverb")
+    private val EFFECTS_NESTED = mapOf("normalize" to setOf("enabled", "targetDb"))
+    private val TONE_KEYS = setOf("type", "enabled", "eq", "compressor")
+    private val TONE_NESTED = mapOf(
+        "eq" to setOf("enabled", "lowDb", "presenceDb", "highDb"),
+        "compressor" to setOf("enabled", "amount")
+    )
+    private val REVERB_KEYS = setOf("type", "enabled", "seconds", "preDelayMs", "damping", "mix")
+    private val AIRWINDOWS_KEYS = setOf("type", "enabled", "values", "levelMatch")
 
     @OptIn(ExperimentalSerializationApi::class)
     private val format = Json { prettyPrint = true; prettyPrintIndent = "  " }
@@ -36,9 +71,23 @@ object ProjectJson {
 
     /** The lowest version that holds everything in [project], so older apps keep opening simple projects. */
     private fun version(project: Project) = when {
-        project.masterChain.isNotEmpty() || project.tracks.any { it.effects.chain.isNotEmpty() } -> 3
+        project.masterChain.isNotEmpty() || project.tracks.any { it.effects.chain.isNotEmpty() } ||
+            project.recordTrack?.effects?.chain?.isNotEmpty() == true -> 3
         project.tracks.any { it.channels == 2 } -> 2
         else -> 1
+    }
+
+    /** Adds the preserved [unknown] fields after the known ones; known fields always win. */
+    private fun JsonObject.with(unknown: UnknownFields): JsonObject {
+        if (unknown.isEmpty) return this
+        val merged = LinkedHashMap<String, JsonElement>(this)
+        for ((key, fields) in unknown.nested) {
+            // A sub-object that is no longer written (e.g. a removed loop) takes its unknown fields with it.
+            val known = merged[key] as? JsonObject ?: continue
+            merged[key] = JsonObject(known + fields.filterKeys { it !in known })
+        }
+        for ((key, value) in unknown.own) if (key !in merged) merged[key] = value
+        return JsonObject(merged)
     }
 
     private fun toJson(project: Project) = buildJsonObject {
@@ -59,7 +108,10 @@ object ProjectJson {
         put("sampleRate", project.sampleRate)
         put("nextTrackNumber", project.nextTrackNumber)
         put("metronome", metronomeJson(project.metronome))
-        if (project.masterChain.isNotEmpty()) put("master", buildJsonObject { put("chain", chainJson(project.masterChain)) })
+        // Also written without a chain when a newer version stored other master fields.
+        if (project.masterChain.isNotEmpty() || "master" in project.unknown.nested) {
+            put("master", buildJsonObject { if (project.masterChain.isNotEmpty()) put("chain", chainJson(project.masterChain)) })
+        }
         project.loop?.let { loop ->
             put("loop", buildJsonObject {
                 put("startFrames", loop.startFrames)
@@ -67,30 +119,45 @@ object ProjectJson {
                 put("enabled", loop.enabled)
             })
         }
-        put("tracks", buildJsonArray {
-            for (track in project.tracks) add(buildJsonObject {
-                put("id", track.id)
-                put("name", track.name)
-                put("fileName", track.fileName)
-                if (track.channels != 1) put("channels", track.channels)
-                put("offsetFrames", track.offsetFrames)
-                put("lengthFrames", track.lengthFrames)
-                put("volume", track.volume.toDouble())
-                put("muted", track.muted)
-                put("solo", track.solo)
-                put("pan", track.pan.toDouble())
-                put("createdAtMillis", track.createdAtMillis)
-                track.recordedMetronome?.let { put("recordedMetronome", metronomeJson(it)) }
-                put("countInFrames", track.countInFrames)
-                track.referenceFileName?.let { put("referenceFileName", it) }
-                put("effects", effectsJson(track.effects))
-                put("volumeEnvelope", buildJsonArray {
-                    for (point in track.volumeEnvelope) add(buildJsonObject {
-                        put("frame", point.frame)
-                        put("gain", point.gain.toDouble())
-                    })
-                })
-            })
+        put("tracks", buildJsonArray { for (track in project.tracks) add(trackJson(track)) })
+        project.recordTrack?.let { put("recordTrack", recordTrackJson(it)) }
+    }.with(project.unknown)
+
+    private fun trackJson(track: Track) = buildJsonObject {
+        put("id", track.id)
+        put("name", track.name)
+        put("fileName", track.fileName)
+        if (track.channels != 1) put("channels", track.channels)
+        put("offsetFrames", track.offsetFrames)
+        put("lengthFrames", track.lengthFrames)
+        put("volume", track.volume.toDouble())
+        put("muted", track.muted)
+        put("solo", track.solo)
+        put("pan", track.pan.toDouble())
+        put("createdAtMillis", track.createdAtMillis)
+        track.recordedMetronome?.let { put("recordedMetronome", metronomeJson(it)) }
+        put("countInFrames", track.countInFrames)
+        track.referenceFileName?.let { put("referenceFileName", it) }
+        // Missing means calibrated; only the exception is written.
+        if (!track.latencyCalibrated) put("latencyCalibrated", false)
+        put("effects", effectsJson(track.effects))
+        put("volumeEnvelope", envelopeJson(track.volumeEnvelope))
+    }.with(track.unknown)
+
+    private fun recordTrackJson(record: RecordTrack) = buildJsonObject {
+        record.name?.let { put("name", it) }
+        put("volume", record.volume.toDouble())
+        put("muted", record.muted)
+        put("solo", record.solo)
+        put("pan", record.pan.toDouble())
+        put("effects", effectsJson(record.effects))
+        put("volumeEnvelope", envelopeJson(record.volumeEnvelope))
+    }.with(record.unknown)
+
+    private fun envelopeJson(points: List<VolumePoint>) = buildJsonArray {
+        for (point in points) add(buildJsonObject {
+            put("frame", point.frame)
+            put("gain", point.gain.toDouble())
         })
     }
 
@@ -118,41 +185,45 @@ object ProjectJson {
             put("targetDb", effects.normalize.targetDb.toDouble())
         })
         if (effects.chain.isNotEmpty()) put("chain", chainJson(effects.chain))
-    }
+    }.with(effects.unknown)
 
     private fun chainJson(chain: List<EffectSlot>) = buildJsonArray {
-        for (slot in chain) add(buildJsonObject {
-            put("enabled", slot.enabled)
-            when (val effect = slot.effect) {
-                is ChainEffect.Tone -> {
-                    put("type", TONE)
-                    put("eq", buildJsonObject {
-                        put("enabled", effect.eq.enabled)
-                        put("lowDb", effect.eq.lowDb.toDouble())
-                        put("presenceDb", effect.eq.presenceDb.toDouble())
-                        put("highDb", effect.eq.highDb.toDouble())
-                    })
-                    put("compressor", buildJsonObject {
-                        put("enabled", effect.compressor.enabled)
-                        put("amount", effect.compressor.amount.toDouble())
-                    })
-                }
-                is ChainEffect.Reverb -> {
-                    put("type", REVERB)
-                    put("seconds", effect.reverb.seconds.toDouble())
-                    put("preDelayMs", effect.reverb.preDelayMs.toDouble())
-                    put("damping", effect.reverb.damping.toDouble())
-                    put("mix", effect.reverb.mix.toDouble())
-                }
-                is ChainEffect.Airwindows -> {
-                    put("type", AIRWINDOWS + effect.name)
-                    put("values", buildJsonArray { effect.values.forEach { add(JsonPrimitive(it.toDouble())) } })
-                    // Missing means on; only the exception is written.
-                    if (!effect.levelMatch) put("levelMatch", false)
-                }
-            }
-        })
+        for (slot in chain) add(slotJson(slot))
     }
+
+    private fun slotJson(slot: EffectSlot): JsonObject = buildJsonObject {
+        put("enabled", slot.enabled)
+        when (val effect = slot.effect) {
+            is ChainEffect.Tone -> {
+                put("type", TONE)
+                put("eq", buildJsonObject {
+                    put("enabled", effect.eq.enabled)
+                    put("lowDb", effect.eq.lowDb.toDouble())
+                    put("presenceDb", effect.eq.presenceDb.toDouble())
+                    put("highDb", effect.eq.highDb.toDouble())
+                })
+                put("compressor", buildJsonObject {
+                    put("enabled", effect.compressor.enabled)
+                    put("amount", effect.compressor.amount.toDouble())
+                })
+            }
+            is ChainEffect.Reverb -> {
+                put("type", REVERB)
+                put("seconds", effect.reverb.seconds.toDouble())
+                put("preDelayMs", effect.reverb.preDelayMs.toDouble())
+                put("damping", effect.reverb.damping.toDouble())
+                put("mix", effect.reverb.mix.toDouble())
+            }
+            is ChainEffect.Airwindows -> {
+                put("type", AIRWINDOWS + effect.name)
+                put("values", buildJsonArray { effect.values.forEach { add(JsonPrimitive(it.toDouble())) } })
+                // Missing means on; only the exception is written.
+                if (!effect.levelMatch) put("levelMatch", false)
+            }
+            // Written back exactly as read; only the bypass switch belongs to this version.
+            is ChainEffect.Unknown -> for ((key, value) in effect.fields) if (key != "enabled") put(key, value)
+        }
+    }.with(slot.unknown)
 
     private fun JsonFields?.float(key: String, default: Float) =
         this?.optDouble(key)?.takeUnless { it.isNaN() }?.toFloat() ?: default
@@ -180,21 +251,32 @@ object ProjectJson {
     }
 
     /**
-     * An unknown effect type means a newer app wrote the file; dropping it would silently change the sound.
-     * Airwindows effects are kept by name even if this build lacks one, so saving never loses it.
+     * An effect type this version does not know comes from a newer app. Dropping it would silently change the
+     * sound after saving, so it stays as a [ChainEffect.Unknown] slot that is shown but not rendered. Airwindows
+     * effects are likewise kept by name even if this build lacks one.
      */
     private fun parseChain(json: JsonArray?): List<EffectSlot> = json.orEmpty().map { element ->
         val slot = JsonFields(element as? JsonObject ?: throw IllegalArgumentException("Effect slot is not an object"))
-        val effect = when (val type = slot.optString("type", "")) {
-            TONE -> ChainEffect.Tone(parseEq(slot.optObject("eq")), parseCompressor(slot.optObject("compressor")))
-            REVERB -> ChainEffect.Reverb(parseReverb(slot))
+        val enabled = slot.optBoolean("enabled", true)
+        when (val type = slot.optString("type", "")) {
+            TONE -> EffectSlot(
+                ChainEffect.Tone(parseEq(slot.optObject("eq")), parseCompressor(slot.optObject("compressor"))),
+                enabled,
+                slot.unknown(TONE_KEYS, TONE_NESTED)
+            )
+            REVERB -> EffectSlot(ChainEffect.Reverb(parseReverb(slot)), enabled, slot.unknown(REVERB_KEYS))
             else -> if (type.startsWith(AIRWINDOWS) && type.length > AIRWINDOWS.length) {
-                ChainEffect.Airwindows(type.removePrefix(AIRWINDOWS), slot.optArray("values").orEmpty().map { value ->
-                    ((value as? JsonPrimitive)?.content?.toFloatOrNull()?.takeUnless { it.isNaN() } ?: 0f).coerceIn(0f, 1f)
-                }, levelMatch = slot.optBoolean("levelMatch", true))
-            } else throw IllegalArgumentException("Unsupported effect $type")
+                EffectSlot(
+                    ChainEffect.Airwindows(type.removePrefix(AIRWINDOWS), slot.optArray("values").orEmpty().map { value ->
+                        ((value as? JsonPrimitive)?.content?.toFloatOrNull()?.takeUnless { it.isNaN() } ?: 0f).coerceIn(0f, 1f)
+                    }, levelMatch = slot.optBoolean("levelMatch", true)),
+                    enabled,
+                    slot.unknown(AIRWINDOWS_KEYS)
+                )
+            } else {
+                EffectSlot(ChainEffect.Unknown(type, JsonObject(slot.raw.filterKeys { it != "enabled" })), enabled)
+            }
         }
-        EffectSlot(effect, slot.optBoolean("enabled", true))
     }.take(EffectSlot.MAX_PER_CHAIN)
 
     /**
@@ -222,9 +304,13 @@ object ProjectJson {
                 enabled = normalize?.optBoolean("enabled", false) ?: false,
                 targetDb = normalize.float("targetDb", NormalizeEffect.DEFAULT_TARGET_DB)
             ),
-            chain = if (version >= 3) parseChain(json.optArray("chain")) else legacyChain(json)
+            chain = if (version >= 3) parseChain(json.optArray("chain")) else legacyChain(json),
+            unknown = json.unknown(EFFECTS_KEYS, EFFECTS_NESTED)
         )
     }
+
+    private fun parsePan(json: JsonFields) =
+        json.optDouble("pan", 0.0).toFloat().takeUnless { it.isNaN() }?.coerceIn(-1f, 1f) ?: 0f
 
     private fun parse(json: JsonFields): Project {
         val version = json.optInt("version", 1)
@@ -244,29 +330,44 @@ object ProjectJson {
             nextTrackNumber = json.optInt("nextTrackNumber", tracks.size + 1),
             metronome = parseMetronome(json.optObject("metronome")) ?: Metronome(),
             loop = parseLoop(json.optObject("loop")),
-            tracks = tracks.map { element ->
-                val track = JsonFields(element as JsonObject)
-                Track(
-                    id = track.getLong("id"),
-                    name = track.getString("name"),
-                    fileName = track.getString("fileName"),
-                    channels = track.optInt("channels", 1).also { require(it in 1..2 && (it == 1 || version >= 2)) },
-                    offsetFrames = track.getLong("offsetFrames"),
-                    lengthFrames = track.getLong("lengthFrames"),
-                    volume = track.optDouble("volume", 1.0).toFloat(),
-                    muted = track.optBoolean("muted", false),
-                    solo = track.optBoolean("solo", false),
-                    pan = track.optDouble("pan", 0.0).toFloat().takeUnless { it.isNaN() }?.coerceIn(-1f, 1f) ?: 0f,
-                    createdAtMillis = track.getLong("createdAtMillis"),
-                    recordedMetronome = parseMetronome(track.optObject("recordedMetronome")),
-                    countInFrames = track.optLong("countInFrames", 0L),
-                    referenceFileName = track.optString("referenceFileName", "").takeIf { it.isNotEmpty() },
-                    effects = parseEffects(track.optObject("effects"), version),
-                    volumeEnvelope = parseEnvelope(track.optArray("volumeEnvelope"))
-                )
-            }
+            tracks = tracks.map { element -> parseTrack(JsonFields(element as JsonObject), version) },
+            recordTrack = json.optObject("recordTrack")?.let { parseRecordTrack(it, version) },
+            unknown = json.unknown(PROJECT_KEYS, PROJECT_NESTED)
         )
     }
+
+    private fun parseTrack(track: JsonFields, version: Int) = Track(
+        id = track.getLong("id"),
+        name = track.getString("name"),
+        fileName = track.getString("fileName"),
+        channels = track.optInt("channels", 1).also { require(it in 1..2 && (it == 1 || version >= 2)) },
+        offsetFrames = track.getLong("offsetFrames"),
+        lengthFrames = track.getLong("lengthFrames"),
+        volume = track.optDouble("volume", 1.0).toFloat(),
+        muted = track.optBoolean("muted", false),
+        solo = track.optBoolean("solo", false),
+        pan = parsePan(track),
+        createdAtMillis = track.getLong("createdAtMillis"),
+        recordedMetronome = parseMetronome(track.optObject("recordedMetronome")),
+        countInFrames = track.optLong("countInFrames", 0L),
+        referenceFileName = track.optString("referenceFileName", "").takeIf { it.isNotEmpty() },
+        effects = parseEffects(track.optObject("effects"), version),
+        volumeEnvelope = parseEnvelope(track.optArray("volumeEnvelope")),
+        latencyCalibrated = track.optBoolean("latencyCalibrated", true),
+        unknown = track.unknown(TRACK_KEYS, TRACK_NESTED)
+    )
+
+    private fun parseRecordTrack(json: JsonFields, version: Int) = RecordTrack(
+        name = json.optString("name", "").takeIf { it.isNotEmpty() },
+        volume = json.optDouble("volume", 1.0).toFloat(),
+        muted = json.optBoolean("muted", true),
+        solo = json.optBoolean("solo", false),
+        pan = parsePan(json),
+        // Written by 0.9 or later, so missing effects mean the defaults of a new take, not legacy cleanup.
+        effects = json.optObject("effects")?.let { parseEffects(it, version) } ?: TrackEffects(),
+        volumeEnvelope = parseEnvelope(json.optArray("volumeEnvelope")),
+        unknown = json.unknown(RECORD_TRACK_KEYS)
+    )
 
     private fun parseNotesScroll(json: JsonFields?): NotesScroll {
         val seconds = json?.optDouble("secondsPerLine")?.takeUnless { it.isNaN() }?.toFloat()
@@ -299,10 +400,10 @@ object ProjectJson {
 }
 
 /** org.json-style access: `opt*` falls back to a default, `get*` throws when a required field is unusable. */
-internal class JsonFields(private val json: JsonObject) {
-    private fun primitive(key: String): JsonPrimitive? = (json[key] as? JsonPrimitive)?.takeUnless { it is JsonNull }
+internal class JsonFields(val raw: JsonObject) {
+    private fun primitive(key: String): JsonPrimitive? = (raw[key] as? JsonPrimitive)?.takeUnless { it is JsonNull }
 
-    fun has(key: String) = json[key].let { it != null && it !is JsonNull }
+    fun has(key: String) = raw[key].let { it != null && it !is JsonNull }
 
     fun optBoolean(key: String, default: Boolean): Boolean = primitive(key)?.let { value ->
         value.booleanOrNull ?: when (value.content.lowercase()) {
@@ -320,9 +421,9 @@ internal class JsonFields(private val json: JsonObject) {
 
     fun optString(key: String, default: String): String = primitive(key)?.content ?: default
 
-    fun optObject(key: String): JsonFields? = (json[key] as? JsonObject)?.let(::JsonFields)
+    fun optObject(key: String): JsonFields? = (raw[key] as? JsonObject)?.let(::JsonFields)
 
-    fun optArray(key: String): JsonArray? = json[key] as? JsonArray
+    fun optArray(key: String): JsonArray? = raw[key] as? JsonArray
 
     fun getArray(key: String): JsonArray = optArray(key) ?: throw IllegalArgumentException("$key is not an array")
 
@@ -333,4 +434,14 @@ internal class JsonFields(private val json: JsonObject) {
 
     fun getString(key: String): String = primitive(key)?.takeIf { it.isString }?.content
         ?: throw IllegalArgumentException("$key is not a string")
+
+    /** The fields outside [known], and those outside the known keys of each sub-object in [nested]. */
+    fun unknown(known: Set<String>, nested: Map<String, Set<String>> = emptyMap()): UnknownFields {
+        val own = raw.filterKeys { it !in known }
+        val inner = nested.mapNotNull { (key, keys) ->
+            val fields = (raw[key] as? JsonObject)?.filterKeys { it !in keys }
+            if (fields.isNullOrEmpty()) null else key to JsonObject(fields)
+        }.toMap()
+        return if (own.isEmpty() && inner.isEmpty()) UnknownFields.NONE else UnknownFields(JsonObject(own), inner)
+    }
 }

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.martensening.my_audio.resources.Res
 import com.martensening.my_audio.resources.*
 import com.martensening.my_audio.ui.theme.RecordRed
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
@@ -116,14 +117,20 @@ fun RecordButton(recording: Boolean, enabled: Boolean = true, onClick: () -> Uni
 
 /** Shared delete confirmation ("… löschen?" / Löschen / Abbrechen). */
 @Composable
-fun ConfirmDeleteDialog(title: String, message: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun ConfirmDeleteDialog(
+    title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmLabel: StringResource = Res.string.action_delete
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = { onConfirm(); onDismiss() }) {
-                Text(stringResource(Res.string.action_delete), color = MaterialTheme.colorScheme.error)
+                Text(stringResource(confirmLabel), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } }

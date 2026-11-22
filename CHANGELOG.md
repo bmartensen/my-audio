@@ -2,6 +2,45 @@
 
 User-visible changes by version, newest first. Current behavior is documented in the [wiki](.wiki/README.md).
 
+## 0.9.8 — test build
+
+- Shorter dialog titles: “Reset?” and “Monitor live?”; the reset confirmation is one line.
+
+## 0.9.6 — test build
+
+- Settings → Audio buffer is a compact Automatic | Short | Long choice without explanatory text; the user guide explains it.
+- The effect library shows the same “Listen | Live” buttons as the track dialog.
+
+## 0.9.5 — test build
+
+- Listen and Live sit side by side in effect editors; with/without and one short note appear only while either runs.
+- The volume envelope over a track waveform uses a contrasting colour; the audio buffer explanation is shorter.
+
+## 0.9.4 — test build
+
+- The empty record track shows a short status: “Empty”, plus “Monitoring” when unmuted.
+
+## 0.9.3 — test build
+
+- Track cards list their active effects in one line and show the volume envelope over the waveform.
+
+## 0.9.2 — test build
+
+- The calibration notice is a single sentence.
+
+## 0.9.1 — test build
+
+- Each effect in a track or master chain has a trash icon in its header to remove it. Confirmations, live warnings and the calibration notice are short.
+
+## 0.9.0 — test build
+
+- The last track is the record track and is always there, even empty. Its effects and settings can be prepared before recording; “Delete recording?” keeps them for the next take, and “Reset?” returns an empty track to a new one. New tracks start muted and are unmuted when a take is saved. “+ Empty track” prepares the next instrument.
+- Live effects: an unmuted empty record track monitors the microphone through its effects while recording, and the library and track effect editors offer “Live” (microphone → effect → output) next to ▶, with A/B. Recordings always stay dry. Loudspeaker and Bluetooth outputs warn before monitoring.
+- Settings → Audio buffer chooses Automatic, Small, Medium or Large for calibration, recording and live monitoring; each choice is calibrated separately.
+- Airwindows effects render identically every time.
+- Recording is possible without calibration. The banner and a warning remain; such takes are saved without latency compensation and marked “Recorded without calibration”.
+- Projects move freely between app versions: fields written by a newer version are kept when saving, and effects that only a newer version knows stay in their slot, silent, marked “Requires a newer version”, instead of preventing the project from opening.
+
 ## 0.8.6 — test build
 
 - Tapping an effect in the library unfolds its description and parameters; ▶ plays with these values and changes are heard in the running loop. Values are not stored.

@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,6 +81,7 @@ fun ChainEffect.displayName(): String = when (this) {
     is ChainEffect.Tone -> stringResource(Res.string.effect_tone_name)
     is ChainEffect.Reverb -> stringResource(Res.string.effect_reverb_name)
     is ChainEffect.Airwindows -> name
+    is ChainEffect.Unknown -> type.ifEmpty { stringResource(Res.string.effect_unavailable) }
 }
 
 /** Short state of a collapsed effect: its preset, or "custom"; Airwindows effects show their category. */
@@ -91,6 +93,7 @@ private fun ChainEffect.summary(): String = when (this) {
         ?: formatResource(Res.string.value_seconds, reverb.seconds)
     is ChainEffect.Airwindows -> AirwindowsCatalog.find(name)?.let { "Airwindows · " + categoryName(it.category) }
         ?: stringResource(Res.string.effect_unavailable)
+    is ChainEffect.Unknown -> stringResource(Res.string.effect_requires_newer)
 }
 
 private class KeyedSlot(val key: Int, val slot: EffectSlot)
@@ -106,7 +109,9 @@ fun EffectChainEditor(
     chain: List<EffectSlot>,
     onChange: (List<EffectSlot>) -> Unit,
     choices: List<EffectChoice>,
-    audition: EffectAudition? = null
+    audition: EffectAudition? = null,
+    /** Offers Live (microphone through the chain); a track's chain, never the master's. */
+    live: Boolean = false
 ) {
     var nextKey by remember { mutableIntStateOf(chain.size) }
     val slots = remember { chain.mapIndexed { index, slot -> KeyedSlot(index, slot) }.toMutableStateList() }
@@ -119,13 +124,14 @@ fun EffectChainEditor(
     fun auditionWithout(key: Int) = slots.filter { it.key != key }.map { it.slot }
     fun publish() {
         onChange(slots.map { it.slot })
-        (audition?.playing as? Int)?.let { key ->
-            if (slots.any { it.key == key }) audition.update(key, auditionWith(key), auditionWithout(key)) else audition.stop()
+        listOfNotNull(audition?.playing as? Int, audition?.live as? Int).distinct().forEach { key ->
+            if (slots.any { it.key == key }) audition?.update(key, auditionWith(key), auditionWithout(key)) else audition?.stop()
         }
     }
     // Only the folded-out effect can sound; folding it in or dragging stops it.
     LaunchedEffect(expanded) {
-        if (audition != null && audition.playing != null && audition.playing != expanded) audition.stop()
+        if (audition != null && (audition.playing ?: audition.live) != null &&
+            (audition.playing ?: audition.live) != expanded) audition.stop()
     }
     fun replace(key: Int, slot: EffectSlot) {
         val index = slots.indexOfFirst { it.key == key }
@@ -160,6 +166,11 @@ fun EffectChainEditor(
                     expanded = expanded == item.key,
                     onToggleExpanded = { expanded = if (expanded == item.key) null else item.key },
                     onCheckedChange = { replace(item.key, item.slot.copy(enabled = it)) },
+                    onRemove = {
+                        slots.removeAll { it.key == item.key }
+                        if (expanded == item.key) expanded = null
+                        publish()
+                    },
                     handle = Modifier.pointerInput(item.key) {
                         detectDragGestures(
                             onDragStart = {
@@ -199,27 +210,10 @@ fun EffectChainEditor(
                     // Full width, also below the drag handle: parameter sliders need the room on phones.
                     Column(modifier = Modifier.padding(bottom = 4.dp)) {
                         if (audition != null) {
-                            AuditionControls(
-                                playing = audition.playing == item.key,
-                                bypassed = audition.bypassed,
-                                sourceKind = audition.sourceKind,
-                                onToggle = { audition.toggle(item.key, auditionWith(item.key), auditionWithout(item.key)) },
-                                onBypass = audition::setBypass,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                            AuditionControls(audition, item.key, { auditionWith(item.key) }, { auditionWithout(item.key) },
+                                live = live, modifier = Modifier.padding(bottom = 8.dp))
                         }
                         EffectControls(item.slot.effect) { replace(item.key, item.slot.copy(effect = it)) }
-                        TextButton(
-                            onClick = {
-                                slots.removeAll { it.key == item.key }
-                                expanded = null
-                                publish()
-                            },
-                            modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Icon(painterResource(Res.drawable.ic_delete), contentDescription = null, modifier = Modifier.size(18.dp))
-                            Text(stringResource(Res.string.effect_remove), modifier = Modifier.padding(start = 8.dp))
-                        }
                     }
                 }
                 HorizontalDivider()
@@ -243,6 +237,7 @@ private fun SlotHeader(
     expanded: Boolean,
     onToggleExpanded: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
+    onRemove: () -> Unit,
     handle: Modifier
 ) {
     val textColor = if (checked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -270,6 +265,14 @@ private fun SlotHeader(
             )
         }
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        // Always in view, also folded: removing must not hide below a long list of parameters.
+        IconButton(onClick = onRemove) {
+            Icon(
+                painterResource(Res.drawable.ic_delete),
+                contentDescription = stringResource(Res.string.effect_remove),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -318,6 +321,12 @@ internal fun EffectControls(effect: ChainEffect, showDescription: Boolean = true
         is ChainEffect.Tone -> ToneControls(effect, onChange)
         is ChainEffect.Reverb -> ReverbControls(effect, onChange)
         is ChainEffect.Airwindows -> AirwindowsControls(effect, showDescription, onChange)
+        // Its parameters belong to a newer version; it can only be bypassed, moved or removed here.
+        is ChainEffect.Unknown -> Text(
+            stringResource(Res.string.effect_requires_newer_summary),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

@@ -14,6 +14,7 @@ add_library(myaudio SHARED
         CalibrationSession.cpp
         Correlation.cpp
         JniBridge.cpp
+        LiveChain.cpp
         Metronome.cpp
         MultitrackEngine.cpp
         EffectPreview.cpp
@@ -24,6 +25,7 @@ add_library(myaudio SHARED
 
 target_compile_options(myaudio PRIVATE -Wall -Wextra)
 # Offline DSP must stay fast in debug builds too; it is pure arithmetic.
-set_source_files_properties(Correlation.cpp TrackProcessing.cpp BleedRemoval.cpp PROPERTIES COMPILE_OPTIONS "-O3;-ffast-math")
+# LiveChain runs the same DSP in the audio callback; same flags, so live and rendered sound alike.
+set_source_files_properties(Correlation.cpp TrackProcessing.cpp BleedRemoval.cpp LiveChain.cpp PROPERTIES COMPILE_OPTIONS "-O3;-ffast-math")
 
 target_link_libraries(myaudio oboe::oboe log airwindows)

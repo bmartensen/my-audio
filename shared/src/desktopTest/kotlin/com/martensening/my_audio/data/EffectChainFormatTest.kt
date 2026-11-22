@@ -75,13 +75,15 @@ class EffectChainFormatTest {
     }
 
     @Test
-    fun unknownEffectsAndNewerVersionsAreRejectedNotDropped() {
+    fun unknownEffectsAreKeptAndNewerVersionsRejected() {
         val unknown = """
             {"version": 3, "id": 1, "name": "Neu", "createdAtMillis": 1, "sampleRate": 48000,
              "tracks": [{"id": 2, "name": "Spur", "fileName": "2.wav", "offsetFrames": 0, "lengthFrames": 1,
                          "createdAtMillis": 2, "effects": {"chain": [{"type": "vst3.SomePlugin", "enabled": true}]}}]}
         """.trimIndent()
-        assertThrows(IllegalArgumentException::class.java) { ProjectJson.decode(unknown) }
+        // An effect of a newer version is kept, not dropped (see VersionExchangeTest).
+        val slot = ProjectJson.decode(unknown).tracks.single().effects.chain.single()
+        assertEquals("vst3.SomePlugin", (slot.effect as ChainEffect.Unknown).type)
         assertThrows(IllegalArgumentException::class.java) { ProjectJson.decode(unknown.replace("\"version\": 3", "\"version\": 4")) }
     }
 

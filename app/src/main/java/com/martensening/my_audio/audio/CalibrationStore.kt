@@ -8,12 +8,16 @@ import org.json.JSONObject
 class CalibrationStore(context: Context) {
     private val preferences = context.getSharedPreferences("calibration", Context.MODE_PRIVATE)
 
+    /** The route's key for the current buffer choice: each buffer changes the round trip, so it is calibrated alone. */
+    private fun keyOf(route: AudioDeviceRoute) = route.key?.let { it + AudioSettings.currentBuffer.calibrationSuffix }
+
     fun load(route: AudioDeviceRoute): CalibrationResult? {
-        val key = route.key ?: return null
+        val key = keyOf(route) ?: return null
         // The previous app only calibrated speaker + built-in mic. Preserve that measurement
-        // exclusively for that pair; it must never calibrate a newly connected headset.
+        // exclusively for that pair (and the default buffer); it must never calibrate a newly connected headset.
+        val legacy = route.builtIn && AudioSettings.currentBuffer == AudioBuffer.Automatic
         val json = preferences.getString(key, null)
-            ?: (if (route.builtIn) preferences.getString(KEY_LATEST, null) else null)
+            ?: (if (legacy) preferences.getString(KEY_LATEST, null) else null)
             ?: return null
         return runCatching {
             with(JSONObject(json)) {
@@ -36,13 +40,13 @@ class CalibrationStore(context: Context) {
 
     fun invalidate(route: AudioDeviceRoute) {
         preferences.edit {
-            route.key?.let { remove(it) }
-            if (route.builtIn) remove(KEY_LATEST)
+            keyOf(route)?.let { remove(it) }
+            if (route.builtIn && AudioSettings.currentBuffer == AudioBuffer.Automatic) remove(KEY_LATEST)
         }
     }
 
     fun save(result: CalibrationResult, route: AudioDeviceRoute) {
-        val key = requireNotNull(route.key)
+        val key = requireNotNull(keyOf(route))
         require(result.isStable(route.maxSpreadMs))
         val json = JSONObject()
             .put("latencyFrames", result.latencyFrames)

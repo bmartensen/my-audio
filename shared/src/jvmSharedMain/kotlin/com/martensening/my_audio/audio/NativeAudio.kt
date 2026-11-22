@@ -44,6 +44,23 @@ object NativeAudio {
                                 outputDeviceId: Int, inputDeviceId: Int, handsFreeInput: Boolean, bluetooth: Boolean,
                                 inputChannel: Int): Boolean
 
+    /**
+     * Live audition: the microphone through the monitor chain to the output, nothing else played or recorded.
+     * Same streams as a take; [stop] ends it.
+     */
+    external fun startMonitoring(outputDeviceId: Int, inputDeviceId: Int, handsFreeInput: Boolean, bluetooth: Boolean,
+                                 inputChannel: Int): Boolean
+
+    /**
+     * The chain the microphone is monitored through, while recording or in live audition: encoded [chain]
+     * (see `AudioEngine.encodeChain`), then [gain] and mono [pan]. Disabled means nothing is monitored.
+     * Builds the chain on the calling thread (may take a moment) and switches with a short crossfade.
+     */
+    external fun setMonitorChain(chain: FloatArray, gain: Float, pan: Float, enabled: Boolean)
+
+    /** Global stream buffer: 0 = system default, 1/2/4 = small/medium/large; see `LiveChain.h`. */
+    external fun setBufferSetting(setting: Int)
+
     /** Actual open stream ports; checked throughout transport to detect silent rerouting. */
     external fun currentDeviceIds(): IntArray
     external fun transportXruns(): Int

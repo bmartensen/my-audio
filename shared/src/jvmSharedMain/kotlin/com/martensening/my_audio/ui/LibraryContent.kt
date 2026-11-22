@@ -111,7 +111,7 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
             if (expandedId == entry.id) {
                 expandedId = null
                 tuned = null
-                if (audition.playing == entry.id) audition.stop()
+                if (audition.playing == entry.id || audition.live == entry.id) audition.stop()
             } else {
                 expand(entry.id)
             }
@@ -119,15 +119,16 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
         selected = entry.id in selection,
         onSelect = { library.setSelected(entry.id, it) },
         playing = audition.playing == entry.id,
-        bypassed = audition.bypassed,
         onPlay = {
             expand(entry.id)
             val effect = tuned ?: EffectChoice(entry.id).create()
             audition.toggle(entry.id, listOf(EffectSlot(effect)), emptyList())
         },
-        onBypass = audition::setBypass,
         controls = {
             tuned?.let { effect ->
+                // The same "Listen | Live" buttons as in the track dialog; the header keeps its quick ▶ as well.
+                AuditionControls(audition, entry.id, { listOf(EffectSlot(tuned ?: effect)) }, { emptyList() },
+                    live = true, modifier = Modifier.padding(bottom = 8.dp))
                 EffectControls(effect, showDescription = false) { changed ->
                     tuned = changed
                     audition.update(entry.id, listOf(EffectSlot(changed)), emptyList())
@@ -272,9 +273,7 @@ private fun LibraryRow(
     selected: Boolean,
     onSelect: (Boolean) -> Unit,
     playing: Boolean,
-    bypassed: Boolean,
     onPlay: () -> Unit,
-    onBypass: (Boolean) -> Unit,
     controls: @Composable () -> Unit
 ) {
     Column {
@@ -301,7 +300,6 @@ private fun LibraryRow(
                     maxLines = if (expanded) Int.MAX_VALUE else 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (playing) Box(Modifier.padding(top = 6.dp)) { AuditionABSwitch(bypassed, onBypass) }
             }
             IconButton(onClick = onPlay) {
                 Icon(

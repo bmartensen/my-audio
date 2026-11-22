@@ -33,7 +33,7 @@ The device-local library selection controls which effects the add dialog offers;
 
 ## Real-time transport and offline rendering
 
-Expensive track/effect processing prepares audio before playback or overdubbing. The real-time callback handles capture, prepared playback and metronome generation. [EffectPreview.cpp](../app/src/main/cpp/EffectPreview.cpp) uses the same processing for short clips played by a separate looping preview player. A/B bypasses one effect while keeping the rest of the chain. Live input monitoring with effects is separate open work.
+Expensive track/effect processing prepares audio before playback or overdubbing. The real-time callback handles capture, prepared playback and metronome generation. [EffectPreview.cpp](../app/src/main/cpp/EffectPreview.cpp) uses the same processing for short clips played by a separate looping preview player. A/B bypasses one effect while keeping the rest of the chain. Live monitoring runs the same chain in real time (`LiveChain.cpp`), only for listening: takes stay dry.
 
 ## Shared musical logic, explicit platform services
 

@@ -61,6 +61,50 @@ class ProjectRepository(root: File) {
         it.copy(tracks = it.tracks + track, nextTrackNumber = it.nextTrackNumber + 1)
     }
 
+    /**
+     * Saves a recorded [take] with the settings of [Project.nextTake], unmuted so it is heard right away. The
+     * empty record track is used up; the new track is now the record track.
+     */
+    @Synchronized
+    fun addTake(projectId: Long, take: Track): Project? = update(projectId) { project ->
+        val settings = project.nextTake
+        val track = take.copy(
+            name = settings.name ?: take.name,
+            volume = settings.volume,
+            muted = false,
+            solo = settings.solo,
+            pan = settings.pan,
+            effects = settings.effects,
+            volumeEnvelope = settings.volumeEnvelope
+        )
+        project.copy(tracks = project.tracks + track, recordTrack = null, nextTrackNumber = project.nextTrackNumber + 1)
+    }
+
+    /**
+     * Deletes only the audio of the last track, which is the record track while no empty one follows it. Its
+     * settings stay as the empty record track, so the next take runs through the same effects.
+     */
+    @Synchronized
+    fun deleteRecording(projectId: Long, trackId: Long): Project? {
+        val project = load(projectId) ?: return null
+        val track = project.tracks.lastOrNull()?.takeIf { it.id == trackId && project.recordTrack == null } ?: return project
+        deleteTrackFiles(projectId, track)
+        return project.copy(tracks = project.tracks - track, recordTrack = RecordTrack.keepingSettingsOf(track)).also(::save)
+    }
+
+    /** Returns the empty record track to the state of a newly created one. */
+    @Synchronized
+    fun resetRecordTrack(projectId: Long): Project? = update(projectId) { it.copy(recordTrack = RecordTrack()) }
+
+    /** Adds an empty record track after the last take, to prepare the next instrument before recording. */
+    @Synchronized
+    fun addEmptyTrack(projectId: Long): Project? = update(projectId) { project ->
+        if (project.recordTrack != null || project.tracks.isEmpty()) project else project.copy(recordTrack = RecordTrack())
+    }
+
+    @Synchronized
+    fun updateRecordTrack(projectId: Long, record: RecordTrack): Project? = update(projectId) { it.copy(recordTrack = record) }
+
     @Synchronized
     fun setMetronome(projectId: Long, metronome: Metronome): Project? = update(projectId) { it.copy(metronome = metronome) }
 

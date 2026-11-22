@@ -11,6 +11,7 @@
 #include <oboe/Oboe.h>
 
 #include "InputChannel.h"
+#include "LiveChain.h"
 #include "ProjectMix.h"
 #include "Wav.h"
 #include "VolumeEnvelope.h"
@@ -51,6 +52,14 @@ public:
     bool startRecording(const std::string &path, const std::string &referencePath, int64_t countInFrames,
                         int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
                         InputChannel inputChannel);
+    /**
+     * Live audition: microphone through the monitor chain to the output, nothing else played or recorded.
+     * Same stream configuration as a take, so the heard latency is the one of recording.
+     */
+    bool startMonitoring(int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
+                         InputChannel inputChannel);
+    /** The chain the microphone is monitored through while recording or in live audition; any time. */
+    void setMonitorChain(std::unique_ptr<LiveChain> chain) { mMonitor.setChain(std::move(chain)); }
     std::vector<int> currentDeviceIds();
     int transportXruns();
     /** Stops any stream; returns the recorded frames for a recording, otherwise -1. */
@@ -85,6 +94,8 @@ private:
 
     MultitrackEngine();
     oboe::Result openOutput(oboe::AudioStreamDataCallback *callback, int deviceId);
+    /** Output with this engine as full-duplex callback plus the matching input; false after closing both. */
+    bool openDuplex(int outputDeviceId, int inputDeviceId, bool handsFreeInput, InputChannel inputChannel);
     /** Renders the output; [mixOnly] (optional) receives the mix without the click; [looping] applies the practice loop. */
     void mix(float *output, int channels, int numFrames, float *mixOnly = nullptr, bool looping = false);
     void writerLoop();
@@ -104,7 +115,10 @@ private:
     std::shared_ptr<oboe::AudioStream> mOutput;
     std::shared_ptr<oboe::AudioStream> mInput;
     bool mRecording = false;
+    bool mMonitorOnly = false;  // live audition: no mix, no take
     InputChannel mInputChannel = InputChannel::Device;
+    LiveMonitor mMonitor;
+    std::vector<float> mMonitorInput;  // copy of the mono input for the monitor; the take never reads it
 
     std::atomic<int64_t> mPosition{0};
     std::atomic<int64_t> mSeekRequest{-1};  // pending playback jump, -1 = none

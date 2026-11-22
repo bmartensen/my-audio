@@ -1,5 +1,8 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.audio.AudioSettings
+import com.martensening.my_audio.ui.LiveInputs
+import com.martensening.my_audio.ui.PlatformLiveInput
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,7 +61,14 @@ fun DesktopApp(window: Frame, version: String, aboutOpen: MutableState<Boolean>)
     val repository = remember { DesktopStorage.repository() }
     val devices = remember { DesktopDevices(DesktopStorage.root) }
     val calibrationStore = remember { DesktopCalibrationStore(DesktopStorage.root) }
-    val platform = remember { DesktopProjectPlatform(repository, devices, calibrationStore, DesktopStorage.root) }
+    val platform = remember {
+        // The buffer choice reaches the engine before any stream opens; live audition uses the selected devices.
+        AudioSettings.forRoot(DesktopStorage.root)
+        DesktopProjectPlatform(repository, devices, calibrationStore, DesktopStorage.root).also { platform ->
+            // Desktop outputs do not tell loudspeaker from headphones; the Live hint asks for headphones.
+            LiveInputs.current = PlatformLiveInput(platform, hasPermission = { true }, warningOf = { null })
+        }
+    }
     val calibration = remember { DesktopCalibration(calibrationStore, devices, scope) }
     val home = remember { DesktopHome(repository, platform.cacheDir, scope) }
     // Development runs can start in a project: gradlew :desktop:run -PmyAudio.openProject=<id> (screenshots).
@@ -75,9 +85,8 @@ fun DesktopApp(window: Frame, version: String, aboutOpen: MutableState<Boolean>)
             home = home,
             onOpenProject = { id, autoRecord -> screen = Screen.Project(id, autoRecord) },
             onRecord = {
-                // A new device pair is calibrated before its first take, as on Android.
-                if (calibrationStore.latencyFrames(devices.route()) == null) settingsOpen = true
-                else scope.launch {
+                // Never blocked by a missing calibration; the project shows the banner and warns at the take.
+                scope.launch {
                     home.create(getString(Res.string.project_default_name, now())) { screen = Screen.Project(it.id, true) }
                 }
             },

@@ -1,5 +1,7 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.audio.AudioSettings
+import com.martensening.my_audio.ui.AudioBufferChoice
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +67,11 @@ fun DesktopSettingsDialog(devices: DesktopDevices, calibration: DesktopCalibrati
                     devices.select(input = it)
                     calibration.refresh()
                 }
+                // Each buffer choice is calibrated alone, so the check below follows it.
+                Text(stringResource(Res.string.audio_buffer_title), style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp))
+                AudioBufferChoice(AudioSettings.forRoot(DesktopStorage.root), enabled = running == null,
+                    onChange = calibration::refresh)
                 Text(stringResource(Res.string.calibration_title), style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 8.dp))
                 Text(stringResource(Res.string.calibration_instruction_desktop), style = MaterialTheme.typography.bodyMedium)

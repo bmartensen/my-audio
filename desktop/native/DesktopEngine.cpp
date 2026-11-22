@@ -19,6 +19,8 @@ constexpr int kWriterChunkFrames = 4096;
 constexpr int kChannels = 2;
 // Larger than any device period, so the reference of a block always fits.
 constexpr int kScratchFrames = kProjectSampleRate;
+// One step of the buffer setting: 128 frames (2.7 ms) per period.
+constexpr int kPeriodFrames = 128;
 
 void dataCallback(ma_device *device, void *output, const void *input, ma_uint32 frames) {
     static_cast<DesktopEngine *>(device->pUserData)
@@ -96,6 +98,8 @@ bool DesktopEngine::openDevice(bool duplex) {
     config.capture.format = ma_format_f32;
     config.capture.channels = 1;
     config.performanceProfile = ma_performance_profile_low_latency;
+    // The global buffer choice (Settings); the calibration applies the same, so its latency fits.
+    if (bufferSetting() > 0) config.periodSizeInFrames = static_cast<ma_uint32>(kPeriodFrames * bufferSetting());
     config.dataCallback = dataCallback;
     config.notificationCallback = notificationCallback;
     config.pUserData = this;
@@ -171,6 +175,26 @@ bool DesktopEngine::startRecording(const std::string &path, const std::string &r
     return true;
 }
 
+bool DesktopEngine::startMonitoring(int /* outputDeviceId */, int /* inputDeviceId */, bool /* handsFreeInput */,
+                                    bool /* bluetooth */, InputChannel /* miniaudio mixes all channels */) {
+    std::lock_guard<std::mutex> guard(mLock);
+    if (mDevice != nullptr) return false;
+    mInputPeak = 0.0f;
+    if (!openDevice(true)) return false;
+    mMonitorOnly = true;
+    mActive = true;
+    if (ma_device_start(static_cast<ma_device *>(mDevice)) != MA_SUCCESS) {
+        mActive = false;
+        mMonitorOnly = false;
+        closeDevice();
+        return false;
+    }
+    auto *device = static_cast<ma_device *>(mDevice);
+    MYAUDIO_LOGI(kTag, "Live monitoring: period %u frames x %u", device->playback.internalPeriodSizeInFrames,
+                 device->playback.internalPeriods);
+    return true;
+}
+
 std::vector<int> DesktopEngine::currentDeviceIds() {
     // Only the system default devices are used so far; a lost device ends the transport instead.
     return {0, 0};
@@ -184,6 +208,7 @@ int64_t DesktopEngine::stopTransport() {
     std::lock_guard<std::mutex> guard(mLock);
     mActive = false;
     closeDevice();
+    mMonitorOnly = false;
     if (!mRecording) return -1;
     mRecording = false;
     mWriterRunning = false;
@@ -211,15 +236,23 @@ void DesktopEngine::process(float *output, const float *input, uint32_t frames) 
         if (mPosition.load(std::memory_order_relaxed) >= mixFrames()) mActive.store(false, std::memory_order_relaxed);
         return;
     }
-    const bool captureReference = mReferenceFifo != nullptr && frames <= mReferenceScratch.size();
-    mix(output, kChannels, static_cast<int>(frames), captureReference ? mReferenceScratch.data() : nullptr, false);
-    if (captureReference && !mReferenceFifo->write(mReferenceScratch.data(), frames)) {
-        mDroppedFrames.fetch_add(frames, std::memory_order_relaxed);
+    if (mMonitorOnly) {
+        std::fill_n(output, frames * kChannels, 0.0f);
+    } else {
+        const bool captureReference = mReferenceFifo != nullptr && frames <= mReferenceScratch.size();
+        // The reference is the playback alone: captured before the monitored microphone is added.
+        mix(output, kChannels, static_cast<int>(frames), captureReference ? mReferenceScratch.data() : nullptr, false);
+        if (captureReference && !mReferenceFifo->write(mReferenceScratch.data(), frames)) {
+            mDroppedFrames.fetch_add(frames, std::memory_order_relaxed);
+        }
     }
     float peak = mInputPeak.load(std::memory_order_relaxed);
     for (uint32_t frame = 0; frame < frames; ++frame) peak = std::max(peak, std::fabs(input[frame]));
     mInputPeak.store(peak, std::memory_order_relaxed);
-    if (!mFifo->write(input, frames)) mDroppedFrames.fetch_add(frames, std::memory_order_relaxed);
+    // The take is always the dry microphone, written from the untouched input before any monitoring.
+    if (!mMonitorOnly && !mFifo->write(input, frames)) mDroppedFrames.fetch_add(frames, std::memory_order_relaxed);
+    // Only the output hears the effects; the monitor reads the input and never changes it.
+    mMonitor.process(input, output, kChannels, static_cast<int>(frames));
 }
 
 // Same rendering as MultitrackEngine::mix on Android: mix, optional practice loop and the click.

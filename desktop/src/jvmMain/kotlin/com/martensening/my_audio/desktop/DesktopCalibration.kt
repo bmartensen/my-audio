@@ -1,5 +1,6 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.audio.AudioSettings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -43,7 +44,10 @@ class DesktopCalibrationStore(root: File) {
 
     private fun writeAll(entries: Map<String, JsonObject>) = file.writeText(JsonObject(entries).toString())
 
-    fun load(route: DesktopRoute): DesktopCalibrationValue? = readAll()[route.key]?.let { json ->
+    /** The pair's key for the current buffer choice: each buffer changes the round trip, so it is calibrated alone. */
+    private fun keyOf(route: DesktopRoute) = route.key + AudioSettings.currentBuffer.calibrationSuffix
+
+    fun load(route: DesktopRoute): DesktopCalibrationValue? = readAll()[keyOf(route)]?.let { json ->
         runCatching {
             DesktopCalibrationValue(
                 latencyFrames = json.getValue("latencyFrames").jsonPrimitive.double,
@@ -55,7 +59,7 @@ class DesktopCalibrationStore(root: File) {
 
     fun latencyFrames(route: DesktopRoute): Long? = load(route)?.latencyFrames?.roundToLong()
 
-    fun save(route: DesktopRoute, value: DesktopCalibrationValue) = writeAll(readAll() + (route.key to buildJsonObject {
+    fun save(route: DesktopRoute, value: DesktopCalibrationValue) = writeAll(readAll() + (keyOf(route) to buildJsonObject {
         put("output", route.output)
         put("input", route.input)
         put("latencyFrames", value.latencyFrames)
@@ -63,7 +67,7 @@ class DesktopCalibrationStore(root: File) {
         put("measuredAtMillis", value.measuredAtMillis)
     }))
 
-    fun invalidate(route: DesktopRoute) = writeAll(readAll() - route.key)
+    fun invalidate(route: DesktopRoute) = writeAll(readAll() - keyOf(route))
 }
 
 /** Runs the same three sessions and stability check as the Android calibration for the current devices. */

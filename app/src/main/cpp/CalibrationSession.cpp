@@ -10,6 +10,7 @@
 #include <android/log.h>
 
 #include "Correlation.h"
+#include "LiveChain.h"
 #include "StreamWarmup.h"
 
 namespace myaudio {
@@ -129,6 +130,8 @@ SessionResult runCalibrationSession(int outputDeviceId, int inputDeviceId, bool 
         result.status = kOpenOutputFailed;
         return result;
     }
+    // The same global buffer choice as takes and live monitoring (MultitrackEngine::openOutput).
+    if (bufferSetting() > 0) output->setBufferSizeInFrames(output->getFramesPerBurst() * bufferSetting());
     const int sampleRate = output->getSampleRate();
     result.sampleRate = sampleRate;
 

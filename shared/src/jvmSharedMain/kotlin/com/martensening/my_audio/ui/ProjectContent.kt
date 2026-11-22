@@ -72,6 +72,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.Metronome
 import com.martensening.my_audio.data.Project
+import com.martensening.my_audio.data.RecordTrack
 import com.martensening.my_audio.data.Track
 import com.martensening.my_audio.ui.theme.RecordRed
 import androidx.compose.foundation.background
@@ -114,6 +115,10 @@ fun ProjectContent(
     val viewModel = session
     val state by viewModel.state.collectAsState()
     var deletingTrack by rememberSaveable { mutableStateOf<Long?>(null) }
+    var deletingRecording by rememberSaveable { mutableStateOf<Long?>(null) }
+    var resettingRecordTrack by rememberSaveable { mutableStateOf(false) }
+    var editingRecordTrack by rememberSaveable { mutableStateOf(false) }
+    var monitorWarning by remember { mutableStateOf<LiveWarning?>(null) }
     var editingMetronome by rememberSaveable { mutableStateOf(false) }
     var envelopeTrack by rememberSaveable { mutableStateOf<Long?>(null) }
     var editingTrack by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -125,11 +130,6 @@ fun ProjectContent(
     KeepScreenOn(notesVisible || state.tunerOpen)
 
     LaunchedEffect(Unit) { viewModel.onEnter() }
-    LaunchedEffect(state.errorMessage) {
-        if (state.errorMessage == Res.string.audio_calibration_required) {
-            viewModel.leave(onOpenCalibration)
-        }
-    }
     LaunchedEffect(autoRecord) {
         if (autoRecord) {
             viewModel.startAutoRecord()
@@ -220,7 +220,18 @@ fun ProjectContent(
                         onToggleSolo = { viewModel.setSolo(it, !it.solo) },
                         onLoopChange = viewModel::setLoop,
                         onDelete = { deletingTrack = it.id },
+                        onDeleteRecording = { deletingRecording = it.id },
                         onEdit = { editingTrack = it.id },
+                        onRecordTrackMute = {
+                            // Unmuting the empty record track monitors the microphone: warn where that feeds back or lags.
+                            val warning = if (project.nextTake.muted) LiveInputs.current?.warning() else null
+                            if (warning != null) monitorWarning = warning
+                            else viewModel.setRecordTrackMuted(!project.nextTake.muted)
+                        },
+                        onRecordTrackSolo = { viewModel.setRecordTrackSolo(!project.nextTake.solo) },
+                        onRecordTrackReset = { resettingRecordTrack = true },
+                        onRecordTrackEdit = { editingRecordTrack = true },
+                        onAddEmptyTrack = viewModel::addEmptyTrack,
                         onEditMaster = { editingMaster = true },
                         onEnvelope = { envelopeTrack = it.id },
                         onSeek = viewModel::seekTo,
@@ -266,6 +277,33 @@ fun ProjectContent(
             onDismiss = { deletingTrack = null }
         )
     }
+    project?.tracks?.firstOrNull { it.id == deletingRecording }?.let { track ->
+        ConfirmDeleteDialog(
+            title = stringResource(Res.string.track_recording_delete_question),
+            message = formatResource(Res.string.track_recording_delete_info, track.name),
+            onConfirm = { viewModel.deleteRecording(track) },
+            onDismiss = { deletingRecording = null }
+        )
+    }
+    monitorWarning?.let { warning ->
+        LiveWarningDialog(
+            warning,
+            onContinue = {
+                monitorWarning = null
+                viewModel.setRecordTrackMuted(false)
+            },
+            onCancel = { monitorWarning = null }
+        )
+    }
+    if (resettingRecordTrack && project != null) {
+        ConfirmDeleteDialog(
+            title = stringResource(Res.string.track_reset_question),
+            message = formatResource(Res.string.track_reset_info, recordTrackName(project)),
+            onConfirm = viewModel::resetRecordTrack,
+            onDismiss = { resettingRecordTrack = false },
+            confirmLabel = Res.string.action_reset
+        )
+    }
     val librarySelection by viewModel.effectLibrary.selection.collectAsState()
     val effectChoices = remember(librarySelection) { EffectChoice.of(librarySelection) }
     project?.tracks?.firstOrNull { it.id == editingTrack }?.let { track ->
@@ -275,6 +313,17 @@ fun ProjectContent(
             onSave = viewModel::setTrackSettings,
             onDismiss = { editingTrack = null },
             auditionSource = remember(track.id) { viewModel.trackAuditionSource(track.id) }
+        )
+    }
+    if (editingRecordTrack && project != null) {
+        val record = project.nextTake
+        val defaultName = formatResource(Res.string.track_default_name, project.nextTrackNumber)
+        // The track dialog edits the empty record track like a take without audio: no clean-up rows apply.
+        TrackSettingsDialog(
+            track = record.asTrack(defaultName),
+            choices = effectChoices,
+            onSave = { edited -> viewModel.setRecordTrackSettings(record.withSettingsOf(edited, defaultName)) },
+            onDismiss = { editingRecordTrack = false }
         )
     }
     if (editingMaster && project != null) {
@@ -307,12 +356,21 @@ private fun TrackList(
     onToggleSolo: (Track) -> Unit,
     onLoopChange: (PlaybackLoop?) -> Unit,
     onDelete: (Track) -> Unit,
+    onDeleteRecording: (Track) -> Unit,
     onEdit: (Track) -> Unit,
+    onRecordTrackMute: () -> Unit,
+    onRecordTrackSolo: () -> Unit,
+    onRecordTrackReset: () -> Unit,
+    onRecordTrackEdit: () -> Unit,
+    onAddEmptyTrack: () -> Unit,
     onEditMaster: () -> Unit,
     onEnvelope: (Track) -> Unit,
     onSeek: (Long) -> Unit,
     modifier: Modifier
 ) {
+    // The last track records the next take: the empty record track, or else the last take itself.
+    val emptyRecordTrack = project.recordTrack != null || project.tracks.isEmpty()
+    val lastTake = project.tracks.lastOrNull()?.takeUnless { emptyRecordTrack }
     val editable = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting
     val seek = onSeek.takeIf { state.mode == TransportMode.Playing }
     LazyColumn(
@@ -341,7 +399,8 @@ private fun TrackList(
                 editable = editable,
                 onToggleMute = { onToggleMute(track) },
                 onToggleSolo = { onToggleSolo(track) },
-                onDelete = { onDelete(track) },
+                // Only the record track loses just its recording; older tracks are deleted as a whole.
+                onDelete = { if (track == lastTake) onDeleteRecording(track) else onDelete(track) },
                 onEdit = { onEdit(track) },
                 onEnvelope = { onEnvelope(track) },
                 onSeek = seek
@@ -352,16 +411,113 @@ private fun TrackList(
             item(key = "preRoll") { PreRollCard(preRollMillis, project.preRoll.seconds) }
         } else if (state.mode == TransportMode.Recording) {
             item(key = "recording") { RecordingCard(project, state) }
-        } else if (project.tracks.isEmpty()) {
-            item {
-                Text(
-                    text = stringResource(Res.string.project_empty_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(32.dp)
+        } else if (emptyRecordTrack) {
+            item(key = "recordTrack") {
+                RecordTrackCard(
+                    project = project,
+                    editable = editable,
+                    onToggleMute = onRecordTrackMute,
+                    onToggleSolo = onRecordTrackSolo,
+                    onReset = onRecordTrackReset,
+                    onEdit = onRecordTrackEdit
                 )
             }
+        } else {
+            item(key = "addTrack") {
+                TextButton(onClick = onAddEmptyTrack, enabled = editable) {
+                    Icon(painterResource(Res.drawable.ic_add), contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                    Text(stringResource(Res.string.record_track_add))
+                }
+            }
+        }
+    }
+}
+
+/** Name the empty record track shows and a take into it gets. */
+@Composable
+private fun recordTrackName(project: Project) =
+    project.nextTake.name ?: formatResource(Res.string.track_default_name, project.nextTrackNumber)
+
+/** The empty record track as the track dialog edits it: a take without audio. */
+private fun RecordTrack.asTrack(defaultName: String) = Track(
+    id = RECORD_TRACK_ID, name = name ?: defaultName, fileName = "", offsetFrames = 0, lengthFrames = 0,
+    volume = volume, muted = muted, solo = solo, pan = pan, createdAtMillis = 0,
+    effects = effects, volumeEnvelope = volumeEnvelope
+)
+
+/** The settings [edited] in the track dialog, back on the record track; the default name stays a default. */
+private fun RecordTrack.withSettingsOf(edited: Track, defaultName: String) = copy(
+    name = edited.name.takeUnless { it == defaultName },
+    volume = edited.volume, pan = edited.pan, effects = edited.effects
+)
+
+private const val RECORD_TRACK_ID = -1L
+
+/**
+ * The empty record track at the end: the next take goes here with its settings. A long press opens them; the
+ * trash resets them and is disabled while nothing differs from a new track, so its state is visible.
+ */
+@Composable
+private fun RecordTrackCard(
+    project: Project,
+    editable: Boolean,
+    onToggleMute: () -> Unit,
+    onToggleSolo: () -> Unit,
+    onReset: () -> Unit,
+    onEdit: () -> Unit
+) {
+    val record = project.nextTake
+    PanelCard(
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier
+            .clip(PanelShape)
+            .combinedClickable(enabled = editable, onClick = {}, onLongClick = onEdit)
+    ) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = recordTrackName(project),
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onEdit, enabled = editable) {
+                    Icon(painterResource(Res.drawable.ic_graphic_eq), contentDescription = stringResource(Res.string.track_effects),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TrackToggle(
+                    checked = record.solo,
+                    icon = Res.drawable.ic_solo,
+                    description = if (record.solo) Res.string.track_unsolo else Res.string.track_solo,
+                    enabled = editable,
+                    onToggle = onToggleSolo
+                )
+                TrackToggle(
+                    checked = record.muted,
+                    icon = if (record.muted) Res.drawable.ic_volume_off else Res.drawable.ic_volume_up,
+                    description = if (record.muted) Res.string.track_unmute else Res.string.track_mute,
+                    enabled = editable,
+                    onToggle = onToggleMute
+                )
+                IconButton(onClick = onReset, enabled = editable && !record.isPristine) {
+                    Icon(
+                        painterResource(Res.drawable.ic_delete),
+                        contentDescription = stringResource(Res.string.track_reset_question)
+                    )
+                }
+            }
+            ActiveEffectsLine(record.effects.chain)
+            val parts = listOf(stringResource(Res.string.record_track_empty)) +
+                // Unmuted, the empty record track monitors the microphone while recording.
+                listOfNotNull(stringResource(Res.string.record_track_monitoring).takeIf { !record.muted })
+            Text(
+                text = parts.joinToString(" · "),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -379,9 +535,7 @@ private fun RecordingCard(project: Project, state: ProjectUiState) {
                         .coerceIn(1, Metronome.COUNT_IN_BEATS.toLong())
                     formatResource(Res.string.project_count_in, beat, Metronome.COUNT_IN_BEATS)
                 } else {
-                    formatResource(Res.string.project_recording_take,
-                        formatResource(Res.string.track_default_name, project.nextTrackNumber)
-                    )
+                    formatResource(Res.string.project_recording_take, recordTrackName(project))
                 },
                 style = MaterialTheme.typography.titleMedium,
                 color = RecordRed
@@ -517,6 +671,15 @@ private fun TrackCard(
                     )
                 }
             }
+            ActiveEffectsLine(track.effects.chain)
+            if (!track.latencyCalibrated) {
+                Text(
+                    text = stringResource(Res.string.track_uncalibrated),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
             TrackWaveform(
                 track = track,
                 projectFrames = project.lengthFrames,
@@ -532,6 +695,24 @@ private fun TrackCard(
             )
         }
     }
+}
+
+/**
+ * The switched-on effects of a track in one line, comma-separated and cut with "…" when they do not fit,
+ * so a track with effects is recognisable at a glance; nothing when there are none.
+ */
+@Composable
+private fun ActiveEffectsLine(chain: List<EffectSlot>) {
+    val active = chain.filter { it.audible }
+    if (active.isEmpty()) return
+    Text(
+        text = active.map { it.effect.displayName() }.joinToString(", "),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(bottom = 4.dp)
+    )
 }
 
 /** The master channel: its effect chain at a glance; a tap or long press opens it. */
@@ -741,6 +922,8 @@ private fun TrackWaveform(
 ) {
     val baseline = MaterialTheme.colorScheme.outlineVariant
     val loopShade = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    // A contrasting colour, so the curve stands out from the waveform without covering it.
+    val envelopeColor = MaterialTheme.colorScheme.tertiary
     // While playing, a tap continues playback at that point of the shared timeline.
     val seekModifier = if (onSeek != null && projectFrames > 0) {
         Modifier.pointerInput(projectFrames) {
@@ -772,6 +955,20 @@ private fun TrackWaveform(
         clipRect {
             drawPath(area, color.copy(alpha = color.alpha * 0.55f))
             drawPath(area, color, style = Stroke(width = 1.dp.toPx(), join = StrokeJoin.Round))
+            // The volume envelope as a subtle line over the take: top = 100 %, bottom = 0 %, held beyond its points.
+            val points = track.volumeEnvelope
+            if (points.isNotEmpty()) {
+                val inset = 2.dp.toPx()
+                fun x(frame: Long) = size.width * frame / projectFrames
+                fun y(gain: Float) = inset + (1f - gain.coerceIn(0f, 1f)) * (size.height - 2 * inset)
+                val start = maxOf(track.offsetFrames, 0L)
+                val curve = Path().apply {
+                    moveTo(x(start), y(points.first().gain))
+                    for (point in points) lineTo(x(point.frame.coerceIn(start, track.endFrames)), y(point.gain))
+                    lineTo(x(track.endFrames), y(points.last().gain))
+                }
+                drawPath(curve, envelopeColor, style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round))
+            }
         }
         playheadFrames?.let {
             drawPlaybackCursor(it.coerceIn(0, projectFrames), 0, projectFrames)

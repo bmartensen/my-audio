@@ -1,8 +1,11 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
+
+struct AirwinConsolidatedBase;
 
 namespace myaudio {
 
@@ -34,5 +37,26 @@ std::vector<std::string> airwindowsDisplay(int index, const std::vector<float> &
  */
 bool applyAirwindows(int index, const std::vector<float> &values, std::vector<float> &left,
                      std::vector<float> &right, int sampleRate);
+
+/**
+ * One running Airwindows effect for real-time use (live monitoring). Create and destroy it outside the
+ * audio thread: construction allocates the effect and its scratch buffers; process() never allocates.
+ */
+class AirwindowsProcessor {
+public:
+    /** Null for an unknown [index]. */
+    static std::unique_ptr<AirwindowsProcessor> create(int index, const std::vector<float> &values, int sampleRate);
+    ~AirwindowsProcessor();
+
+    /** Processes the stereo signal in place; any number of frames. */
+    void process(float *left, float *right, int frames);
+
+private:
+    AirwindowsProcessor() = default;
+    static constexpr int kBlock = 256;
+    std::unique_ptr<AirwinConsolidatedBase> mEffect;
+    std::vector<float> mOutLeft = std::vector<float>(kBlock);
+    std::vector<float> mOutRight = std::vector<float>(kBlock);
+};
 
 }  // namespace myaudio

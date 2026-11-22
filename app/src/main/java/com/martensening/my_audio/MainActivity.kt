@@ -13,6 +13,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.edit
 import androidx.compose.runtime.mutableStateOf
+import com.martensening.my_audio.ui.AndroidProjectPlatform
+import com.martensening.my_audio.ui.LiveInputs
 import com.martensening.my_audio.ui.MyAudioApp
 import com.martensening.my_audio.ui.Route
 import com.martensening.my_audio.ui.theme.MyAudioTheme
@@ -28,6 +30,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Hardware volume keys always control media volume; the app has no master volume of its own.
         volumeControlStream = AudioManager.STREAM_MUSIC
+        // Buffer choice to the engine and live audition for library and effect dialogs, before any screen opens.
+        LiveInputs.current = AndroidProjectPlatform(application).liveInput()
         handleDebugLaunch(intent)
         handleProjectIntent(intent)
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {

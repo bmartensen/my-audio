@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "InputChannel.h"
+#include "LiveChain.h"
 #include "PlaybackLoop.h"
 #include "ProjectMix.h"
 #include "Wav.h"
@@ -68,6 +69,11 @@ public:
     bool startRecording(const std::string &path, const std::string &referencePath, int64_t countInFrames,
                         int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
                         InputChannel inputChannel);
+    /** Live audition: microphone through the monitor chain to the output, nothing played or recorded. */
+    bool startMonitoring(int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
+                         InputChannel inputChannel);
+    /** The chain the microphone is monitored through while recording or in live audition; any time. */
+    void setMonitorChain(std::unique_ptr<LiveChain> chain) { mMonitor.setChain(std::move(chain)); }
     std::vector<int> currentDeviceIds();
     int transportXruns();
     int64_t stopTransport();
@@ -98,6 +104,8 @@ private:
     std::vector<float> mMixRight;
     void *mDevice = nullptr;  // ma_device, owned
     bool mRecording = false;
+    bool mMonitorOnly = false;  // live audition: no mix, no take
+    LiveMonitor mMonitor;
 
     std::atomic<int64_t> mPosition{0};
     std::atomic<int64_t> mSeekRequest{-1};

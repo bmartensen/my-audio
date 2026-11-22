@@ -12,6 +12,7 @@
 
 #include "Correlation.h"
 #include "DesktopDevices.h"
+#include "LiveChain.h"
 #include "Log.h"
 #include "ProjectMix.h"
 #include "Wav.h"
@@ -98,6 +99,8 @@ SessionResult runCalibrationSession(int /* outputDeviceId */, int /* inputDevice
     config.capture.format = ma_format_f32;
     config.capture.channels = 1;
     config.performanceProfile = ma_performance_profile_low_latency;
+    // The same global buffer choice as takes and live monitoring (DesktopEngine::openDevice).
+    if (bufferSetting() > 0) config.periodSizeInFrames = static_cast<ma_uint32>(128 * bufferSetting());
     config.dataCallback = dataCallback;
     config.notificationCallback = notificationCallback;
     config.pUserData = &recorder;

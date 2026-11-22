@@ -35,6 +35,7 @@ add_library(myaudio SHARED
         ${SHARED_DIR}/JniBridge.cpp
         ${SHARED_DIR}/Metronome.cpp
         ${SHARED_DIR}/EffectPreview.cpp
+        ${SHARED_DIR}/LiveChain.cpp
         ${SHARED_DIR}/ProjectMix.cpp
         ${SHARED_DIR}/TrackProcessing.cpp
         ${SHARED_DIR}/Wav.cpp
@@ -65,6 +66,6 @@ endif()
 
 # As on Android, only the pure DSP is built with fast math; the mix relies on NaN meaning "off".
 set_source_files_properties(${SHARED_DIR}/Correlation.cpp ${SHARED_DIR}/TrackProcessing.cpp ${SHARED_DIR}/BleedRemoval.cpp
-        PROPERTIES COMPILE_OPTIONS "${FAST_MATH}")
+        ${SHARED_DIR}/LiveChain.cpp PROPERTIES COMPILE_OPTIONS "${FAST_MATH}")
 
 target_link_libraries(myaudio PRIVATE opus airwindows)

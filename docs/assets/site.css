@@ -1,0 +1,79 @@
+/* My Audio on GitHub Pages: the stage, ivory and recording-light colours of the app's branding. */
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --stage1: #2e333b; --stage2: #121418; --ivory: #f4efe4; --nickel: #b4bbc5; --rec: #e53935;
+  --text: #1f2328; --muted: #5f6670; --line: #e3e0d8; --paper: #fbfaf7; --accent: #3d5a80;
+}
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--text);
+  font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--accent); }
+img { max-width: 100%; height: auto; }
+
+.site-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding: 0.8rem 1.5rem; background: var(--stage2); color: var(--ivory);
+}
+.site-header a { color: var(--ivory); text-decoration: none; }
+.brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.15rem; }
+.brand img { border-radius: 8px; }
+.site-header nav { display: flex; gap: 1.1rem; flex-wrap: wrap; font-size: 0.95rem; }
+.site-header nav a:hover { color: #fff; text-decoration: underline; }
+.site-header .lang { border: 1px solid #ffffff55; border-radius: 999px; padding: 0 0.6em; }
+
+.content { max-width: 52rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+.content h1, .content h2, .content h3 { line-height: 1.25; }
+.content h2 { margin-top: 2.6rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
+.content h3 { margin-top: 1.8rem; }
+.content code { background: #efece4; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.95rem; }
+.content th, .content td { border-bottom: 1px solid var(--line); padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+.content blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--rec); background: #fff; border-radius: 0 10px 10px 0; }
+
+/* Screenshots: phone-sized, softly framed; dialogs keep their own rounded corners. */
+.shot { display: block; margin: 1.2rem auto; width: 340px; max-width: 100%; border-radius: 18px;
+  box-shadow: 0 10px 30px #1214182e; background: var(--stage2); }
+.shot.wide { width: 420px; }
+.shot.dialog { background: transparent; box-shadow: 0 10px 30px #12141838; }
+.shots { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
+.shots .shot { margin: 0.6rem 0; }
+
+/* Landing page */
+.hero {
+  border-radius: 24px; color: var(--ivory); padding: 2.6rem 2.6rem 2.2rem;
+  background: radial-gradient(120% 90% at 50% 0%, var(--stage1), var(--stage2));
+  box-shadow: 0 18px 50px #12141833; text-align: center;
+}
+.hero img { width: 104px; height: 104px; filter: drop-shadow(0 8px 24px #0008); }
+.hero h1 { font-size: 2.6rem; margin: 0.5rem 0 0.1rem; }
+.hero .tagline { color: var(--nickel); font-style: italic; font-size: 1.15rem; margin: 0; }
+.hero .lead { color: #d6d1c6; max-width: 34rem; margin: 1rem auto 1.6rem; }
+.buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.8rem; max-width: 30rem; margin: 0 auto; }
+.btn, .btn:visited {
+  display: flex; flex-direction: column; align-items: flex-start; padding: 0.8rem 1.1rem; border-radius: 14px;
+  background: var(--ivory); color: #1d2026; text-decoration: none; text-align: left; transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px #0006; }
+.btn .title { font-weight: 700; font-size: 1.15rem; }
+.btn .title::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; border-radius: 50%;
+  background: var(--rec); margin-right: 0.5em; vertical-align: 0.15em; }
+.btn .sub { font-size: 0.88rem; opacity: 0.75; }
+.hero .meta { color: var(--nickel); font-size: 0.85rem; margin-top: 1rem; }
+.hero .meta a { color: var(--ivory); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 2rem 0; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; }
+.card h3 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+.card h3::before { content: "♪"; color: var(--rec); margin-right: 0.45em; }
+.card p { margin: 0; font-size: 0.97rem; }
+
+.toc { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1.4rem; columns: 2; column-gap: 2rem; }
+.toc ul { margin: 0; padding-left: 1.1rem; }
+.site-footer { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 1.5rem; border-top: 1px solid var(--line); }
+
+@media (max-width: 640px) {
+  .hero { padding: 2rem 1rem 1.6rem; border-radius: 18px; }
+  .hero h1 { font-size: 2rem; }
+  .toc { columns: 1; }
+}

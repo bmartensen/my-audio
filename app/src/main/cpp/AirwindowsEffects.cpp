@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -39,9 +40,16 @@ constexpr double kTailSeconds = 8.0;
 constexpr float kSilence = 1e-6f;
 constexpr int kBlock = 512;
 
+std::mutex creationLock;
+// Many Airwindows effects seed their dither and modulation from rand() in the constructor. A fixed seed per
+// instance makes every render of a mix identical and lets live monitoring sound exactly like the render.
+constexpr unsigned kRandomSeed = 1;
+
 /** A new instance at the project rate with all parameters at their defaults. */
 std::unique_ptr<AirwinConsolidatedBase> create(int index, int sampleRate) {
     if (index < 0 || index >= static_cast<int>(entries().size())) return nullptr;
+    std::lock_guard<std::mutex> guard(creationLock);
+    std::srand(kRandomSeed);
     // Some effects read the rate in their constructor.
     AirwinConsolidatedBase::defaultSampleRate = static_cast<float>(sampleRate);
     auto effect = entries()[index].create();
@@ -134,6 +142,32 @@ bool applyAirwindows(int index, const std::vector<float> &values, std::vector<fl
     left.resize(end);
     right.resize(end);
     return true;
+}
+
+std::unique_ptr<AirwindowsProcessor> AirwindowsProcessor::create(int index, const std::vector<float> &values,
+                                                                 int sampleRate) {
+    auto effect = myaudio::create(index, sampleRate);
+    if (!effect) return nullptr;
+    const int count = parameterCount(index);
+    for (int i = 0; i < count && i < static_cast<int>(values.size()); ++i) {
+        effect->setParameter(i, std::clamp(values[i], 0.0f, 1.0f));
+    }
+    std::unique_ptr<AirwindowsProcessor> processor(new AirwindowsProcessor());
+    processor->mEffect = std::move(effect);
+    return processor;
+}
+
+AirwindowsProcessor::~AirwindowsProcessor() = default;
+
+void AirwindowsProcessor::process(float *left, float *right, int frames) {
+    for (int start = 0; start < frames; start += kBlock) {
+        const int count = std::min(kBlock, frames - start);
+        float *inputs[2] = {left + start, right + start};
+        float *outputs[2] = {mOutLeft.data(), mOutRight.data()};
+        mEffect->processReplacing(inputs, outputs, count);
+        std::copy_n(mOutLeft.data(), count, left + start);
+        std::copy_n(mOutRight.data(), count, right + start);
+    }
 }
 
 }  // namespace myaudio

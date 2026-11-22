@@ -2,6 +2,18 @@
 
 Only outstanding work belongs here. Agreed scope is in [requirements](app-requirements.md); evidence and limitations are in [current work](current-work.md).
 
+## Version 0.9: record track and live effects
+
+Agreed scope: [requirements](app-requirements.md#planned-for-09-record-track-and-live-effects).
+
+- Show a project-level hint when a project contains effects that require a newer version.
+- Check record track, two-stage trash and recording without calibration on Windows and on the Pixel 9 (emulator checked), including imports while an empty record track exists.
+- Accept live monitoring on the Pixel 9 (internal, wired, USB interface) and Windows: heard latency per buffer setting (Automatic/Short/Long, each calibrated), dropouts, callback CPU with six heavy Airwindows slots, Live in library and track dialogs, monitoring while recording, and that takes stay dry.
+- Decide from those measurements whether the buffer default should change and whether xruns during live audition need a visible notice; recording already stops on dropouts.
+- Stop live audition when the app goes to the background; it currently runs until the dialog or library closes.
+- Desktop cannot tell loudspeakers from headphones, so Windows shows no feedback warning; only the Live hint asks for headphones.
+- Tag `v0.9.0` on the commit the 0.9.0 installers were built from once it is saved.
+
 ## Product and hardware acceptance
 
 - Confirm the provisional minimum Android version (API 29).
@@ -25,7 +37,6 @@ Only outstanding work belongs here. Agreed scope is in [requirements](app-requir
 - Measure long-term drift between Bluetooth music playback and the internal microphone; test additional headsets and Android devices.
 - Acoustically calibrate Bluetooth headset microphone plus phone speaker on real hardware, including communication-mode routing during media playback.
 - Investigate clipping before raw PCM16 storage: measure capture and playback levels; saved PCM16 alone cannot distinguish hardware clipping from write-time limiting.
-- Investigate live input monitoring through an effect chain (“Live amp”) as a separate feature: measure callback CPU and latency with USB versus Bluetooth, retain dry recording and non-destructive effect slots, support both Oboe and miniaudio.
 - Shorten audio import time on Android. A set of stems that imports within seconds on Windows currently takes about 15 minutes on Android. Measure the time per track first; candidates are the MediaCodec loop in `AudioImport.kt`, which waits up to 10 ms per packet, and per-sample resampling/WAV writing.
 
 ## Desktop

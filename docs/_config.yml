@@ -1,0 +1,11 @@
+# GitHub Pages site of My Audio: info, downloads and the user guide, in German and English.
+# Publish with Settings → Pages → Deploy from a branch → <branch> /docs.
+title: My Audio
+description: Mehrspur-Recorder für Musikdemos · Multitrack recorder for music demos
+repository_url: https://github.com/bmartensen/my-audio
+# The release whose signed APK and MSI the download buttons offer (GitHub release tag v<release>).
+release: 0.9.8
+released: 2026-11-22
+markdown: kramdown
+kramdown:
+  auto_ids: true

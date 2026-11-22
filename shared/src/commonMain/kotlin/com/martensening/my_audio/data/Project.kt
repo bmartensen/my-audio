@@ -1,5 +1,6 @@
 package com.martensening.my_audio.data
 
+import kotlinx.serialization.json.JsonObject
 import kotlin.math.floor
 
 /**
@@ -124,11 +125,22 @@ sealed interface ChainEffect {
      * changes the sound but not the balance of the mix.
      */
     data class Airwindows(val name: String, val values: List<Float>, val levelMatch: Boolean = true) : ChainEffect
+
+    /**
+     * An effect [type] that only a newer app version knows. Its slot JSON ([fields], without `enabled`) is kept
+     * verbatim and written back, so the effect survives editing here; it is not rendered by this version.
+     */
+    data class Unknown(val type: String, val fields: JsonObject) : ChainEffect
 }
 
 /** One insert of an effect chain; switching it off keeps its settings. */
-data class EffectSlot(val effect: ChainEffect, val enabled: Boolean = true) {
-    val audible get() = enabled && (effect !is ChainEffect.Tone || effect.audible)
+data class EffectSlot(
+    val effect: ChainEffect,
+    val enabled: Boolean = true,
+    val unknown: UnknownFields = UnknownFields.NONE
+) {
+    /** Whether the slot changes the sound in this version; an effect only a newer version knows does not. */
+    val audible get() = enabled && effect !is ChainEffect.Unknown && (effect !is ChainEffect.Tone || effect.audible)
 
     companion object {
         /** Inserts per track and on the master. */
@@ -147,7 +159,8 @@ data class TrackEffects(
     /** Removes the speaker playback of the other tracks; only relevant for takes with a reference. */
     val removeBleed: Boolean = false,
     val normalize: NormalizeEffect = NormalizeEffect(),
-    val chain: List<EffectSlot> = emptyList()
+    val chain: List<EffectSlot> = emptyList(),
+    val unknown: UnknownFields = UnknownFields.NONE
 ) {
     companion object {
         /** Imported audio has no recorded click and no playback reference, so nothing is removed. */
@@ -188,9 +201,48 @@ data class Track(
     val effects: TrackEffects = TrackEffects(),
     val volumeEnvelope: List<VolumePoint> = emptyList(),
     /** PCM channel count; microphone takes and old projects are mono. */
-    val channels: Int = 1
+    val channels: Int = 1,
+    /**
+     * False for a take recorded on a device pair that was not calibrated: [offsetFrames] then holds only the
+     * count-in, without latency compensation. Later calibrations never move it.
+     */
+    val latencyCalibrated: Boolean = true,
+    val unknown: UnknownFields = UnknownFields.NONE
 ) {
     val endFrames get() = offsetFrames + lengthFrames
+}
+
+/**
+ * The empty record track at the end of the project: settings prepared for the next take, without audio.
+ * Record captures into it; the take then becomes a [Track] with these settings, unmuted. A new record track
+ * starts [muted], which also means its microphone is not monitored; unmuting it monitors the input.
+ */
+data class RecordTrack(
+    /** Null shows and records under the default name for the next track number. */
+    val name: String? = null,
+    val volume: Float = 1f,
+    val muted: Boolean = true,
+    val solo: Boolean = false,
+    val pan: Float = 0f,
+    val effects: TrackEffects = TrackEffects(),
+    val volumeEnvelope: List<VolumePoint> = emptyList(),
+    val unknown: UnknownFields = UnknownFields.NONE
+) {
+    /** Unchanged since it was created; then there is nothing to reset. Unknown fields do not count. */
+    val isPristine get() = copy(unknown = UnknownFields.NONE) == RecordTrack()
+
+    companion object {
+        /** The settings that stay when only the recording of [track] is deleted. */
+        fun keepingSettingsOf(track: Track) = RecordTrack(
+            name = track.name,
+            volume = track.volume,
+            muted = track.muted,
+            solo = track.solo,
+            pan = track.pan,
+            effects = track.effects,
+            volumeEnvelope = track.volumeEnvelope
+        )
+    }
 }
 
 /**
@@ -244,7 +296,13 @@ data class Project(
     val notesScroll: NotesScroll = NotesScroll(),
     val preRoll: PreRoll = PreRoll(),
     /** Effect chain on the whole mix, before the fixed loudness and limiter stage. */
-    val masterChain: List<EffectSlot> = emptyList()
+    val masterChain: List<EffectSlot> = emptyList(),
+    /**
+     * The empty record track after [tracks], or null. With null, a project without tracks still shows a fresh
+     * empty record track; otherwise the last track (which holds a take) is the record track.
+     */
+    val recordTrack: RecordTrack? = null,
+    val unknown: UnknownFields = UnknownFields.NONE
 ) {
     companion object {
         const val DEFAULT_NOTES_TEXT_SIZE = 18
@@ -256,10 +314,19 @@ data class Project(
     /** Project length in frames; audio before project frame 0 is not part of the project. */
     val lengthFrames get() = tracks.maxOfOrNull { it.endFrames }?.coerceAtLeast(0L) ?: 0L
 
-    /** Tracks that Play, Record, the overdub reference and Share include: the soloed ones, else the unmuted. */
-    val audibleTracks get() = if (tracks.any { it.solo }) tracks.filter { it.solo } else tracks.filterNot { it.muted }
+    /**
+     * Settings the next take starts from: the empty record track, or, when the last track already holds a take,
+     * a new muted track inheriting that track's effect chain and input settings.
+     */
+    val nextTake: RecordTrack get() = recordTrack ?: tracks.lastOrNull()?.let { RecordTrack(effects = it.effects) } ?: RecordTrack()
 
-    fun isAudible(track: Track) = if (tracks.any { it.solo }) track.solo else !track.muted
+    /** A solo on the empty record track also counts: then only its monitored input is heard. */
+    private val anySolo get() = tracks.any { it.solo } || recordTrack?.solo == true
+
+    /** Tracks that Play, Record, the overdub reference and Share include: the soloed ones, else the unmuted. */
+    val audibleTracks get() = if (anySolo) tracks.filter { it.solo } else tracks.filterNot { it.muted }
+
+    fun isAudible(track: Track) = if (anySolo) track.solo else !track.muted
 
     /** The loop when it is switched on and still lies within the project. */
     val activeLoop get() = loop?.takeIf { it.enabled && it.startFrames >= 0 && it.endFrames <= lengthFrames && it.lengthFrames > 0 }

@@ -107,7 +107,8 @@ fun TrackSettingsDialog(
     var normalizeExpanded by rememberSaveable { mutableStateOf(false) }
     var chain by remember { mutableStateOf(track.effects.chain) }
 
-    fun currentEffects() = TrackEffects(
+    // A copy, so fields of a newer app version stored with the effects stay.
+    fun currentEffects() = track.effects.copy(
         removeMetronome = removeMetronome,
         removeBleed = removeBleed,
         normalize = NormalizeEffect(normalizeOn, normalizeDb),
@@ -177,7 +178,7 @@ fun TrackSettingsDialog(
                 }
 
                 SectionTitle(Res.string.track_effects)
-                EffectChainEditor(chain, onChange = { chain = it }, choices = choices, audition = audition)
+                EffectChainEditor(chain, onChange = { chain = it }, choices = choices, audition = audition, live = true)
 
                 SectionTitle(Res.string.track_section_channel)
                 ValueSlider(

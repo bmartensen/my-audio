@@ -7,6 +7,7 @@
     <string name="action_play">Play</string>
     <string name="action_stop">Stop</string>
     <string name="action_delete">Delete</string>
+    <string name="action_reset">Reset</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="action_discard">Discard</string>
@@ -30,7 +31,7 @@
     <string name="audio_system_default">System default</string>
     <string name="audio_default_device">%1$s · %2$s</string>
     <string name="audio_device_unavailable">%1$s (disconnected) · Using %2$s</string>
-    <string name="audio_calibration_required">Calibrate this playback device and microphone before recording.</string>
+    <string name="audio_recording_uncalibrated">Not calibrated: take without latency compensation.</string>
     <string name="audio_not_calibrated">Not calibrated for these devices yet</string>
     <string name="audio_choose_output">Choose a playback device in Settings → Audio.</string>
     <string name="audio_route_changed">The audio devices changed. Playback or recording was stopped. Check the selected devices and their calibration.</string>
@@ -65,9 +66,24 @@
         <item quantity="one">%1$d track · %2$s</item>
         <item quantity="other">%1$d tracks · %2$s</item>
     </plurals>
-    <string name="project_empty_hint">Tap the record button to record the first track.</string>
+    <string name="record_track_empty">Empty</string>
+    <string name="record_track_add">Empty track</string>
+    <string name="record_track_monitoring">Monitoring</string>
+    <string name="live_start">Live</string>
+    <string name="live_stop">Stop live</string>
+    <string name="live_hint">Use headphones.</string>
+    <string name="live_no_permission">Live needs microphone access. Allow it when recording for the first time or in the system settings.</string>
+    <string name="live_failed">Live could not open the audio devices. Stop other audio and try again.</string>
+    <string name="live_warning_title">Monitor live?</string>
+    <string name="live_warning_speaker">The loudspeaker may feed back.</string>
+    <string name="live_warning_bluetooth">Bluetooth delays the sound noticeably.</string>
+    <string name="live_warning_continue">Monitor anyway</string>
+    <string name="audio_buffer_title">Audio buffer</string>
+    <string name="audio_buffer_short">Short</string>
+    <string name="audio_buffer_long">Long</string>
+    <string name="audio_buffer_automatic">Automatic</string>
     <string name="project_recording_take">%1$s is being recorded …</string>
-    <string name="project_calibration_hint">This playback device and microphone combination must be calibrated before recording.</string>
+    <string name="project_calibration_hint">This playback and microphone combination is not calibrated and may be delayed.</string>
     <string name="project_calibration_action">Calibrate now</string>
     <string name="project_error_missing">The project could not be loaded.</string>
     <string name="project_error_audio">The audio streams could not be started. Close other audio apps and try again.</string>
@@ -75,6 +91,11 @@
     <string name="track_default_name">Track %1$d</string>
     <string name="track_delete_question">Delete track?</string>
     <string name="track_delete_info">“%1$s” and its recording will be deleted.</string>
+    <string name="track_recording_delete_question">Delete recording?</string>
+    <string name="track_recording_delete_info">The recording of “%1$s” will be deleted.</string>
+    <string name="track_reset_question">Reset?</string>
+    <string name="track_reset_info">“%1$s” will be reset.</string>
+    <string name="track_uncalibrated">Recorded without calibration</string>
     <string name="track_solo">Solo</string>
     <string name="track_unsolo">Solo off</string>
     <string name="loop_toggle">Loop on/off</string>
@@ -149,6 +170,8 @@
     <string name="effect_chain_empty">No effects yet</string>
     <string name="effect_unavailable">Not available</string>
     <string name="effect_unavailable_summary">This app version lacks the effect. It stays stored but makes no sound.</string>
+    <string name="effect_requires_newer">Requires a newer version</string>
+    <string name="effect_requires_newer_summary">A newer version of My Audio added this effect. It stays stored but makes no sound here; update the app to hear and edit it.</string>
     <string name="effect_choices_empty">Select effects in the library on the home screen</string>
     <string name="effect_reset">Default values</string>
     <string name="library_title">Effect library</string>

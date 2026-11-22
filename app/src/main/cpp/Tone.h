@@ -70,36 +70,71 @@ inline void applyEq(std::vector<float> &samples, const EqParameters &eq, int sam
     for (float &sample : samples) sample = high.process(presence.process(low.process(sample)));
 }
 
+/** The three EQ bands of one channel as a running filter, for real-time processing. */
+class EqFilter {
+public:
+    EqFilter(const EqParameters &eq, int sampleRate)
+        : mLow(Biquad::lowShelf(150.0, eq.lowDb, sampleRate)),
+          mPresence(Biquad::peak(3000.0, 1.0, eq.presenceDb, sampleRate)),
+          mHigh(Biquad::highShelf(8000.0, eq.highDb, sampleRate)) {}
+
+    float process(float sample) { return mHigh.process(mPresence.process(mLow.process(sample))); }
+
+private:
+    Biquad mLow;
+    Biquad mPresence;
+    Biquad mHigh;
+};
+
 /**
  * Feed-forward compressor with one control. [amount] 0..1 lowers the threshold from -10 to
  * -30 dBFS and raises the ratio from 1.5:1 to 5:1; 10 ms attack, 150 ms release, 6 dB soft knee.
  * Make-up gain gives back part of the reduction, so a stronger setting sounds denser, not quieter.
  */
+class Compressor {
+public:
+    Compressor(float amount, int sampleRate) {
+        const float strength = std::clamp(amount, 0.0f, 1.0f);
+        mThreshold = -10.0f - 20.0f * strength;
+        const float ratio = 1.5f + 3.5f * strength;
+        mSlope = 1.0f - 1.0f / ratio;
+        mMakeUpDb = 0.4f * -mThreshold * mSlope;
+        mAttack = std::exp(-1.0f / (0.010f * sampleRate));
+        mRelease = std::exp(-1.0f / (0.150f * sampleRate));
+    }
+
+    /** Gain for the next sample whose (linked) level is [level]; sample by sample, so it also runs in real time. */
+    float gain(float level) {
+        const float coefficient = level > mEnvelope ? mAttack : mRelease;
+        mEnvelope = coefficient * mEnvelope + (1.0f - coefficient) * level;
+        const float over = 20.0f * std::log10(mEnvelope + 1e-9f) - mThreshold;
+        float reductionDb = 0.0f;
+        if (over >= kKnee / 2) {
+            reductionDb = over * mSlope;
+        } else if (over > -kKnee / 2) {
+            const float x = over + kKnee / 2;
+            reductionDb = mSlope * x * x / (2.0f * kKnee);
+        }
+        return std::pow(10.0f, (mMakeUpDb - reductionDb) / 20.0f);
+    }
+
+private:
+    static constexpr float kKnee = 6.0f;
+    float mThreshold;
+    float mSlope;
+    float mMakeUpDb;
+    float mAttack;
+    float mRelease;
+    float mEnvelope = 0.0f;
+};
+
 inline void applyCompressorChannels(std::vector<float> &samples, std::vector<float> *right,
                                     float amount, int sampleRate) {
-    const float strength = std::clamp(amount, 0.0f, 1.0f);
-    const float threshold = -10.0f - 20.0f * strength;
-    const float ratio = 1.5f + 3.5f * strength;
-    constexpr float knee = 6.0f;
-    const float slope = 1.0f - 1.0f / ratio;
-    const float makeUpDb = 0.4f * -threshold * slope;
-    const float attack = std::exp(-1.0f / (0.010f * sampleRate));
-    const float release = std::exp(-1.0f / (0.150f * sampleRate));
-    float envelope = 0.0f;
+    Compressor compressor(amount, sampleRate);
     for (size_t i = 0; i < samples.size(); ++i) {
         float &sample = samples[i];
         const float level = right ? std::max(std::fabs(sample), std::fabs((*right)[i])) : std::fabs(sample);
-        const float coefficient = level > envelope ? attack : release;
-        envelope = coefficient * envelope + (1.0f - coefficient) * level;
-        const float over = 20.0f * std::log10(envelope + 1e-9f) - threshold;
-        float reductionDb = 0.0f;
-        if (over >= knee / 2) {
-            reductionDb = over * slope;
-        } else if (over > -knee / 2) {
-            const float x = over + knee / 2;
-            reductionDb = slope * x * x / (2.0f * knee);
-        }
-        const float gain = std::pow(10.0f, (makeUpDb - reductionDb) / 20.0f);
+        const float gain = compressor.gain(level);
         sample *= gain;
         if (right) (*right)[i] *= gain;
     }

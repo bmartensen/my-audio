@@ -45,11 +45,11 @@ foreach ($source in $sources) {
     $remote = "/data/local/tmp/my-audio-$name"
     $extraSources = @()
     $extraFlags = @()
-    if ($source.BaseName -in @('stereo_mix_test', 'airwindows_test')) {
+    if ($source.BaseName -in @('stereo_mix_test', 'airwindows_test', 'live_chain_test')) {
         # The mix links the Airwindows effects of the effect library (slow to compile: ~1400 files).
         $airwindows = Join-Path $repo 'app\src\main\cpp\third_party\airwindows'
         $extraSources = @('ProjectMix.cpp', 'Wav.cpp', 'TrackProcessing.cpp', 'BleedRemoval.cpp', 'Metronome.cpp',
-            'AirwindowsEffects.cpp') | ForEach-Object { Join-Path $repo "app\src\main\cpp\$_" }
+            'AirwindowsEffects.cpp', 'LiveChain.cpp') | ForEach-Object { Join-Path $repo "app\src\main\cpp\$_" }
         $extraSources += Join-Path $airwindows 'airwin_consolidated_base.cpp'
         $extraSources += (Get-ChildItem (Join-Path $airwindows 'autogen_airwin') -Filter '*.cpp').FullName
         $extraFlags = @('-O2', '-w', '-llog', "-I$airwindows")
