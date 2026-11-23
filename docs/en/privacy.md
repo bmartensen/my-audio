@@ -25,7 +25,7 @@ My Audio works entirely on your device. It needs no account, contains no adverti
 
 - **Recordings, imported audio files, projects and notes** are stored locally: on Android in the app's private storage, on Windows in *Documents/My Audio*.
 - **Sharing and backups** only happen when you start them. The file goes to the app or location you choose. That provider's terms apply to its processing.
-- **Android backup:** if you have set up a device backup in Android's settings, Android may include My Audio's app data in that backup. You control this in the system settings. Your backup provider's terms apply (usually Google).
+- **Android backup and transfer:** if you have set up a device backup in Android's settings, Android may include your projects and effect library in that backup, and a transfer to a new phone takes them along. Calibration and device settings stay on the phone. You control this in the system settings. Your backup provider's terms apply (usually Google).
 
 **Android permissions**
 

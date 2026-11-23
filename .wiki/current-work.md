@@ -2,7 +2,7 @@
 
 As of 2026-11-23: **My Audio 0.9.18 / versionCode 33, released** for Android and Windows: tag `v0.9.18` (commit `a3890a9`) and the published [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.9.18) with APK, MSI, checksums and the runtime source.
 
-Development continues on `develop` toward **0.10.0** (amp models and cabinet IRs from user-imported tones, see [requirements](app-requirements.md#amp-models-and-cabinet-irs-planned-for-0100)); `main` holds 0.9.18. Open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+Development continues on `develop` toward **0.10.x** (amp models and cabinet IRs from user-imported tones, see [requirements](app-requirements.md#amp-models-and-cabinet-irs-planned-for-010x); Android backup and device-transfer rules are implemented there); `main` holds 0.9.18. Open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
 
 ## Release 0.9.18
 

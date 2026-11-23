@@ -238,6 +238,8 @@ Schlage eine leere Saite an. Das Stimmgerät erkennt die Saite automatisch (Stan
 - **Einzelspuren:** jede Spur als bereinigte WAV-Datei ab Projektanfang, ohne Effekte, Lautstärke und Panorama, in einem ZIP – zum Weiterarbeiten in einer DAW.
 - **Projekt sichern:** das ganze Projekt mit allen Originalaufnahmen und Einstellungen als ZIP. **Projekt importieren** auf der Startseite stellt es wieder her, auch auf einem anderen Gerät.
 
+Wechselst du auf ein neues Android-Telefon, nimmt die Datenübertragung von Android deine Projekte und die Effekt-Bibliothek mit. Auf dem neuen Telefon misst du neu ein.
+
 ## Effekt-Bibliothek
 
 <div class="shots">

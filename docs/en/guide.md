@@ -238,6 +238,8 @@ Play an open string. The tuner detects the string automatically (standard tuning
 - **Stems:** each track as a cleaned WAV file from the project start, without effects, volume or panning, in a ZIP – for further work in a DAW.
 - **Back up project:** the whole project with all original recordings and settings as a ZIP. **Import project** on the home screen restores it, also on a different device.
 
+When you move to a new Android phone, Android's data transfer takes your projects and the effect library along. Calibrate again on the new phone.
+
 ## Effect library
 
 <div class="shots">

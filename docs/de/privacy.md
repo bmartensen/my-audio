@@ -25,7 +25,7 @@ My Audio arbeitet vollständig auf deinem Gerät. Die App braucht kein Konto, en
 
 - **Aufnahmen, importierte Audiodateien, Projekte und Notizen** werden lokal gespeichert: unter Android im privaten Speicher der App, unter Windows im Ordner *Dokumente/My Audio*.
 - **Teilen und Sichern** geschieht nur, wenn du es auslöst. Die Datei geht dann an die App oder den Speicherort, den du auswählst. Für deren Verarbeitung gelten die Bedingungen des jeweiligen Anbieters.
-- **Android-Sicherung:** Hast du in den Android-Einstellungen eine Gerätesicherung eingerichtet, kann Android App-Daten von My Audio in diese Sicherung aufnehmen. Das steuerst du in den Systemeinstellungen. Es gelten die Bedingungen deines Sicherungsanbieters (in der Regel Google).
+- **Android-Sicherung und -Übertragung:** Hast du in den Android-Einstellungen eine Gerätesicherung eingerichtet, kann Android deine Projekte und die Effekt-Bibliothek in diese Sicherung aufnehmen, und eine Übertragung auf ein neues Telefon nimmt sie mit. Einmessung und Geräteeinstellungen bleiben auf dem Telefon. Das steuerst du in den Systemeinstellungen. Es gelten die Bedingungen deines Sicherungsanbieters (in der Regel Google).
 
 **Berechtigungen unter Android**
 
