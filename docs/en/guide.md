@@ -102,9 +102,7 @@ You can also press **Record** without preparing a track. The new track then take
 - **Metronome** opens the [metronome settings](#metronome).
 - With a USB interface with two inputs, the choice **Input 1**, **Input 2** or **Input 1 and 2 mixed** appears below the time. Recordings are always mono.
 
-Recordings are always saved without effects. Effects, volume and envelope only apply during playback and sharing – you can change them any time.
-
-On Android, playback and recording continue in the background with a notification, even with the screen off.
+Recordings are always saved without effects. Effects, volume and envelope only apply during playback and sharing – you can change them any time. On Android, playback and recording continue in the background with a notification, even with the screen off.
 
 ## Track settings
 

@@ -102,9 +102,7 @@ Du kannst auch ohne vorbereitete Spur direkt auf **Aufnehmen** tippen. Dann übe
 - **Metronom** öffnet die [Metronom-Einstellungen](#metronom).
 - Mit einem USB-Interface mit zwei Eingängen erscheint unter der Zeit die Wahl **Eingang 1**, **Eingang 2** oder **Eingang 1 und 2 gemischt**. Aufnahmen sind immer mono.
 
-Aufnahmen werden immer ohne Effekte gespeichert. Effekte, Lautstärke und Verlauf wirken nur beim Abspielen und Teilen – du kannst sie jederzeit ändern.
-
-Auf Android laufen Wiedergabe und Aufnahme mit Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiter.
+Aufnahmen werden immer ohne Effekte gespeichert. Effekte, Lautstärke und Verlauf wirken nur beim Abspielen und Teilen – du kannst sie jederzeit ändern. Auf Android laufen Wiedergabe und Aufnahme mit Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiter.
 
 ## Spur-Einstellungen
 
