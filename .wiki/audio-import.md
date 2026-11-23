@@ -1,5 +1,7 @@
 # Stereo import and playback validation
 
+Android decodes with MediaCodec without waiting per packet and converts up to four files at once; the resampler evaluates its Kaiser-windowed sinc once per phase of the rate ratio (160 phases for 44.1 → 48 kHz) and works on blocks. On the Pixel 9, 11 MP3 stems of 3:18 import in 42 s (3 min 33 s before 0.10.4); resampling and writing take about 0.4 s per stem on the desktop JVM, so the rest is MediaCodec decoding.
+
 Stereo is preserved through platform decoding, channel-aware resampling, PCM16 WAV storage, shared native mixing and export. Recordings and overdub references remain mono. Windows enables `MA_DR_MP3_FLOAT_OUTPUT` to retain float precision until final PCM16 storage. Android requests float output for compressed formats and reads the actual output format; raw WAV keeps its extractor-reported encoding because KEY_PCM_ENCODING also specifies input encoding.
 
 Stereo balance attenuates only the opposite channel. Normalization/compression share one gain factor across channels, reverb preserves separate inputs, and waveforms use the largest channel magnitude per bucket, including opposite-phase audio. New takes/imports explicitly disable click/bleed cleanup; existing-file missing-field defaults remain part of the format contract.

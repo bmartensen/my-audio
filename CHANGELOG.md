@@ -2,6 +2,11 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.10.4
+
+- Importing audio files and stems on Android is several times faster.
+- Windows: a right-click on a track or the master opens its options, in addition to the long press.
+
 ## 0.10.3
 
 - Amp models and cabinets: import Neural Amp Modeler profiles (.nam) and cabinet impulse responses (.wav) you downloaded, for example from TONE3000, also as ZIP. They work like every other effect, live and in the mix, with **Input**, **Output** and **Match level**.
