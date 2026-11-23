@@ -23,10 +23,9 @@ E-Mail: [info@martensening.com](mailto:info@martensening.com)
 
 My Audio arbeitet vollständig auf deinem Gerät. Die App braucht kein Konto, enthält keine Werbung, keine Analyse- oder Absturzberichtsdienste und überträgt keine Daten an den Anbieter oder an Dritte. Die Android-App fordert keine Internetberechtigung an.
 
-- **Aufnahmen, importierte Audiodateien, Projekte und Notizen** werden lokal gespeichert: unter Android im privaten Speicher der App, unter Windows im Ordner *Dokumente/My Audio*. Beim Deinstallieren der Android-App werden sie gelöscht; unter Windows bleiben sie erhalten.
-- **Teilen und Sichern** geschieht nur, wenn du es auslöst. Die Datei geht dann an die App oder den Speicherort, den du auswählst; für deren Verarbeitung gelten die Bedingungen des jeweiligen Anbieters.
-- **Android-Sicherung:** Hast du in den Android-Einstellungen eine Gerätesicherung eingerichtet, kann Android App-Daten von My Audio in diese Sicherung aufnehmen. Das steuerst du in den Systemeinstellungen; es gelten die Bedingungen deines Sicherungsanbieters (in der Regel Google).
-- **Einstellungen** wie gewählte Geräte, Audiopuffer und Einmessergebnisse bleiben auf dem Gerät.
+- **Aufnahmen, importierte Audiodateien, Projekte und Notizen** werden lokal gespeichert: unter Android im privaten Speicher der App, unter Windows im Ordner *Dokumente/My Audio*.
+- **Teilen und Sichern** geschieht nur, wenn du es auslöst. Die Datei geht dann an die App oder den Speicherort, den du auswählst. Für deren Verarbeitung gelten die Bedingungen des jeweiligen Anbieters.
+- **Android-Sicherung:** Hast du in den Android-Einstellungen eine Gerätesicherung eingerichtet, kann Android App-Daten von My Audio in diese Sicherung aufnehmen. Das steuerst du in den Systemeinstellungen. Es gelten die Bedingungen deines Sicherungsanbieters (in der Regel Google).
 
 **Berechtigungen unter Android**
 
@@ -34,19 +33,19 @@ My Audio arbeitet vollständig auf deinem Gerät. Die App braucht kein Konto, en
 - **Benachrichtigungen und Vordergrunddienst:** damit Wiedergabe und Aufnahme mit einer sichtbaren Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiterlaufen.
 - **Audioeinstellungen ändern:** um das gewählte Wiedergabegerät und Mikrofon zu verwenden, etwa ein USB-Interface oder ein Bluetooth-Headset.
 
-Links in *Über My Audio* (Website, Datenschutz, E-Mail) öffnen deinen Browser oder dein E-Mail-Programm; dabei gelten die Abschnitte 3 und 4.
+Links in **Über My Audio** (Website, Datenschutz, E-Mail) öffnen deinen Browser oder dein E-Mail-Programm. Dabei gelten die Abschnitte 3 und 4.
 
 ## 3. Diese Website und Downloads auf GitHub
 
-Diese Website wird mit GitHub Pages bereitgestellt; die Installationsdateien liegen als Release im [GitHub-Repository]({{ site.repository_url }}). Anbieter ist GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA, in Europa auch GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande.
+Diese Website wird mit GitHub Pages bereitgestellt. Die Installationsdateien liegen als Release im [GitHub-Repository]({{ site.repository_url }}). Anbieter ist GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA, in Europa auch GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande.
 
-Beim Aufruf der Seiten und beim Herunterladen verarbeitet GitHub technische Zugriffsdaten, insbesondere deine IP-Adresse, die GitHub nach eigenen Angaben aus Sicherheitsgründen protokolliert. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf diese Protokolle haben wir keinen Zugriff. Dabei können Daten in die USA übermittelt werden; GitHub ist nach dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss, Art. 45 DSGVO). Einzelheiten stehen in der [Datenschutzerklärung von GitHub](https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement).
+Beim Aufruf der Seiten und beim Herunterladen verarbeitet GitHub technische Zugriffsdaten, insbesondere deine IP-Adresse, die GitHub nach eigenen Angaben aus Sicherheitsgründen protokolliert. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf diese Protokolle haben wir keinen Zugriff. Dabei können Daten in die USA übermittelt werden. GitHub ist nach dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss, Art. 45 DSGVO). Einzelheiten stehen in der [Datenschutzerklärung von GitHub](https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement).
 
 Diese Website setzt keine Cookies, verwendet keine Analyse- oder Trackingdienste und lädt keine Schriften oder Skripte von Drittanbietern.
 
 ## 4. Produktseite auf martensening.com
 
-*Über My Audio* verlinkt außerdem die Produktseite auf [martensening.com/myaudio](https://www.martensening.com/myaudio/); ihre Download-Buttons führen zum GitHub-Release (Abschnitt 3). Für diese Website gilt die [Datenschutzerklärung von martensening.com](https://www.martensening.com/privacy.php).
+**Über My Audio** verlinkt außerdem die Produktseite auf [martensening.com/myaudio](https://www.martensening.com/myaudio/). Ihre Download-Buttons führen zum GitHub-Release (Abschnitt 3). Für diese Website gilt die [Datenschutzerklärung von martensening.com](https://www.martensening.com/privacy.php).
 
 ## 5. Kontakt per E-Mail
 
@@ -62,4 +61,4 @@ Eine automatisierte Entscheidungsfindung oder ein Profiling (Art. 22 DSGVO) find
 
 ## 7. Änderungen
 
-Ändern sich die App, die Bereitstellung oder rechtliche Vorgaben, passen wir diese Erklärung an. Die aktuelle Fassung steht immer auf dieser Seite; frühere Fassungen sind in der Versionsgeschichte des [Repositorys]({{ site.repository_url }}) nachvollziehbar.
+Ändern sich die App, die Bereitstellung oder rechtliche Vorgaben, passen wir diese Erklärung an. Die aktuelle Fassung steht immer auf dieser Seite.

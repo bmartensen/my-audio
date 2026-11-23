@@ -27,9 +27,9 @@ permalink: /en/
 
 ## Installation
 
-**Android:** download the APK and open it. Android asks once whether your browser or file manager may install apps. Install updates the same way over the existing app; your projects are kept.
+**Android:** download the APK and open it. Android asks once whether your browser or file manager may install apps. Install updates the same way over the existing app.
 
-**Windows:** download the MSI and run it. The installer is not signed with a code-signing certificate, so Windows SmartScreen may ask (“More info” → “Run anyway”). My Audio is installed for your user only; projects live in *Documents/My Audio* and are kept when you uninstall.
+**Windows:** download the MSI and run it. The installer is not signed with a code-signing certificate, so Windows SmartScreen may ask (**More info** → **Run anyway**). My Audio is installed for your user only.
 
 If you like, compare the file's SHA-256 checksum with the one {% if site.release_downloads %}in the [release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}on the [download page]({{ site.download_page }}?lang=en){% endif %}.
 

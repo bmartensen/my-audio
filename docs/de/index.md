@@ -27,9 +27,9 @@ permalink: /de/
 
 ## Installation
 
-**Android:** Lade die APK herunter und öffne sie. Android fragt einmalig, ob dein Browser oder Dateimanager Apps installieren darf. Updates installierst du genauso über die vorhandene App; deine Projekte bleiben erhalten.
+**Android:** Lade die APK herunter und öffne sie. Android fragt einmalig, ob dein Browser oder Dateimanager Apps installieren darf. Updates installierst du genauso über die vorhandene App.
 
-**Windows:** Lade die MSI herunter und starte sie. Da der Installer nicht mit einem Code-Signing-Zertifikat signiert ist, kann Windows SmartScreen nachfragen („Weitere Informationen“ → „Trotzdem ausführen“). My Audio wird nur für deinen Benutzer installiert; Projekte liegen unter *Dokumente/My Audio* und bleiben bei einer Deinstallation erhalten.
+**Windows:** Lade die MSI herunter und starte sie. Da der Installer nicht mit einem Code-Signing-Zertifikat signiert ist, kann Windows SmartScreen nachfragen (**Weitere Informationen** → **Trotzdem ausführen**). My Audio wird nur für deinen Benutzer installiert.
 
 Prüfe bei Bedarf die SHA-256-Prüfsumme der Datei mit den Angaben {% if site.release_downloads %}im [Release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}auf der [Download-Seite]({{ site.download_page }}){% endif %}.
 
