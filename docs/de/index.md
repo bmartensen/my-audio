@@ -17,9 +17,9 @@ permalink: /de/
 <div class="cards">
   <div class="card"><h3>Aufnehmen</h3><p>Neue Spuren im Takt zu den bestehenden, eingemessen auf dein Gerät.</p></div>
   <div class="card"><h3>Live-Effekte</h3><p>Beim Aufnehmen durch Hall, EQ oder Verstärker mithören – die Aufnahme bleibt trocken.</p></div>
-  <div class="card"><h3>Mischen</h3><p>Lautstärke, Panorama, Verlaufskurven und bis zu sechs Effekte je Spur und im Master.</p></div>
+  <div class="card"><h3>Mischen</h3><p>Lautstärke, Panorama, Verlaufskurven und bis zu sechs Effekte je Spur und im Master, auch Amp-Modelle (NAM) und Boxen (IR).</p></div>
   <div class="card"><h3>Üben</h3><p>Metronom, Übungsschleife, Gitarrenstimmgerät und Songtext mit Akkorden.</p></div>
-  <div class="card"><h3>Teilen</h3><p>Mix als Ogg/Opus, Einzelspuren als WAV, ganze Projekte als ZIP.</p></div>
+  <div class="card"><h3>Teilen</h3><p>Mix als Ogg/Opus, Einzelspuren als WAV, ganze Projekte als ZIP und Sitzungen für SoundCraft – auch wieder zurück.</p></div>
   <div class="card"><h3>Offen</h3><p>MIT-lizenziert, mit 478 Airwindows-Effekten. Alles bleibt lokal auf deinem Gerät.</p></div>
 </div>
 

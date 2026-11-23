@@ -55,10 +55,10 @@ Android's cloud backup and device-to-device transfer include projects and the ef
 - The master chain is treated like a track chain on SoundCraft's master, and the fixed −14 LUFS stage becomes a `maximizer` there, so the level is close to My Audio's mix.
 - The metronome tempo becomes the session tempo; notes become session comments. The metronome itself is not exported.
 
-**Import of a SoundCraft session (planned for 0.10.x).** Home's project import also accepts such a ZIP (or a `.scraft` with its `Audio Files/`), so a session can be continued on the phone: recording new tracks, adding effects and exporting it again with every position kept.
+**Import of a SoundCraft session.** Home's project import also accepts such a ZIP (the session folder with its `.scraft` and `Audio Files/`, zipped), so a session can be continued on the phone: recording new tracks, adding effects and exporting it again with every position kept.
 - Each audio track's active playlist becomes one track; several clips are rendered into one take starting at the first clip, honouring clip offsets, gain and fades. Its position is fixed: imported takes keep their offset and cannot be moved in My Audio.
-- Name, volume, pan, mute, solo and volume automation (as envelope) carry over. `eq_7band`, `compressor`, `room_reverb` and `plate_reverb` map back to approximate My Audio effects; other plugins are not imported and are named after the import. Effects that the export rendered into the audio stay in it.
-- Tempo and session comments become metronome tempo and notes. MIDI, instrument, video and bus tracks are ignored.
+- Name, volume, pan, mute, solo and volume automation (as envelope) carry over. `eq_7band`, `compressor`, `room_reverb` and `plate_reverb` map back to approximate My Audio effects (an `eq_7band` followed by a `compressor` becomes one „EQ (My Audio)“); other plugins, non-audio tracks and missing media are not imported and are listed in the project's notes. With volume automation, its loudest point becomes the track volume and the envelope stays within 100 %. Effects that the export rendered into the audio stay in it.
+- Tempo and session comments become metronome tempo and notes. 48 kHz WAVs (also SoundCraft's 32-bit float) are read directly; other formats and rates go through the platform's import decoder.
 
 ## Mixing and effects
 

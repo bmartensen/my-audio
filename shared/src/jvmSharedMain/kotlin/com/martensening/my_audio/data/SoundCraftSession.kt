@@ -35,7 +35,7 @@ object SoundCraftSession {
      * Both pan with constant power, but SoundCraft's default law sits 3.01 dB lower in the centre than My Audio's
      * (whose centred mono track keeps unity gain on each side), so mono tracks are raised by that much.
      */
-    private const val MONO_PAN_COMPENSATION_DB = 3.0103
+    const val MONO_PAN_COMPENSATION_DB = 3.0103
 
     /** One exported track: its audio files and where its clip starts. */
     data class ExportedTrack(

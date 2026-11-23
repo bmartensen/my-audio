@@ -30,7 +30,9 @@ Guide version: My Audio {{ site.release }}. Available installers are listed on t
 - [Project settings](#project-settings)
 - [Tuner](#tuner)
 - [Sharing and backups](#sharing-and-backups)
+- [SoundCraft](#soundcraft)
 - [Effect library](#effect-library)
+- [Amp models and cabinets](#amp-models-and-cabinets)
 - [Settings](#settings)
 - [Latency calibration](#latency-calibration)
 - [Windows](#windows)
@@ -53,7 +55,7 @@ Headphones are always the best choice when overdubbing or monitoring.
 - **Record button (red):** creates a project named after the date and time and starts the first recording.
 - **New project** below the list creates an empty project without recording.
 - **Effect library** (wave icon): all effects for browsing and selecting, see [Effect library](#effect-library).
-- **Import project** (down arrow): opens a ZIP file. A backup from **Share → Back up project** is restored as a project. A ZIP with audio files (MP3, Ogg, WAV) becomes a new project with one track per file. A leading number in the file name ("01 Drums.wav") determines the order.
+- **Import project** (down arrow): opens a ZIP file. A backup from **Share → Back up project** is restored as a project. A zipped SoundCraft session becomes a project with every track at its position. A ZIP with audio files (MP3, Ogg, WAV) becomes a new project with one track per file. A leading number in the file name ("01 Drums.wav") determines the order.
 - **Settings** (gear): devices, audio buffer, calibration and info.
 
 ## Project view
@@ -237,7 +239,18 @@ Play an open string. The tuner detects the string automatically (standard tuning
 - **Share mix:** exactly what **Play** lets you hear, as stereo Ogg/Opus – small enough for messengers.
 - **Stems:** each track as a cleaned WAV file from the project start, without effects, volume or panning, in a ZIP – for further work in a DAW.
 - **Back up project:** the whole project with all original recordings and settings as a ZIP. **Import project** on the home screen restores it, also on a different device.
-- **SoundCraft session:** the project as a session for the desktop DAW [SoundCraft](https://github.com/storytold/soundcraft), as a ZIP. Unzip it and open the *.scraft* file. Every track sits at its place in the song and can be moved there. EQ, compressor and reverb come along as SoundCraft effects, other effects are rendered into the track, and the untouched take is in the playlist “Dry”.
+- **SoundCraft session:** the project as a session for the desktop DAW SoundCraft, as a ZIP (see [SoundCraft](#soundcraft)).
+
+## SoundCraft
+
+[SoundCraft](https://github.com/storytold/soundcraft) is an open-source DAW for the PC. Use it to move and cut tracks you recorded on the go, then take the session back to your phone.
+
+- **Share → SoundCraft session** creates a ZIP. Unzip it on the PC and open the *.scraft* file in SoundCraft.
+- Every track sits at its place in the song there, with volume, panning, mute and volume envelope.
+- **EQ (My Audio)** with **Compressor** and **Reverb (My Audio)** become the matching SoundCraft effects and stay adjustable. They sound similar there, but not exactly the same.
+- Airwindows effects, amp models and cabinets do not exist in SoundCraft. They are rendered into the track, and the untouched take is next to it in the playlist “Dry”.
+- Back to the phone: save the session in SoundCraft, zip its folder and open it with **Import project**. Every track keeps its position, also when you moved clips there. Then record more, add effects and export the session again.
+- What My Audio cannot take over, such as other plugins or MIDI tracks, is listed in the project's **Notes** afterwards.
 
 When you move to a new Android phone, Android's data transfer takes your projects and the effect library along. Calibrate again on the new phone.
 
@@ -254,9 +267,11 @@ The library contains **EQ (My Audio)**, **Reverb (My Audio)**, your imported amp
 - Tap an **effect** to expand it with description and controls. **▶** auditions it right away. When expanded, it offers **Listen** and **Live** with **With / Without**.
 - The **tick** selects an effect for **Add effect** in the tracks.
 
-### Amp models and cabinets
+## Amp models and cabinets
 
-**Amp models and cabinets** brings amp profiles (Neural Amp Modeler, *.nam*) and cabinet impulse responses (*.wav*) into the app, for example from [TONE3000](https://www.tone3000.com). Download them in your browser and tap **Import**. You can pick a downloaded ZIP file directly, the app takes every profile and impulse response from it.
+An amp model is a profile of a real amplifier or pedal, learned with the [Neural Amp Modeler](https://www.neuralampmodeler.com). It sounds like the device itself. A cabinet impulse response (IR) recreates the speaker and the microphone in front of it. Together they make a complete guitar or bass sound. Many profiles already contain the cabinet, then you need no IR.
+
+**Amp models and cabinets** in the library brings such profiles (*.nam*) and impulse responses (*.wav*) into the app, for example from [TONE3000](https://www.tone3000.com). Download them in your browser and tap **Import**. You can pick a downloaded ZIP file directly, the app takes every profile and impulse response from it.
 
 - Imported tones are selected right away and offered under **Add effect**, live and during playback.
 - An amp model has **Input** and **Output**, both kinds have **Match level**.

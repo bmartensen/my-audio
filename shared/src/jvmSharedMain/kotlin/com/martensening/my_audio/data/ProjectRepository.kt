@@ -219,16 +219,27 @@ class ProjectRepository(root: File) {
         return project
     }
 
-    /** A converted audio file ([file] in the internal WAV format) that becomes a track named [name]. */
-    data class ImportedTake(val name: String, val file: File, val frames: Long, val channels: Int = 1)
+    /**
+     * A converted audio file ([file] in the internal WAV format) that becomes a track named [name], starting at
+     * project frame [offsetFrames]; [configure] sets further track settings (e.g. from a SoundCraft session).
+     */
+    data class ImportedTake(
+        val name: String,
+        val file: File,
+        val frames: Long,
+        val channels: Int = 1,
+        val offsetFrames: Long = 0,
+        val configure: (Track) -> Track = { it }
+    )
 
     /**
-     * Creates a project from converted audio files, one track each at project frame 0, in the given
-     * order. The files are moved into the project; `project.json` is written last, so an import
-     * that fails half-way never shows up as a project.
+     * Creates a project from converted audio files, one track each at its offset (usually project frame 0), in the
+     * given order; [configure] completes the project. The files are moved into the project; `project.json` is
+     * written last, so an import that fails half-way never shows up as a project.
      */
     @Synchronized
-    fun createFromTakes(name: String, sampleRate: Int, takes: List<ImportedTake>, nowMillis: Long): Project {
+    fun createFromTakes(name: String, sampleRate: Int, takes: List<ImportedTake>, nowMillis: Long,
+                        configure: (Project) -> Project = { it }): Project {
         var id = nowMillis
         while (projectDir(id).exists()) id++
         val dir = File(projectDir(id), TRACKS_DIR).apply { mkdirs() }
@@ -244,17 +255,17 @@ class ProjectRepository(root: File) {
                     id = trackId,
                     name = take.name,
                     fileName = target.name,
-                    offsetFrames = 0,
+                    offsetFrames = take.offsetFrames,
                     lengthFrames = take.frames,
                     channels = take.channels,
                     createdAtMillis = nowMillis,
                     effects = TrackEffects.IMPORTED
-                )
+                ).let(take.configure)
             }
             return Project(
                 id = id, name = name, createdAtMillis = nowMillis, sampleRate = sampleRate,
                 nextTrackNumber = tracks.size + 1, tracks = tracks
-            ).also(::save)
+            ).let(configure).also(::save)
         } catch (error: Throwable) {
             projectDir(id).deleteRecursively()
             throw error
@@ -303,6 +314,8 @@ class ProjectRepository(root: File) {
     companion object {
         /** Marks a ZIP as a backup; a ZIP without it is imported as audio files. */
         const val PROJECT_FILE = "project.json"
+        /** Highest track volume an import may set; the track dialog offers the same (+6 dB). */
+        const val MAX_IMPORTED_GAIN = 2f
         private const val TRACKS_DIR = "tracks"
         private const val CLEAN_CACHE_VERSION = 4
         // Take and reference names as the app writes them, e.g. "1793307503200.ref.wav".

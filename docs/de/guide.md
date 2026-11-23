@@ -30,7 +30,9 @@ Stand: My Audio {{ site.release }}. Die verfügbaren Installationsdateien stehen
 - [Projekteinstellungen](#projekteinstellungen)
 - [Stimmgerät](#stimmgerät)
 - [Teilen und Sichern](#teilen-und-sichern)
+- [SoundCraft](#soundcraft)
 - [Effekt-Bibliothek](#effekt-bibliothek)
+- [Amp-Modelle und Boxen](#amp-modelle-und-boxen)
 - [Einstellungen](#einstellungen)
 - [Latenz einmessen](#latenz-einmessen)
 - [Windows](#windows)
@@ -53,7 +55,7 @@ Kopfhörer sind beim Überspielen und Mithören immer die beste Wahl.
 - **Aufnahmeknopf (rot):** legt ein Projekt mit Datum und Uhrzeit als Namen an und startet die erste Aufnahme.
 - **Neues Projekt** unter der Liste legt ein leeres Projekt an, ohne aufzunehmen.
 - **Effekt-Bibliothek** (Wellensymbol): alle Effekte zum Ausprobieren und Auswählen, siehe [Effekt-Bibliothek](#effekt-bibliothek).
-- **Projekt importieren** (Pfeil nach unten): öffnet eine ZIP-Datei. Eine Sicherung aus **Teilen → Projekt sichern** wird als Projekt wiederhergestellt. Ein ZIP mit Audiodateien (MP3, Ogg, WAV) wird zu einem neuen Projekt mit einer Spur je Datei. Eine führende Nummer im Dateinamen („01 Drums.wav“) bestimmt die Reihenfolge.
+- **Projekt importieren** (Pfeil nach unten): öffnet eine ZIP-Datei. Eine Sicherung aus **Teilen → Projekt sichern** wird als Projekt wiederhergestellt. Eine gezippte SoundCraft-Sitzung wird zu einem Projekt mit allen Spuren an ihren Positionen. Ein ZIP mit Audiodateien (MP3, Ogg, WAV) wird zu einem neuen Projekt mit einer Spur je Datei. Eine führende Nummer im Dateinamen („01 Drums.wav“) bestimmt die Reihenfolge.
 - **Einstellungen** (Zahnrad): Geräte, Audiopuffer, Einmessung und Infos.
 
 ## Projektansicht
@@ -237,7 +239,18 @@ Schlage eine leere Saite an. Das Stimmgerät erkennt die Saite automatisch (Stan
 - **Mix teilen:** genau das, was **Abspielen** hören lässt, als Stereo-Ogg/Opus – klein genug für Messenger.
 - **Einzelspuren:** jede Spur als bereinigte WAV-Datei ab Projektanfang, ohne Effekte, Lautstärke und Panorama, in einem ZIP – zum Weiterarbeiten in einer DAW.
 - **Projekt sichern:** das ganze Projekt mit allen Originalaufnahmen und Einstellungen als ZIP. **Projekt importieren** auf der Startseite stellt es wieder her, auch auf einem anderen Gerät.
-- **SoundCraft-Sitzung:** das Projekt als Sitzung für die Desktop-DAW [SoundCraft](https://github.com/storytold/soundcraft), als ZIP. Entpacke es und öffne die *.scraft*-Datei. Jede Spur liegt an ihrer Stelle im Song und lässt sich dort verschieben. EQ, Kompressor und Hall kommen als SoundCraft-Effekte mit, andere Effekte sind in die Spur eingerechnet, die unbearbeitete Aufnahme liegt in der Playlist „Dry“.
+- **SoundCraft-Sitzung:** das Projekt als Sitzung für die Desktop-DAW SoundCraft, als ZIP (siehe [SoundCraft](#soundcraft)).
+
+## SoundCraft
+
+[SoundCraft](https://github.com/storytold/soundcraft) ist eine quelloffene DAW für den PC. Mit ihr verschiebst und schneidest du Spuren, die du unterwegs aufgenommen hast, und nimmst die Sitzung danach wieder mit aufs Telefon.
+
+- **Teilen → SoundCraft-Sitzung** erzeugt ein ZIP. Entpacke es am PC und öffne die *.scraft*-Datei in SoundCraft.
+- Jede Spur liegt dort an ihrer Stelle im Song, mit Lautstärke, Panorama, Stummschaltung und Lautstärkeverlauf.
+- **EQ (My Audio)** mit **Kompressor** und **Hall (My Audio)** werden zu den passenden SoundCraft-Effekten und bleiben einstellbar. Sie klingen dort ähnlich, aber nicht exakt gleich.
+- Airwindows-Effekte, Amp-Modelle und Boxen gibt es in SoundCraft nicht. Sie sind in die Spur eingerechnet, die unbearbeitete Aufnahme liegt in der Playlist „Dry“ daneben.
+- Zurück aufs Telefon: Speichere die Sitzung in SoundCraft, packe ihren Ordner als ZIP und öffne es mit **Projekt importieren**. Jede Spur behält ihre Position, auch wenn du dort Clips verschoben hast. Danach nimmst du weiter auf, fügst Effekte hinzu und exportierst die Sitzung erneut.
+- Was My Audio nicht übernehmen kann, etwa fremde Plugins oder MIDI-Spuren, steht danach in den **Notizen** des Projekts.
 
 Wechselst du auf ein neues Android-Telefon, nimmt die Datenübertragung von Android deine Projekte und die Effekt-Bibliothek mit. Auf dem neuen Telefon misst du neu ein.
 
@@ -254,9 +267,11 @@ Die Bibliothek enthält **EQ (My Audio)**, **Hall (My Audio)**, deine importiert
 - Tippen auf einen **Effekt** klappt ihn mit Beschreibung und Reglern auf. **▶** spielt ihn sofort an. Aufgeklappt gibt es **Probehören** und **Live** mit **Mit / Ohne**.
 - Das **Häkchen** wählt einen Effekt für **Effekt hinzufügen** in den Spuren aus.
 
-### Amp-Modelle und Boxen
+## Amp-Modelle und Boxen
 
-Unter **Amp-Modelle und Boxen** holst du dir Verstärker-Profile (Neural Amp Modeler, *.nam*) und Box-Impulsantworten (*.wav*) in die App, zum Beispiel von [TONE3000](https://www.tone3000.com). Lade sie im Browser herunter und tippe auf **Importieren**. Eine heruntergeladene ZIP-Datei kannst du direkt auswählen, die App übernimmt alle Profile und Impulsantworten daraus.
+Ein Amp-Modell ist ein Profil eines echten Verstärkers oder Pedals, gelernt mit dem [Neural Amp Modeler](https://www.neuralampmodeler.com). Es klingt wie das Gerät selbst. Eine Box-Impulsantwort (IR) bildet den Lautsprecher und das Mikrofon davor nach. Zusammen ergeben sie einen kompletten Gitarren- oder Bass-Sound. Viele Profile enthalten die Box bereits, dann brauchst du keine IR.
+
+Unter **Amp-Modelle und Boxen** in der Bibliothek holst du dir solche Profile (*.nam*) und Impulsantworten (*.wav*) in die App, zum Beispiel von [TONE3000](https://www.tone3000.com). Lade sie im Browser herunter und tippe auf **Importieren**. Eine heruntergeladene ZIP-Datei kannst du direkt auswählen, die App übernimmt alle Profile und Impulsantworten daraus.
 
 - Importierte Tones sind gleich ausgewählt und stehen unter **Effekt hinzufügen** bereit, live und beim Abspielen.
 - Ein Amp-Modell hat **Eingang** und **Ausgang**, beide Arten haben **Pegel ausgleichen**.

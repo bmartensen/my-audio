@@ -17,9 +17,9 @@ permalink: /en/
 <div class="cards">
   <div class="card"><h3>Record</h3><p>New tracks in time with the existing ones, calibrated to your device.</p></div>
   <div class="card"><h3>Live effects</h3><p>Monitor through reverb, EQ or amp effects while recording – the take stays dry.</p></div>
-  <div class="card"><h3>Mix</h3><p>Volume, panning, envelopes and up to six effects per track and on the master.</p></div>
+  <div class="card"><h3>Mix</h3><p>Volume, panning, envelopes and up to six effects per track and on the master, including amp models (NAM) and cabinets (IR).</p></div>
   <div class="card"><h3>Practice</h3><p>Metronome, practice loop, guitar tuner and lyrics with chords.</p></div>
-  <div class="card"><h3>Share</h3><p>Mix as Ogg/Opus, stems as WAV, whole projects as ZIP.</p></div>
+  <div class="card"><h3>Share</h3><p>Mix as Ogg/Opus, stems as WAV, whole projects as ZIP and sessions for SoundCraft – and back again.</p></div>
   <div class="card"><h3>Open</h3><p>MIT licensed, with 478 Airwindows effects. Everything stays local on your device.</p></div>
 </div>
 

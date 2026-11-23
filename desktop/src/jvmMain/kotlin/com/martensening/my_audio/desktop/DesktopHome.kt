@@ -1,5 +1,6 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.data.SoundCraftImport
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -47,7 +48,7 @@ class DesktopHome(
 
     /**
      * Imports a ZIP as a new project, decided by its content like on Android: a backup when it
-     * holds `project.json`, otherwise one track per audio file. [onDone] receives null on failure.
+     * holds `project.json`, a SoundCraft session when it holds a `.scraft` file, otherwise one track per audio file. [onDone] receives null on failure.
      */
     fun importZip(file: File, onDone: (Project?) -> Unit) {
         if (importing) return
@@ -59,6 +60,12 @@ class DesktopHome(
                     val names = ZipFile(file).use { zip -> zip.entries().toList().map { it.name } }
                     if (ProjectRepository.PROJECT_FILE in names) {
                         file.inputStream().use { repository.importBackup(it, System.currentTimeMillis()) }
+                    } else if (SoundCraftImport.isSession(names)) {
+                        ZipFile(file).use { zip ->
+                            SoundCraftImport.import(zip, work, repository, System.currentTimeMillis(), file.nameWithoutExtension) { source, target ->
+                                DesktopAudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE)
+                            }
+                        }
                     } else {
                         importAudio(file, work)
                     }
