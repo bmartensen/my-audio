@@ -247,11 +247,20 @@ When you move to a new Android phone, Android's data transfer takes your project
   <img class="shot" src="{{ '/images/library-preview.png' | relative_url }}" alt="Auditioning in the library">
 </div>
 
-The library contains **EQ (My Audio)**, **Reverb (My Audio)** and 478 Airwindows effects.
+The library contains **EQ (My Audio)**, **Reverb (My Audio)**, your imported amp models and cabinets and 478 Airwindows effects.
 
 - **Search** by name or description, **filter** by **All**, **Selected** or category.
 - Tap an **effect** to expand it with description and controls. **▶** auditions it right away. When expanded, it offers **Listen** and **Live** with **With / Without**.
 - The **tick** selects an effect for **Add effect** in the tracks.
+
+### Amp models and cabinets
+
+**Amp models and cabinets** brings amp profiles (Neural Amp Modeler, *.nam*) and cabinet impulse responses (*.wav*) into the app, for example from [TONE3000](https://www.tone3000.com). Download them in your browser and tap **Import**. You can pick a downloaded ZIP file directly, the app takes every profile and impulse response from it.
+
+- Imported tones are selected right away and offered under **Add effect**, live and during playback.
+- An amp model has **Input** and **Output**, both kinds have **Match level**.
+- **Remove tone** deletes it from this device. Project backups contain the tones they use.
+- Respect the license shown on each tone's page when you publish recordings made with it.
 
 ## Settings
 

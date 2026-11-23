@@ -1,5 +1,15 @@
 package com.martensening.my_audio.ui
 
+import org.jetbrains.compose.resources.getString
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import com.martensening.my_audio.data.ToneLibrary
+import com.martensening.my_audio.data.ToneKind
+import com.martensening.my_audio.data.ToneImportResult
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,11 +98,31 @@ private class LibraryEntry(
 /**
  * The effect library from the home screen: every effect the app can render, searchable and
  * filtered by category. A check box puts an effect into the selection that "Add effect" offers;
- * deselecting never touches projects that already use it.
+ * deselecting never touches projects that already use it. Imported amp models and cabinets follow
+ * the own effects; [onImportTones] lets the platform pick files and reports what the import added.
  */
 @Composable
-fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
+fun LibraryContent(
+    library: EffectLibrary,
+    onBack: () -> Unit,
+    tones: ToneLibrary? = ToneLibrary.current,
+    onImportTones: (((ToneImportResult?) -> Unit) -> Unit)? = null
+) {
     val selection by library.selection.collectAsState()
+    val toneList by remember(tones) { tones?.tones ?: MutableStateFlow(emptyList()) }.collectAsState()
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var removingTone by remember { mutableStateOf<String?>(null) }
+    fun importTones() = onImportTones?.invoke { result ->
+        // Imported tones are selected right away, so "Add effect" offers them.
+        result?.added?.forEach { library.setSelected(EffectLibrary.toneId(it.hash), true) }
+        scope.launch {
+            snackbar.showSnackbar(
+                if (result == null || result.empty) getString(Res.string.tones_import_none)
+                else getString(Res.string.tones_import_result, result.added.size, result.duplicates, result.failed.size)
+            )
+        }
+    }
     // Every effect can be heard on the bundled sample, also before selecting it. One entry at a time
     // unfolds its parameters; they start from the defaults, are heard while playing and never stored.
     val audition = rememberEffectAudition(SampleAuditionSource)
@@ -133,9 +163,35 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
                     tuned = changed
                     audition.update(entry.id, listOf(EffectSlot(changed)), emptyList())
                 }
+                EffectLibrary.toneHash(entry.id)?.let { hash ->
+                    TextButton(onClick = { removingTone = hash }) { Text(stringResource(Res.string.tone_remove)) }
+                }
             }
         }
     )
+    removingTone?.let { hash ->
+        val tone = tones?.find(hash)
+        if (tone == null) {
+            removingTone = null
+        } else {
+            ConfirmDeleteDialog(
+                title = stringResource(Res.string.tone_remove_question),
+                message = formatResource(Res.string.tone_remove_info, tone.name),
+                onConfirm = {
+                    val id = EffectLibrary.toneId(hash)
+                    if (audition.playing == id || audition.live == id) audition.stop()
+                    if (expandedId == id) {
+                        expandedId = null
+                        tuned = null
+                    }
+                    library.setSelected(id, false)
+                    tones.remove(hash)
+                    removingTone = null
+                },
+                onDismiss = { removingTone = null }
+            )
+        }
+    }
     var query by rememberSaveable { mutableStateOf("") }
     var filterKey by rememberSaveable { mutableStateOf("") }
     val categories = remember { AirwindowsCatalog.effects.map { it.category }.distinct().sorted() }
@@ -151,6 +207,13 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
         LibraryEntry(EffectLibrary.TONE, effectName(EffectLibrary.TONE), null, toneDescription),
         LibraryEntry(EffectLibrary.REVERB, effectName(EffectLibrary.REVERB), null, reverbDescription)
     )
+    val ampLabel = stringResource(Res.string.tone_kind_amp)
+    val cabinetLabel = stringResource(Res.string.tone_kind_cabinet)
+    val toneEntries = toneList.sortedWith(compareBy({ it.kind }, { it.name.lowercase() })).map { tone ->
+        val kind = if (tone.kind == ToneKind.AmpModel) ampLabel else cabinetLabel
+        LibraryEntry(EffectLibrary.toneId(tone.hash), tone.name, null,
+            listOf(kind, tone.details).filter { it.isNotEmpty() }.joinToString(" · "))
+    }
     val descriptions by rememberAirwindowsDescriptions()
     val airwindows = remember(descriptions) {
         AirwindowsCatalog.effects.map {
@@ -169,9 +232,15 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
         return inFilter && words.all { it in text }
     }
     val shownOwn = own.filter { it.matches() }
+    val shownTones = toneEntries.filter { it.matches() }
+    // The section with its import button stays visible without filter, also while it is still empty.
+    val showToneSection = onImportTones != null && (shownTones.isNotEmpty() || (query.isBlank() && filter == LibraryFilter.All))
     val shownAirwindows = airwindows.filter { it.matches() }
 
-    Scaffold(topBar = { BackTopAppBar(title = stringResource(Res.string.library_title), onBack = onBack) }) { padding ->
+    Scaffold(
+        topBar = { BackTopAppBar(title = stringResource(Res.string.library_title), onBack = onBack) },
+        snackbarHost = { SnackbarHost(snackbar) }
+    ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(modifier = Modifier.widthIn(max = PanelMaxWidth).fillMaxWidth()) {
                 OutlinedTextField(
@@ -209,8 +278,8 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
                     }
                 }
                 Text(
-                    pluralStringResource(Res.plurals.library_count, shownOwn.size + shownAirwindows.size,
-                        shownOwn.size + shownAirwindows.size),
+                    pluralStringResource(Res.plurals.library_count, shownOwn.size + shownTones.size + shownAirwindows.size,
+                        shownOwn.size + shownTones.size + shownAirwindows.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -224,6 +293,22 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
                     item(key = "own") { LibraryHeader(stringResource(Res.string.library_section_own)) }
                     items(shownOwn, key = { it.id }) { entry -> EntryRow(entry) }
                 }
+                if (showToneSection) {
+                    item(key = "tones") {
+                        LibraryHeader(stringResource(Res.string.library_section_tones)) {
+                            TextButton(onClick = { importTones() }) { Text(stringResource(Res.string.tones_import)) }
+                        }
+                    }
+                    if (toneEntries.isEmpty()) item(key = "tones-hint") {
+                        Text(
+                            stringResource(Res.string.tones_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                    items(shownTones, key = { it.id }) { entry -> EntryRow(entry) }
+                }
                 if (shownAirwindows.isNotEmpty()) {
                     item(key = "airwindows") { LibraryHeader(stringResource(Res.string.library_section_airwindows)) }
                     items(shownAirwindows, key = { it.id }) { entry -> EntryRow(entry) }
@@ -236,7 +321,7 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
                         )
                     }
                 }
-                if (shownOwn.isEmpty() && shownAirwindows.isEmpty()) {
+                if (shownOwn.isEmpty() && shownAirwindows.isEmpty() && !showToneSection) {
                     item(key = "empty") {
                         Text(
                             stringResource(Res.string.library_empty),
@@ -252,13 +337,16 @@ fun LibraryContent(library: EffectLibrary, onBack: () -> Unit) {
 }
 
 @Composable
-private fun LibraryHeader(title: String) {
-    Text(
-        title,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
-    )
+private fun LibraryHeader(title: String, action: (@Composable () -> Unit)? = null) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
+        )
+        if (action != null) Box(modifier = Modifier.padding(end = 4.dp, top = 8.dp)) { action() }
+    }
 }
 
 /**

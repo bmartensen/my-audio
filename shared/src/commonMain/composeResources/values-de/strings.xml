@@ -317,4 +317,18 @@
     <string name="effect_audition_source_mix">Ein Ausschnitt des Mixes läuft in Schleife</string>
     <string name="effect_audition_source_sample">Der Beispielklang läuft in Schleife</string>
     <string name="about_community_credit">Mit Dank an die Menschen hinter Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, Skia und OpenJDK. Vollständige Credits und Lizenzhinweise stehen unten.</string>
+    <string name="library_section_tones">Amp-Modelle und Boxen</string>
+    <string name="tones_import">Importieren</string>
+    <string name="tones_hint">Importiere heruntergeladene NAM-Profile (.nam) und Box-IRs (.wav), auch als ZIP.</string>
+    <string name="tone_kind_amp">Amp-Modell</string>
+    <string name="tone_kind_cabinet">Box-IR</string>
+    <string name="tones_import_result">Importiert: %1$d · schon vorhanden: %2$d · nicht verwendbar: %3$d</string>
+    <string name="tones_import_none">Kein verwendbares Profil und keine IR gefunden</string>
+    <string name="tone_remove">Tone entfernen</string>
+    <string name="tone_remove_question">Tone entfernen?</string>
+    <string name="tone_remove_info">„%1$s“ wird von diesem Gerät entfernt. Projekte, die ihn nutzen, behalten den Slot ohne Klang.</string>
+    <string name="tone_missing">Tone fehlt</string>
+    <string name="tone_missing_summary">Dieser Tone ist nicht auf diesem Gerät. Importiere ihn erneut in der Bibliothek.</string>
+    <string name="effect_input_gain">Eingang</string>
+    <string name="effect_output_gain">Ausgang</string>
 </resources>

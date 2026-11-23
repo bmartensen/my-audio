@@ -2,7 +2,13 @@
 
 As of 2026-11-23: **My Audio 0.9.18 / versionCode 33, released** for Android and Windows: tag `v0.9.18` (commit `a3890a9`) and the published [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.9.18) with APK, MSI, checksums and the runtime source.
 
-Development continues on `develop` toward **0.10.x** (amp models and cabinet IRs from user-imported tones, see [requirements](app-requirements.md#amp-models-and-cabinet-irs-planned-for-010x); Android backup and device-transfer rules are implemented there); `main` holds 0.9.18. Open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+Development continues on `develop` with **0.10.1 / versionCode 35**: amp models and cabinet IRs from user-imported tones ([requirements](app-requirements.md#amp-models-and-cabinet-irs)) and Android backup and device-transfer rules; `main` holds 0.9.18. Open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+
+## Candidate 0.10.1 (develop)
+
+- Amp models (NAM A1/A2) and cabinet IRs from imported `.nam`/`.wav` files or ZIPs, tone library, tones in project backups, Android backup and device-transfer rules. See [requirements](app-requirements.md#amp-models-and-cabinet-irs) and [audio technology](audio-technology.md#amp-models-and-cabinets).
+- 107 shared desktop tests and 13 Android JVM tests pass; Android lint 0 errors, 14 warnings. `amp_cabinet_test` passes on the Pixel 9 (cabinet equals direct convolution, block-size independent; with a TONE3000 A2 profile: accepted, audible, 96-frame blocks equal the render). Desktop native library builds with MSVC; the Windows app was not run.
+- Release APK 0.10.1 installed on the Pixel 9 as an update over 0.9.18 (0.10.0 was installed briefly before; it dropped NAM's self-registering architectures from the static library, fixed by building NAM as an object library). On the phone: a cabinet ZIP (4 IRs) and an A2 profile ZIP imported, the profile auditioned in the library on the loudspeaker and judged correct by the contributor, who also used it in a track. Backups with tones and Windows remain to be checked.
 
 ## Release 0.9.18
 
@@ -35,4 +41,4 @@ Original work is MIT-licensed. [`licenses/`](../licenses/README.md) holds the th
 - All eight native tests, including `live_chain_test` (live chain and monitor sample-identical to the rendered chain), passed on the x86_64 emulator with 0.9.x native code, which 0.9.18 does not change; they have not yet run on the arm64 Pixel 9.
 - Before publishing 0.9.18, `prepare_public_repo.py` inspected 1,793 files and Gitleaks found no leaks in the copied candidate; the findings in the working tree were all in ignored local files (hash manifests in `.work/`, a JDK configuration under `build/`).
 
-These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; see the [acceptance issues](https://github.com/bmartensen/my-audio/issues?q=is%3Aopen+label%3Aacceptance).
+These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; they are verified while working on the affected features.

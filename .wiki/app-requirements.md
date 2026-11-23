@@ -95,15 +95,15 @@ Record-track settings can be prepared before a take or removed when no longer ne
 
 **Audio buffer.** Settings offer one global choice for calibration, takes and live monitoring as a compact Automatic | Short | Long switch without explanation: Automatic is the system's low-latency default and keeps existing calibrations, Short and Long use 1 or 4 device periods (desktop periods of 128 frames). A medium step is omitted because it matches Automatic on Android. Each choice is calibrated separately, so changing it shows the calibration notice until measured; a stored choice this version does not offer falls back to Automatic.
 
-## Amp models and cabinet IRs (planned for 0.10.x)
+## Amp models and cabinet IRs
 
-Agreed scope, not yet implemented. Tracked in the [0.10.x milestone](https://github.com/bmartensen/my-audio/milestone/1).
+Implemented in 0.10.0 ([#1](https://github.com/bmartensen/my-audio/issues/1), milestone [0.10.x](https://github.com/bmartensen/my-audio/milestone/1)).
 
 **Tones from the user's own downloads.** Users download Neural Amp Modeler profiles (`.nam`) and impulse responses (WAV), for example from TONE3000, in their browser and import them into the app, either as single files or as the downloaded ZIP; every profile and WAV in a ZIP is imported. The app has no internet access and ships no third-party tones; the TONE3000 API is not used.
 
 **Two slot types.** An amp model slot runs a NAM profile (A1 in every size and A2); a cabinet slot convolves an impulse response. Both sit in track and master chains like every other effect, with bypass, reordering and level matching (default on). An amp model slot offers input and output level.
 
-**Tone library.** Importing copies the file once into a device-local tone library, identified by its content hash, so a second import of the same file adds nothing. The library lists tones by name and type next to the effects, lets them be auditioned like effects and removed; removing a tone that a project uses leaves those slots silent with a “Tone missing” hint. NAM profiles must be 48 kHz; IRs are resampled to 48 kHz.
+**Tone library.** Importing copies the file once into a device-local tone library, identified by its content hash, so a second import of the same file adds nothing; a summary reports imported, already present and unusable files. Imported tones are selected for “Add effect” right away. The library lists them in the section “Amp models and cabinets” after the own effects, by name with type, gear and author from the profile's metadata, lets them be auditioned like effects and removed after confirmation; removing a tone that a project uses leaves those slots silent with a “Tone missing” hint. NAM profiles must be 48 kHz; IRs are resampled to 48 kHz.
 
 **Projects and backups.** A slot references its tone by content hash and keeps the display name. Project backups contain the tone files their slots use, and restoring a backup adds them to the tone library, so a project sounds the same on another device. Mix and track exports contain no tone files. App versions without these slot types keep them as preserved slots (“Requires a newer version”).
 

@@ -118,4 +118,13 @@ object NativeAudio {
 
     /** The preview source through the encoded [chain] as a seamless interleaved stereo loop; empty without a source. */
     external fun previewRender(chain: FloatArray): FloatArray
+
+    /**
+     * Checks a tone file of [kind] (1 amp model, 2 cabinet): "1"/"0", error, sample rate, IR frames at 48 kHz,
+     * NAM metadata JSON. Blocks; does not register the file.
+     */
+    external fun inspectTone(path: String, kind: Int): Array<String>
+
+    /** Loads a tone file once for effect chains; its handle, or -1 if it cannot be used. Blocks. */
+    external fun loadTone(path: String, kind: Int): Int
 }

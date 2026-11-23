@@ -247,11 +247,20 @@ Wechselst du auf ein neues Android-Telefon, nimmt die Datenübertragung von Andr
   <img class="shot" src="{{ '/images/library-preview.png' | relative_url }}" alt="Probehören in der Bibliothek">
 </div>
 
-Die Bibliothek enthält **EQ (My Audio)**, **Hall (My Audio)** und 478 Airwindows-Effekte.
+Die Bibliothek enthält **EQ (My Audio)**, **Hall (My Audio)**, deine importierten Amp-Modelle und Boxen und 478 Airwindows-Effekte.
 
 - **Suchen** nach Name oder Beschreibung, **Filter** nach **Alle**, **Ausgewählt** oder Kategorie.
 - Tippen auf einen **Effekt** klappt ihn mit Beschreibung und Reglern auf. **▶** spielt ihn sofort an. Aufgeklappt gibt es **Probehören** und **Live** mit **Mit / Ohne**.
 - Das **Häkchen** wählt einen Effekt für **Effekt hinzufügen** in den Spuren aus.
+
+### Amp-Modelle und Boxen
+
+Unter **Amp-Modelle und Boxen** holst du dir Verstärker-Profile (Neural Amp Modeler, *.nam*) und Box-Impulsantworten (*.wav*) in die App, zum Beispiel von [TONE3000](https://www.tone3000.com). Lade sie im Browser herunter und tippe auf **Importieren**. Eine heruntergeladene ZIP-Datei kannst du direkt auswählen, die App übernimmt alle Profile und Impulsantworten daraus.
+
+- Importierte Tones sind gleich ausgewählt und stehen unter **Effekt hinzufügen** bereit, live und beim Abspielen.
+- Ein Amp-Modell hat **Eingang** und **Ausgang**, beide Arten haben **Pegel ausgleichen**.
+- **Tone entfernen** löscht ihn von diesem Gerät. Projekt-Sicherungen enthalten die verwendeten Tones.
+- Beachte die Lizenz, die auf der Seite des jeweiligen Tones steht, wenn du Aufnahmen damit veröffentlichst.
 
 ## Einstellungen
 

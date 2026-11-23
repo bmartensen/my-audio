@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "AirwindowsEffects.h"
+#include "AmpCabinet.h"
 #include "BleedRemoval.h"
 #include "Log.h"
 #include "Loudness.h"
@@ -152,7 +153,11 @@ std::vector<EffectSlot> decodeEffectChain(const float *values, size_t count) {
         const bool reverb = type == static_cast<int>(EffectType::Reverb) && parameters == 4;
         const bool airwindows = (type == static_cast<int>(EffectType::Airwindows) ||
                                  type == static_cast<int>(EffectType::AirwindowsLevelMatched)) && parameters >= 1;
-        if (tone || reverb || airwindows) {
+        const bool amp = (type == static_cast<int>(EffectType::AmpModel) ||
+                          type == static_cast<int>(EffectType::AmpModelLevelMatched)) && parameters == 3;
+        const bool cabinet = (type == static_cast<int>(EffectType::Cabinet) ||
+                              type == static_cast<int>(EffectType::CabinetLevelMatched)) && parameters == 1;
+        if (tone || reverb || airwindows || amp || cabinet) {
             chain.push_back({static_cast<EffectType>(type), std::vector<float>(values + index, values + index + parameters)});
         } else {
             MYAUDIO_LOGW(kTag, "Skipping unknown effect %d with %zu parameters", type, parameters);
@@ -198,6 +203,40 @@ void applyEffectChain(const std::vector<EffectSlot> &chain, std::vector<float> &
                 } else {
                     MYAUDIO_LOGW(kTag, "Skipping unknown Airwindows effect %d", static_cast<int>(p[0]));
                     if (!stereo) right.clear();
+                }
+                break;
+            }
+            case EffectType::AmpModel:
+            case EffectType::AmpModelLevelMatched:
+            case EffectType::Cabinet:
+            case EffectType::CabinetLevelMatched: {
+                const bool cabinet = slot.type == EffectType::Cabinet || slot.type == EffectType::CabinetLevelMatched;
+                const bool match = slot.type == EffectType::AmpModelLevelMatched || slot.type == EffectType::CabinetLevelMatched;
+                // The same streaming processor as live monitoring, so the render sounds exactly like it.
+                auto processor = ToneProcessor::create(cabinet ? ToneKind::Cabinet : ToneKind::AmpModel,
+                                                       static_cast<int>(p[0]), cabinet ? 0.0f : p[1],
+                                                       cabinet ? 0.0f : p[2], stereo, sampleRate);
+                if (!processor) {
+                    MYAUDIO_LOGW(kTag, "Skipping missing tone %d", static_cast<int>(p[0]));
+                    break;
+                }
+                const double before = match ? integratedLoudnessStreamed(left, stereo ? right : left)
+                                            : -std::numeric_limits<double>::infinity();
+                const size_t tail = static_cast<size_t>(processor->tailFrames());
+                left.resize(left.size() + tail, 0.0f);
+                if (stereo) right.resize(left.size(), 0.0f);
+                processor->process(left.data(), stereo ? right.data() : nullptr, static_cast<int>(left.size()));
+                if (match) {
+                    if (stereo) {
+                        matchLoudness(left, right, before);
+                    } else {
+                        // Measured on both channels like the input, then applied to the mono signal.
+                        const double after = integratedLoudnessStreamed(left, left);
+                        if (std::isfinite(before) && std::isfinite(after)) {
+                            const auto gain = static_cast<float>(std::pow(10.0, std::clamp(before - after, -24.0, 24.0) / 20.0));
+                            for (float &sample : left) sample *= gain;
+                        }
+                    }
                 }
                 break;
             }

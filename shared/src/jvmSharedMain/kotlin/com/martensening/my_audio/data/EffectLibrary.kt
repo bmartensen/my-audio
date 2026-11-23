@@ -53,6 +53,12 @@ class EffectLibrary(private val file: File) {
         fun airwindowsId(name: String) = AIRWINDOWS + name
         fun airwindowsName(id: String): String? = id.takeIf { it.startsWith(AIRWINDOWS) }?.removePrefix(AIRWINDOWS)
 
+        private const val TONE_PREFIX = "tone."
+
+        /** Library id of an imported tone (amp model or cabinet) by its content hash. */
+        fun toneId(hash: String) = TONE_PREFIX + hash
+        fun toneHash(id: String): String? = id.takeIf { it.startsWith(TONE_PREFIX) }?.removePrefix(TONE_PREFIX)
+
         private val instances = mutableMapOf<String, EffectLibrary>()
 
         /** The app-wide selection stored below [root], next to the projects. */

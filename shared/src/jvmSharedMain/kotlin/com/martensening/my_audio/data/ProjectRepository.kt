@@ -16,6 +16,7 @@ import java.util.zip.ZipInputStream
  */
 class ProjectRepository(root: File) {
     private val projectsDir = File(root, "projects")
+    private val tones = ToneLibrary.forRoot(root)
 
     @Synchronized
     fun list(): List<Project> =
@@ -147,8 +148,8 @@ class ProjectRepository(root: File) {
     }
 
     /**
-     * Writes the project as a ZIP backup: `project.json` with the takes and their references.
-     * Derived caches are left out and rebuilt after an import.
+     * Writes the project as a ZIP backup: `project.json` with the takes and their references, and the imported
+     * tones its effect chains use under `tones/`. Derived caches are left out and rebuilt after an import.
      */
     @Synchronized
     fun exportBackup(projectId: Long, target: File): Boolean {
@@ -156,13 +157,16 @@ class ProjectRepository(root: File) {
         val takes = project.tracks.flatMap { listOfNotNull(it.fileName, it.referenceFileName) }
             .map { "$TRACKS_DIR/$it" to File(tracksDir(projectId), it) }
             .filter { it.second.isFile }
-        ProjectArchive.writeZip(target, listOf(PROJECT_FILE to File(projectDir(projectId), PROJECT_FILE)) + takes)
+        val toneFiles = ToneLibrary.usedBy(project).keys.mapNotNull(tones::find)
+            .map { "${ToneLibrary.DIR}/${it.hash}.${it.kind.extension}" to tones.file(it) }
+            .filter { it.second.isFile }
+        ProjectArchive.writeZip(target, listOf(PROJECT_FILE to File(projectDir(projectId), PROJECT_FILE)) + takes + toneFiles)
         return true
     }
 
     /**
-     * Imports a backup as a new project (new id, everything else kept). Only `project.json` and
-     * WAV files directly below `tracks/` are unpacked, never anything else; a backup from a newer
+     * Imports a backup as a new project (new id, everything else kept). Only `project.json`, WAV files
+     * directly below `tracks/` and tones below `tones/` (into the tone library) are unpacked; a backup from a newer
      * format or with missing takes is rejected. Returns null for anything that is not a valid backup.
      */
     @Synchronized
@@ -173,6 +177,7 @@ class ProjectRepository(root: File) {
         val tracks = File(dir, TRACKS_DIR).apply { mkdirs() }
         val project = runCatching {
             var json: String? = null
+            val toneEntries = File(dir, "tones.import").apply { mkdirs() }
             ZipInputStream(input.buffered()).use { zip ->
                 while (true) {
                     val entry = zip.nextEntry ?: break
@@ -181,6 +186,8 @@ class ProjectRepository(root: File) {
                         entry.name == PROJECT_FILE -> json = zip.readBytes().decodeToString()
                         BACKUP_TAKE.matches(entry.name) ->
                             File(tracks, entry.name.substringAfter('/')).outputStream().use { zip.copyTo(it) }
+                        BACKUP_TONE.matches(entry.name) ->
+                            File(toneEntries, entry.name.substringAfter('/')).outputStream().use { zip.copyTo(it) }
                     }
                 }
             }
@@ -191,6 +198,17 @@ class ProjectRepository(root: File) {
                 check(imported.tracks.flatMap { listOfNotNull(it.fileName, it.referenceFileName) }.all { name ->
                     TAKE_NAME.matches(name) && File(tracks, name).isFile
                 })
+                // Tones go into the library under the name their slot shows; a missing one leaves its slot silent.
+                for ((hash, effect) in ToneLibrary.usedBy(imported)) {
+                    val (kind, name) = when (effect) {
+                        is ChainEffect.AmpModel -> ToneKind.AmpModel to effect.name
+                        is ChainEffect.Cabinet -> ToneKind.Cabinet to effect.name
+                        else -> continue
+                    }
+                    val file = File(toneEntries, "$hash.${kind.extension}")
+                    if (file.isFile) file.inputStream().use { tones.restore(hash, kind, name, it) }
+                }
+                toneEntries.deleteRecursively()
             }
         }.getOrNull()
         if (project == null) {
@@ -290,6 +308,7 @@ class ProjectRepository(root: File) {
         // Take and reference names as the app writes them, e.g. "1793307503200.ref.wav".
         private val TAKE_NAME = Regex("""[0-9]+(\.[A-Za-z0-9-]+)*\.wav""")
         private val BACKUP_TAKE = Regex("$TRACKS_DIR/${TAKE_NAME.pattern}")
+        private val BACKUP_TONE = Regex("""${ToneLibrary.DIR}/[0-9a-f]{64}\.(nam|wav)""")
 
         /** Reference file written next to a take while recording over playback. */
         fun referenceFileFor(take: File) = File(take.parentFile, "${take.nameWithoutExtension}.ref.wav")

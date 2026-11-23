@@ -27,9 +27,12 @@ find_package(JNI REQUIRED)
 
 # The Airwindows effects of the effect library (shared with Android).
 add_subdirectory(${SHARED_DIR}/third_party/airwindows ${CMAKE_CURRENT_BINARY_DIR}/airwindows)
+# Neural Amp Modeler inference for imported amp models (shared with Android).
+add_subdirectory(${SHARED_DIR}/third_party/nam ${CMAKE_CURRENT_BINARY_DIR}/nam)
 
 add_library(myaudio SHARED
         ${SHARED_DIR}/AirwindowsEffects.cpp
+        ${SHARED_DIR}/AmpCabinet.cpp
         ${SHARED_DIR}/BleedRemoval.cpp
         ${SHARED_DIR}/Correlation.cpp
         ${SHARED_DIR}/JniBridge.cpp
@@ -65,7 +68,7 @@ else()
 endif()
 
 # As on Android, only the pure DSP is built with fast math; the mix relies on NaN meaning "off".
-set_source_files_properties(${SHARED_DIR}/Correlation.cpp ${SHARED_DIR}/TrackProcessing.cpp ${SHARED_DIR}/BleedRemoval.cpp
+set_source_files_properties(${SHARED_DIR}/AmpCabinet.cpp ${SHARED_DIR}/Correlation.cpp ${SHARED_DIR}/TrackProcessing.cpp ${SHARED_DIR}/BleedRemoval.cpp
         ${SHARED_DIR}/LiveChain.cpp PROPERTIES COMPILE_OPTIONS "${FAST_MATH}")
 
-target_link_libraries(myaudio PRIVATE opus airwindows)
+target_link_libraries(myaudio PRIVATE opus airwindows nam)

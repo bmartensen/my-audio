@@ -19,6 +19,12 @@ enum class EffectType : int {
     // Same layout as Airwindows; the output is brought back to the input's integrated loudness, so
     // switching the effect on changes the sound but not the balance of the mix.
     AirwindowsLevelMatched = 4,
+    // Imported amp model (Neural Amp Modeler): tone handle (AmpCabinet.h), input gain dB, output gain dB.
+    AmpModel = 5,
+    AmpModelLevelMatched = 6,
+    // Imported cabinet impulse response: tone handle.
+    Cabinet = 7,
+    CabinetLevelMatched = 8,
 };
 
 /** One switched-on insert of an effect chain. */

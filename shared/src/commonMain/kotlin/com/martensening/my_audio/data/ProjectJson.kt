@@ -27,6 +27,8 @@ object ProjectJson {
     private const val TONE = "myaudio.eq"
     private const val REVERB = "myaudio.reverb"
     private const val AIRWINDOWS = "airwindows."
+    private const val AMP_MODEL = "myaudio.nam"
+    private const val CABINET = "myaudio.ir"
 
     // Keys each object level understands; everything else is preserved as unknown.
     private val METRONOME_KEYS = setOf("enabled", "bpm", "volume", "duringPlayback")
@@ -58,6 +60,8 @@ object ProjectJson {
     )
     private val REVERB_KEYS = setOf("type", "enabled", "seconds", "preDelayMs", "damping", "mix")
     private val AIRWINDOWS_KEYS = setOf("type", "enabled", "values", "levelMatch")
+    private val AMP_MODEL_KEYS = setOf("type", "enabled", "tone", "name", "inputDb", "outputDb", "levelMatch")
+    private val CABINET_KEYS = setOf("type", "enabled", "tone", "name", "levelMatch")
 
     @OptIn(ExperimentalSerializationApi::class)
     private val format = Json { prettyPrint = true; prettyPrintIndent = "  " }
@@ -220,6 +224,20 @@ object ProjectJson {
                 // Missing means on; only the exception is written.
                 if (!effect.levelMatch) put("levelMatch", false)
             }
+            is ChainEffect.AmpModel -> {
+                put("type", AMP_MODEL)
+                put("tone", effect.tone)
+                put("name", effect.name)
+                put("inputDb", effect.inputDb.toDouble())
+                put("outputDb", effect.outputDb.toDouble())
+                if (!effect.levelMatch) put("levelMatch", false)
+            }
+            is ChainEffect.Cabinet -> {
+                put("type", CABINET)
+                put("tone", effect.tone)
+                put("name", effect.name)
+                if (!effect.levelMatch) put("levelMatch", false)
+            }
             // Written back exactly as read; only the bypass switch belongs to this version.
             is ChainEffect.Unknown -> for ((key, value) in effect.fields) if (key != "enabled") put(key, value)
         }
@@ -265,6 +283,25 @@ object ProjectJson {
                 slot.unknown(TONE_KEYS, TONE_NESTED)
             )
             REVERB -> EffectSlot(ChainEffect.Reverb(parseReverb(slot)), enabled, slot.unknown(REVERB_KEYS))
+            AMP_MODEL -> {
+                val range = ChainEffect.AmpModel.GAIN_RANGE_DB
+                EffectSlot(
+                    ChainEffect.AmpModel(
+                        tone = slot.optString("tone", ""),
+                        name = slot.optString("name", ""),
+                        inputDb = slot.float("inputDb", 0f).coerceIn(-range, range),
+                        outputDb = slot.float("outputDb", 0f).coerceIn(-range, range),
+                        levelMatch = slot.optBoolean("levelMatch", true)
+                    ),
+                    enabled,
+                    slot.unknown(AMP_MODEL_KEYS)
+                )
+            }
+            CABINET -> EffectSlot(
+                ChainEffect.Cabinet(slot.optString("tone", ""), slot.optString("name", ""), slot.optBoolean("levelMatch", true)),
+                enabled,
+                slot.unknown(CABINET_KEYS)
+            )
             else -> if (type.startsWith(AIRWINDOWS) && type.length > AIRWINDOWS.length) {
                 EffectSlot(
                     ChainEffect.Airwindows(type.removePrefix(AIRWINDOWS), slot.optArray("values").orEmpty().map { value ->

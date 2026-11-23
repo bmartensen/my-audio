@@ -322,4 +322,18 @@
     <string name="effect_audition_source_mix">Playing an excerpt of the mix in a loop</string>
     <string name="effect_audition_source_sample">Playing the sample sound in a loop</string>
     <string name="about_community_credit">With thanks to the people behind Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, Skia and OpenJDK. Full credits and notices are available below.</string>
+    <string name="library_section_tones">Amp models and cabinets</string>
+    <string name="tones_import">Import</string>
+    <string name="tones_hint">Import NAM profiles (.nam) and cabinet IRs (.wav) you downloaded, also as ZIP.</string>
+    <string name="tone_kind_amp">Amp model</string>
+    <string name="tone_kind_cabinet">Cabinet IR</string>
+    <string name="tones_import_result">Imported: %1$d · already there: %2$d · not usable: %3$d</string>
+    <string name="tones_import_none">No usable profile or IR found</string>
+    <string name="tone_remove">Remove tone</string>
+    <string name="tone_remove_question">Remove tone?</string>
+    <string name="tone_remove_info">“%1$s” is removed from this device. Projects that use it keep the slot without sound.</string>
+    <string name="tone_missing">Tone missing</string>
+    <string name="tone_missing_summary">This tone is not on this device. Import it again in the library.</string>
+    <string name="effect_input_gain">Input</string>
+    <string name="effect_output_gain">Output</string>
 </resources>

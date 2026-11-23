@@ -1,5 +1,7 @@
 package com.martensening.my_audio.ui
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.resources.Res
 import com.martensening.my_audio.resources.*
 import org.jetbrains.compose.resources.DrawableResource
@@ -311,7 +313,8 @@ fun ProjectContent(
         )
     }
     val librarySelection by viewModel.effectLibrary.selection.collectAsState()
-    val effectChoices = remember(librarySelection) { EffectChoice.of(librarySelection) }
+    val tones by remember { ToneLibrary.current?.tones ?: MutableStateFlow(emptyList()) }.collectAsState()
+    val effectChoices = remember(librarySelection, tones) { EffectChoice.of(librarySelection, tones) }
     project?.tracks?.firstOrNull { it.id == editingTrack }?.let { track ->
         TrackSettingsDialog(
             track = track,

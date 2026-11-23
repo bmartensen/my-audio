@@ -4,9 +4,11 @@
 #include <vector>
 
 #include "AirwindowsEffects.h"
+#include "AmpCabinet.h"
 #include "CalibrationSession.h"
 #include "EffectPreview.h"
 #include "LiveChain.h"
+#include "Log.h"
 #include "TransportEngine.h"
 
 namespace {
@@ -301,4 +303,19 @@ Java_com_martensening_my_1audio_audio_NativeAudio_previewRender(JNIEnv *env, job
     jfloatArray array = env->NewFloatArray(static_cast<jsize>(loop.size()));
     if (array != nullptr) env->SetFloatArrayRegion(array, 0, static_cast<jsize>(loop.size()), loop.data());
     return array;
+}
+
+// Imported tones (AmpCabinet.h): amp models and cabinet impulse responses.
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_inspectTone(JNIEnv *env, jobject /* this */, jstring path, jint kind) {
+    const myaudio::ToneFileInfo info = myaudio::inspectToneFile(toString(env, path), static_cast<myaudio::ToneKind>(kind));
+    if (!info.ok) MYAUDIO_LOGW("MyAudioTone", "Rejected tone file: %s", info.error.c_str());
+    return toStringArray(env, {info.ok ? "1" : "0", info.error, std::to_string(info.sampleRate),
+                               std::to_string(info.frames), info.metadata});
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_loadTone(JNIEnv *env, jobject /* this */, jstring path, jint kind) {
+    return myaudio::loadTone(toString(env, path), static_cast<myaudio::ToneKind>(kind));
 }

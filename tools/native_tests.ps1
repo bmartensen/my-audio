@@ -54,7 +54,18 @@ foreach ($source in $sources) {
         $extraSources += (Get-ChildItem (Join-Path $airwindows 'autogen_airwin') -Filter '*.cpp').FullName
         $extraFlags = @('-O2', '-w', '-llog', "-I$airwindows")
     }
-    & $clang --target=aarch64-linux-android29 -static-libstdc++ -std=c++17 $source.FullName @extraSources @extraFlags -o $binary
+    $standard = '-std=c++17'
+    if ($source.BaseName -eq 'amp_cabinet_test') {
+        # Imported tones: Neural Amp Modeler core with Eigen, built like third_party/nam/CMakeLists.txt.
+        $nam = Join-Path $repo 'app\src\main\cpp\third_party\nam'
+        $extraSources = @(Join-Path $repo 'app\src\main\cpp\AmpCabinet.cpp')
+        $extraSources += (Get-ChildItem (Join-Path $nam 'NAM') -Filter '*.cpp').FullName
+        $extraSources += (Get-ChildItem (Join-Path $nam 'NAM\wavenet') -Filter '*.cpp').FullName
+        $extraFlags = @('-O2', '-w', '-llog', '-DNAM_SAMPLE_FLOAT', '-DNAM_ENABLE_A2_FAST', "-I$nam", "-I$(Join-Path $nam 'NAM')",
+            "-I$(Join-Path $nam 'Dependencies\nlohmann')", '-isystem', (Join-Path $nam 'Dependencies\eigen'))
+        $standard = '-std=c++20'
+    }
+    & $clang --target=aarch64-linux-android29 -static-libstdc++ $standard $source.FullName @extraSources @extraFlags -o $binary
     if ($LASTEXITCODE -ne 0) { throw "Compiling $($source.Name) failed." }
     & $adb -s $Device push $binary $remote | Out-Null
     & $adb -s $Device shell chmod 755 $remote
