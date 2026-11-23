@@ -39,7 +39,9 @@ Links in **About My Audio** (website, privacy, e-mail) open your browser or e-ma
 
 This website is served by GitHub Pages. The installers are published as a release in the [GitHub repository]({{ site.repository_url }}). The provider is GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA, and in Europe also GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, the Netherlands.
 
-When you visit these pages or download files, GitHub processes technical access data, in particular your IP address, which GitHub states it logs for security purposes. The legal basis is our legitimate interest in secure and reliable delivery (Art. 6(1)(f) GDPR). We have no access to these logs. Data may be transferred to the USA. GitHub is certified under the EU-U.S. Data Privacy Framework (adequacy decision, Art. 45 GDPR). Details are in [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+When you visit these pages or download files, GitHub processes technical access data, in particular your IP address, which GitHub states it logs for security purposes. The legal basis is our legitimate interest in secure and reliable delivery (Art. 6(1)(f) GDPR). We have no access to these logs.
+
+In this processing, data may be transferred to the USA. GitHub is certified under the EU-U.S. Data Privacy Framework (adequacy decision, Art. 45 GDPR). Details are in [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 This website sets no cookies, uses no analytics or tracking services and loads no third-party fonts or scripts.
 

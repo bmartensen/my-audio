@@ -39,7 +39,9 @@ Links in **Über My Audio** (Website, Datenschutz, E-Mail) öffnen deinen Browse
 
 Diese Website wird mit GitHub Pages bereitgestellt. Die Installationsdateien liegen als Release im [GitHub-Repository]({{ site.repository_url }}). Anbieter ist GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA, in Europa auch GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande.
 
-Beim Aufruf der Seiten und beim Herunterladen verarbeitet GitHub technische Zugriffsdaten, insbesondere deine IP-Adresse, die GitHub nach eigenen Angaben aus Sicherheitsgründen protokolliert. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf diese Protokolle haben wir keinen Zugriff. Dabei können Daten in die USA übermittelt werden. GitHub ist nach dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss, Art. 45 DSGVO). Einzelheiten stehen in der [Datenschutzerklärung von GitHub](https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement).
+Beim Aufruf der Seiten und beim Herunterladen verarbeitet GitHub technische Zugriffsdaten, insbesondere deine IP-Adresse, die GitHub nach eigenen Angaben aus Sicherheitsgründen protokolliert. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Auf diese Protokolle haben wir keinen Zugriff.
+
+Bei dieser Verarbeitung können Daten in die USA übermittelt werden. GitHub ist nach dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss, Art. 45 DSGVO). Einzelheiten stehen in der [Datenschutzerklärung von GitHub](https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement).
 
 Diese Website setzt keine Cookies, verwendet keine Analyse- oder Trackingdienste und lädt keine Schriften oder Skripte von Drittanbietern.
 
