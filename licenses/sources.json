@@ -118,5 +118,40 @@
     "file": "zlib-LICENSE.txt",
     "source": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/646b7f569718921d7d4b5b8e22572ff6c76f2596/LICENSE?format=TEXT",
     "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c"
+  },
+  {
+    "file": "eigen-COPYING.APACHE.txt",
+    "source": "app/src/main/cpp/third_party/nam/Dependencies/eigen/COPYING.APACHE (Eigen 5.0.1)",
+    "sha256": "a724e50ee0e1de4b62c0540d7877c3ef383aa176f55be806df61420aba9b3de6"
+  },
+  {
+    "file": "eigen-COPYING.BSD.txt",
+    "source": "app/src/main/cpp/third_party/nam/Dependencies/eigen/COPYING.BSD (Eigen 5.0.1)",
+    "sha256": "ee73de74a1980f7f1667f874473393f13bc6a74c87fcee4cc9732bce96bc60cc"
+  },
+  {
+    "file": "eigen-COPYING.MINPACK.txt",
+    "source": "app/src/main/cpp/third_party/nam/Dependencies/eigen/COPYING.MINPACK (Eigen 5.0.1)",
+    "sha256": "37f2b8b54e7bbf107954865cc3cf567385930a1b7031b479909a09968d9db670"
+  },
+  {
+    "file": "eigen-COPYING.MPL2.txt",
+    "source": "app/src/main/cpp/third_party/nam/Dependencies/eigen/COPYING.MPL2 (Eigen 5.0.1, bc3b39870ecb690a623a3f49149a358b95c5781d)",
+    "sha256": "9303ea1cfbf049945652668089d753fb1a7e1f2e52c680615c3d2cea7515c118"
+  },
+  {
+    "file": "eigen-COPYING.README.txt",
+    "source": "app/src/main/cpp/third_party/nam/Dependencies/eigen/COPYING.README (Eigen 5.0.1)",
+    "sha256": "1843cae75dab9a5396f9d4663b85e30d8b5e7fddf7ed4638790c17f85167fec0"
+  },
+  {
+    "file": "neural-amp-modeler-core-MIT.txt",
+    "source": "app/src/main/cpp/third_party/nam/LICENSE (NeuralAmpModelerCore v0.6.0, 0b3d3c97b0859a3a8c92a8628c4dd89a25eb5842)",
+    "sha256": "c2092a2b52a2dd660324dd31abfa61ed2e43262a150fa903f1083c8b0be2c652"
+  },
+  {
+    "file": "nlohmann-json-LICENSE.MIT.txt",
+    "source": "https://raw.githubusercontent.com/nlohmann/json/v3.12.0/LICENSE.MIT",
+    "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
   }
 ]

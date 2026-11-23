@@ -1,6 +1,7 @@
 package com.martensening.my_audio.audio
 
 import com.martensening.my_audio.data.ChainEffect
+import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.Metronome
 import com.martensening.my_audio.data.PlaybackLoop
@@ -46,6 +47,32 @@ object AudioEngine {
                 val tracks = TrackArguments(project, project.tracks, repository)
                 NativeAudio.exportStems(tracks.paths, tracks.frames, tracks.parameters, tracks.chains, tracks.envelopes,
                     tracks.gains, project.lengthFrames, targets.map { it.absolutePath }.toTypedArray())
+            }
+        }
+
+    /**
+     * DAW session export of all tracks: dry takes to [dry], takes through [renderChains] to [wet] where a chain is
+     * not empty. Per track start frame, dry frames, rendered frames and channels; null on a write error.
+     */
+    suspend fun exportDawTracks(project: Project, repository: ProjectRepository, renderChains: List<List<EffectSlot>>,
+                                dry: List<File>, wet: List<File>): LongArray? =
+        lock.withLock {
+            withContext(Dispatchers.Default) {
+                val tracks = TrackArguments(project, project.tracks, repository)
+                NativeAudio.exportDawTracks(tracks.paths, tracks.frames, tracks.parameters, tracks.chains, tracks.envelopes,
+                    tracks.gains, renderChains.map(::encodeChain).toTypedArray(),
+                    dry.map { it.absolutePath }.toTypedArray(), wet.map { it.absolutePath }.toTypedArray())
+            }
+        }
+
+    /** Loudness (LUFS) of the audible mix through the master chain, before the fixed master stage. */
+    suspend fun mixLoudness(project: Project, repository: ProjectRepository): Double =
+        lock.withLock {
+            if (project.audibleTracks.isEmpty()) return@withLock Double.NEGATIVE_INFINITY
+            withContext(Dispatchers.Default) {
+                val tracks = TrackArguments(project, project.audibleTracks, repository)
+                NativeAudio.mixLoudness(tracks.paths, tracks.frames, tracks.parameters, tracks.chains, tracks.envelopes,
+                    tracks.gains, encodeChain(project.masterChain))
             }
         }
 
@@ -96,11 +123,15 @@ object AudioEngine {
     private const val EFFECT_REVERB = 2f
     private const val EFFECT_AIRWINDOWS = 3f
     private const val EFFECT_AIRWINDOWS_LEVEL_MATCHED = 4f
+    private const val EFFECT_AMP_MODEL = 5f
+    private const val EFFECT_AMP_MODEL_LEVEL_MATCHED = 6f
+    private const val EFFECT_CABINET = 7f
+    private const val EFFECT_CABINET_LEVEL_MATCHED = 8f
 
     /**
      * The audible slots of [chain] in order, each as type code, parameter count and parameters. Switched-off
      * slots and switched-off parts are left out, so they cost no rendering time; so are Airwindows effects this
-     * build does not know. Layout see `ProjectMix.h`.
+     * build does not know and tones missing from the tone library. Layout see `ProjectMix.h`.
      */
     internal fun encodeChain(chain: List<EffectSlot>): FloatArray = chain.filter { it.audible }.flatMap { slot ->
         val (type, values) = when (val effect = slot.effect) {
@@ -115,6 +146,15 @@ object AudioEngine {
                 val known = AirwindowsCatalog.find(effect.name) ?: return@flatMap emptyList()
                 (if (effect.levelMatch) EFFECT_AIRWINDOWS_LEVEL_MATCHED else EFFECT_AIRWINDOWS) to
                     listOf(known.index.toFloat()) + AirwindowsCatalog.complete(effect.name, effect.values)
+            }
+            is ChainEffect.AmpModel -> {
+                val handle = ToneLibrary.current?.handle(effect.tone) ?: return@flatMap emptyList()
+                (if (effect.levelMatch) EFFECT_AMP_MODEL_LEVEL_MATCHED else EFFECT_AMP_MODEL) to
+                    listOf(handle.toFloat(), effect.inputDb, effect.outputDb)
+            }
+            is ChainEffect.Cabinet -> {
+                val handle = ToneLibrary.current?.handle(effect.tone) ?: return@flatMap emptyList()
+                (if (effect.levelMatch) EFFECT_CABINET_LEVEL_MATCHED else EFFECT_CABINET) to listOf(handle.toFloat())
             }
             // Never audible; filtered above, listed for completeness.
             is ChainEffect.Unknown -> return@flatMap emptyList()

@@ -4,7 +4,18 @@ Policy is in [AGENTS.md](../AGENTS.md); setup and optional signing are in [devel
 
 ## Git and project memory
 
-Branch, remote and push rules are in [AGENTS.md](../AGENTS.md). Update the wiki alongside meaningful changes: decisions newest-first, backlog with open work only, current work with evidence and limitations. User-visible changes go into CHANGELOG.md. Shared workflows: [.agents](../.agents/README.md).
+Commit and push permission rules are in [AGENTS.md](../AGENTS.md). Update the wiki alongside meaningful changes: decisions newest-first, current work with evidence and limitations. User-visible changes go into CHANGELOG.md. Shared workflows: [.agents](../.agents/README.md).
+
+## Branches and releases
+
+- `main` is the default branch and the latest release; GitHub Pages builds from `main` → `/docs`, so the site always describes the released app. It is protected: changes only through a pull request (no required approval), no direct or force pushes, no deletion, also for admins. Only merge commits are allowed in the repository.
+- `develop` is the working branch. All commits, wiki updates and guide changes land there and are pushed there; no feature branches for now. Pull requests from contributors target `develop`.
+- **Release:** on `develop`, raise the version, update CHANGELOG and current work, build and accept the candidate (see [UI refinement and final acceptance](#ui-refinement-and-final-acceptance)). Then open a pull request `develop` → `main` titled `Release <version>` whose body is the changelog entry, merge it with a merge commit, and put the annotated tag `v<version>` on that merge commit (its tree equals the built `develop` commit). Publish the GitHub release from the tag and switch the download links with a second pull request ([publishing a version](site-publication.md#publishing-a-version)). Each step needs the user's explicit request.
+- After a merge into `main`, bring the merge commit back into `develop` (`git merge --ff-only origin/main`, or a plain merge if `develop` moved on) and push `develop`. `main` then never holds anything `develop` lacks, so the next release pull request has no conflicts.
+
+## Issues
+
+Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests, measurements or acceptance checks to perform; those belong to the work on an issue, and their results and open verification go to [current work](current-work.md). Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
 
 ## Build and automated checks
 
@@ -15,7 +26,7 @@ Branch, remote and push rules are in [AGENTS.md](../AGENTS.md). Update the wiki 
 .\build.ps1 -Target Windows
 ```
 
-Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build. Each version gets an annotated tag `v<versionName>` (e.g. `v0.8.6`) on the commit it was built from, pushed together with that commit.
+Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build. Each released version gets an annotated tag `v<versionName>` (e.g. `v0.8.6`) on its release merge commit in `main`, whose tree equals the `develop` commit it was built from.
 
 ```powershell
 .\tools\build_desktop_native.ps1

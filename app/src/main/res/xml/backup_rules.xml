@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 10 and 11: same rules as data_extraction_rules.xml. Projects and the effect library are
+  backed up; this phone's calibration, device selection and buffer setting are not.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="calibration.xml" />
+    <exclude domain="sharedpref" path="audio_devices.xml" />
+    <exclude domain="file" path="audio.json" />
+</full-backup-content>

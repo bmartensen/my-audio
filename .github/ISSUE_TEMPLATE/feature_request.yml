@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest an idea that makes recording, overdubbing or sharing musical ideas easier.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: My Audio is a studio from the smartphone for spontaneous ideas, multitrack sketches and demos, not a full DAW. English or German are both fine.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do?
+      description: The musical situation or problem, rather than a specific solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: How it could work in the app. Apps you know that solve it well are welcome.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [Android, Windows, Both]

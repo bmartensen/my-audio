@@ -5,6 +5,7 @@
 #include <limits>
 
 #include "AirwindowsEffects.h"
+#include "AmpCabinet.h"
 #include "Log.h"
 #include "Loudness.h"
 #include "Reverb.h"
@@ -47,6 +48,21 @@ float estimateLevelMatch(int index, const std::vector<float> &values, int sample
     if (!std::isfinite(before) || !std::isfinite(after)) return 1.0f;
     const double correctionDb = std::clamp(before - after, -24.0, 24.0);
     return static_cast<float>(std::pow(10.0, correctionDb / 20.0));
+}
+
+/** Level matching of an amp model or cabinet, estimated like [estimateLevelMatch] on its own instance. */
+float estimateToneLevelMatch(ToneKind kind, const std::vector<float> &p, bool stereo, int sampleRate) {
+    static const std::vector<float> signal = testSignal(48000);
+    auto processor = ToneProcessor::create(kind, static_cast<int>(p[0]), kind == ToneKind::AmpModel ? p[1] : 0.0f,
+                                           kind == ToneKind::AmpModel ? p[2] : 0.0f, stereo, sampleRate);
+    if (!processor) return 1.0f;
+    std::vector<float> left = signal;
+    std::vector<float> right = signal;
+    const double before = integratedLoudnessStreamed(left, right);
+    processor->process(left.data(), stereo ? right.data() : nullptr, static_cast<int>(left.size()));
+    const double after = integratedLoudnessStreamed(left, stereo ? right : left);
+    if (!std::isfinite(before) || !std::isfinite(after)) return 1.0f;
+    return static_cast<float>(std::pow(10.0, std::clamp(before - after, -24.0, 24.0) / 20.0));
 }
 
 }  // namespace
@@ -146,6 +162,28 @@ private:
     float mGain;
 };
 
+/** Imported amp model or cabinet; a mono signal is processed once and copied to the right channel. */
+class ToneModelStage : public LiveChain::Stage {
+public:
+    ToneModelStage(std::unique_ptr<ToneProcessor> processor, bool stereo, float gain)
+        : mProcessor(std::move(processor)), mStereo(stereo), mGain(gain) {}
+
+    void process(float *left, float *right, int frames) override {
+        mProcessor->process(left, mStereo ? right : nullptr, frames);
+        if (!mStereo) std::copy_n(left, frames, right);
+        if (mGain == 1.0f) return;
+        for (int i = 0; i < frames; ++i) {
+            left[i] *= mGain;
+            right[i] *= mGain;
+        }
+    }
+
+private:
+    std::unique_ptr<ToneProcessor> mProcessor;
+    bool mStereo;
+    float mGain;
+};
+
 }  // namespace
 
 LiveChain::LiveChain(const std::vector<EffectSlot> &chain, float gain, float pan, bool silent, int sampleRate)
@@ -176,6 +214,23 @@ LiveChain::LiveChain(const std::vector<EffectSlot> &chain, float gain, float pan
                                     ? estimateLevelMatch(index, values, sampleRate) : 1.0f;
                 mStages.push_back(std::make_unique<AirwindowsStage>(std::move(processor), match));
                 stereo = true;
+                break;
+            }
+            case EffectType::AmpModel:
+            case EffectType::AmpModelLevelMatched:
+            case EffectType::Cabinet:
+            case EffectType::CabinetLevelMatched: {
+                const bool cabinet = slot.type == EffectType::Cabinet || slot.type == EffectType::CabinetLevelMatched;
+                const ToneKind kind = cabinet ? ToneKind::Cabinet : ToneKind::AmpModel;
+                auto processor = ToneProcessor::create(kind, static_cast<int>(p[0]), cabinet ? 0.0f : p[1],
+                                                       cabinet ? 0.0f : p[2], stereo, sampleRate);
+                if (!processor) {
+                    MYAUDIO_LOGW(kTag, "Skipping missing tone %d", static_cast<int>(p[0]));
+                    break;
+                }
+                const bool match = slot.type == EffectType::AmpModelLevelMatched || slot.type == EffectType::CabinetLevelMatched;
+                const float gain = match ? estimateToneLevelMatch(kind, p, stereo, sampleRate) : 1.0f;
+                mStages.push_back(std::make_unique<ToneModelStage>(std::move(processor), stereo, gain));
                 break;
             }
         }

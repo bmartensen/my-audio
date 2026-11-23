@@ -1,5 +1,6 @@
 package com.martensening.my_audio.ui
 
+import com.martensening.my_audio.data.SoundCraftImport
 import android.app.Application
 import android.net.Uri
 import android.util.Log
@@ -52,8 +53,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun delete(project: Project) = launchIo { repository.delete(project.id) }
 
     /**
-     * Imports a ZIP as a new project: a backup when it holds `project.json`, otherwise one track per
-     * audio file. [onDone] receives the project, or null if the file is neither.
+     * Imports a ZIP as a new project: a backup when it holds `project.json`, a SoundCraft session when it holds a
+     * `.scraft` file, otherwise one track per audio file. [onDone] receives the project, or null if the file is neither.
      */
     fun importProject(uri: Uri, onDone: (Project?) -> Unit) {
         if (_importing.value) return
@@ -70,6 +71,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     val entries = openZip(zipFile).use { zip -> zip.entries().toList().map { it.name } }
                     if (ProjectRepository.PROJECT_FILE in entries) {
                         zipFile.inputStream().use { repository.importBackup(it, System.currentTimeMillis()) }
+                    } else if (SoundCraftImport.isSession(entries)) {
+                        openZip(zipFile).use { zip ->
+                            SoundCraftImport.import(zip, work, repository, System.currentTimeMillis(),
+                                AudioImport.displayName(app, uri)?.substringBeforeLast('.') ?: app.getString(R.string.import_default_name)
+                            ) { source, target -> AudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE) }
+                        }
                     } else {
                         importAudio(zipFile, work, AudioImport.displayName(app, uri))
                     }

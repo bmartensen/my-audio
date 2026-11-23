@@ -1,5 +1,6 @@
 package com.martensening.my_audio.ui
 
+import com.martensening.my_audio.audio.SoundCraftExport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -469,7 +470,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
 
     /**
      * Exports and requests the share sheet: the mix exactly as Play outputs it (Ogg/Opus), the
-     * cleaned stems (ZIP of WAVs) or a project backup (ZIP).
+     * cleaned stems (ZIP of WAVs), a project backup (ZIP) or a SoundCraft session (ZIP).
      */
     fun share(kind: ProjectArchive.Kind) {
         val project = _state.value.project ?: return
@@ -491,6 +492,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                     ProjectArchive.Kind.Mix -> AudioEngine.exportPlayback(project, repository, file, platform::encodeMix)
                     ProjectArchive.Kind.Stems -> exportStems(project, file)
                     ProjectArchive.Kind.Backup -> withContext(Dispatchers.IO) { repository.exportBackup(project.id, file) }
+                    ProjectArchive.Kind.SoundCraft -> SoundCraftExport.export(project, repository, file)
                 }
             }.onFailure { Log.e(TAG, "Export failed", it) }.getOrDefault(false)
             _state.update {

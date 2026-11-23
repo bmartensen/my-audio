@@ -64,13 +64,13 @@ Kotlin and Compose Multiplatform share the UI, project model and session logic. 
 | [`desktop/`](desktop/) | Windows host, miniaudio and installer |
 | [`docs/`](docs/) | GitHub Pages: landing pages, user guide, privacy policy and legal notice |
 | [`tools/`](tools/) | Tool discovery, builds, native tests, screenshots and release checks |
-| [`.wiki/`](.wiki/README.md) | Requirements, decisions, backlog and technical notes |
+| [`.wiki/`](.wiki/README.md) | Requirements, decisions and technical notes |
 
 [Modeling](.wiki/modeling.md) covers immutable source audio, non-destructive processing, frame-based timing and the versioned project format.
 
 ## Contributing
 
-Ideas, bug reports and pull requests are welcome. Project knowledge lives in the [wiki](.wiki/README.md): agreed behavior in [requirements](.wiki/app-requirements.md), choices in [decisions](.wiki/decisions.md) and open work in the [backlog](.wiki/backlog.md). Please read the [collaboration principles](.wiki/collaboration.md) first.
+Ideas, bug reports and pull requests are welcome. Report bugs and request features as [issues](https://github.com/bmartensen/my-audio/issues/new/choose); open work is tracked there too. Pull requests target `develop`, where development happens; `main` holds the latest release. Project knowledge lives in the [wiki](.wiki/README.md): agreed behavior in [requirements](.wiki/app-requirements.md) and choices in [decisions](.wiki/decisions.md). Please read the [collaboration principles](.wiki/collaboration.md) first.
 
 [`AGENTS.md`](AGENTS.md) is the shared policy for contributors and coding assistants; three shared workflows (`start`, `grill-me`, `wrap`) live in [`.agents/`](.agents/README.md).
 

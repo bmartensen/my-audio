@@ -1,5 +1,6 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.audio.AudioSettings
 import com.martensening.my_audio.ui.LiveInputs
 import com.martensening.my_audio.ui.PlatformLiveInput
@@ -98,7 +99,21 @@ fun DesktopApp(window: Frame, version: String, aboutOpen: MutableState<Boolean>)
             onOpenSettings = { settingsOpen = true },
             onOpenLibrary = { screen = Screen.Library }
         )
-        Screen.Library -> LibraryContent(library = platform.effectLibrary, onBack = { screen = Screen.Home })
+        Screen.Library -> LibraryContent(
+            library = platform.effectLibrary,
+            onBack = { screen = Screen.Home },
+            onImportTones = { report ->
+                val file = chooseFile(window, TONE_PATTERN) { name ->
+                    name.substringAfterLast('.', "").lowercase() in setOf("nam", "wav", "zip")
+                }
+                if (file != null) scope.launch {
+                    val tones = ToneLibrary.current
+                    report(withContext(Dispatchers.IO) {
+                        runCatching { file.inputStream().use { tones?.import(file.name, it) } }.getOrNull()
+                    })
+                }
+            }
+        )
         is Screen.Project -> DesktopProjectScreen(
             window = window,
             platform = platform,
@@ -253,6 +268,7 @@ private fun chooseFile(window: Frame, pattern: String, accept: (String) -> Boole
 }
 
 private const val ZIP_PATTERN = "*.zip;*."
+private const val TONE_PATTERN = "*.nam;*.wav;*.zip"
 private const val AUDIO_PATTERN = "*.mp3;*.wav;*.flac;*.ogg;*.oga;*.opus"
 
 /** Date and time for the default name of a new project. */

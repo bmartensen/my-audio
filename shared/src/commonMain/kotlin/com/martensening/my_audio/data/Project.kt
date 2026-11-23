@@ -127,6 +127,25 @@ sealed interface ChainEffect {
     data class Airwindows(val name: String, val values: List<Float>, val levelMatch: Boolean = true) : ChainEffect
 
     /**
+     * An imported amp model (Neural Amp Modeler profile) from the tone library, referenced by the [tone] content
+     * hash; [name] is shown when the tone is missing. Gains in dB around the model.
+     */
+    data class AmpModel(
+        val tone: String,
+        val name: String,
+        val inputDb: Float = 0f,
+        val outputDb: Float = 0f,
+        val levelMatch: Boolean = true
+    ) : ChainEffect {
+        companion object {
+            const val GAIN_RANGE_DB = 24f
+        }
+    }
+
+    /** An imported cabinet impulse response from the tone library, referenced like [AmpModel]. */
+    data class Cabinet(val tone: String, val name: String, val levelMatch: Boolean = true) : ChainEffect
+
+    /**
      * An effect [type] that only a newer app version knows. Its slot JSON ([fields], without `enabled`) is kept
      * verbatim and written back, so the effect survives editing here; it is not rendered by this version.
      */

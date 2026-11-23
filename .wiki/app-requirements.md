@@ -1,6 +1,6 @@
 # Product requirements
 
-Agreed current behavior for My Audio 0.9.18. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
+Agreed current behavior for My Audio 0.9.18. Implementation acceptance is tracked separately in [current work](current-work.md) and [issues](https://github.com/bmartensen/my-audio/issues). Proposals below are not commitments.
 
 ## Purpose, identity and platforms
 
@@ -47,6 +47,19 @@ Share offers: the audible stereo mix as Ogg/Opus at 48 kHz; all individual track
 
 Home imports ZIPs as new projects. With project.json, validate and restore a backup. Without it, each supported audio entry becomes a track at frame zero. Ignore unrelated entries and platform metadata; reject unreadable audio without leaving a partial project. Project name is the ZIP basename. Track names omit a leading one/two-digit number, and ordering follows that number then name. Audio in subdirectories is supported. Never use archive entry paths as destination paths. [Data format](data-format.md) specifies persistence and compatibility.
 
+Android's cloud backup and device-to-device transfer include projects and the effect library (and the tone library from 0.10.x), so they move to a new phone; calibration, device selection and the buffer setting stay on the device.
+
+**Export for SoundCraft.** A fourth share option writes the project as a session for [SoundCraft](https://github.com/storytold/soundcraft), so it can be rearranged and finished there: one ZIP holding a folder with `<project>.scraft` and `Audio Files/`, opened in SoundCraft after unzipping. Android shares it, Windows saves it.
+- Every recorded track becomes an audio track (mono or stereo) with one clip at its real song position: latency compensated, cleanup applied, count-in removed, so it can be moved and trimmed directly. Name, volume, pan, mute and solo carry over; the volume envelope becomes volume automation. The empty record track is left out.
+- Effects follow a hybrid: My Audio EQ/compressor and reverb become approximate SoundCraft inserts (`eq_7band`, `compressor`, `room_reverb`/`plate_reverb`); Airwindows, amp model and cabinet slots are rendered into the clip audio, up to and including the last such slot, and only the mappable slots after it stay inserts. The untouched take is kept as a second playlist “Dry”. Bypassed slots are not exported.
+- The master chain is treated like a track chain on SoundCraft's master, and the fixed −14 LUFS stage becomes a `maximizer` there, so the level is close to My Audio's mix.
+- The metronome tempo becomes the session tempo; notes become session comments. The metronome itself is not exported.
+
+**Import of a SoundCraft session.** Home's project import also accepts such a ZIP (the session folder with its `.scraft` and `Audio Files/`, zipped), so a session can be continued on the phone: recording new tracks, adding effects and exporting it again with every position kept.
+- Each audio track's active playlist becomes one track; several clips are rendered into one take starting at the first clip, honouring clip offsets, gain and fades. Its position is fixed: imported takes keep their offset and cannot be moved in My Audio.
+- Name, volume, pan, mute, solo and volume automation (as envelope) carry over. `eq_7band`, `compressor`, `room_reverb` and `plate_reverb` map back to approximate My Audio effects (an `eq_7band` followed by a `compressor` becomes one „EQ (My Audio)“); other plugins, non-audio tracks and missing media are not imported and are listed in the project's notes. With volume automation, its loudest point becomes the track volume and the envelope stays within 100 %. Effects that the export rendered into the audio stay in it.
+- Tempo and session comments become metronome tempo and notes. 48 kHz WAVs (also SoundCraft's 32-bit float) are read directly; other formats and rates go through the platform's import decoder.
+
 ## Mixing and effects
 
 Removing an effect from a track or master chain asks for confirmation in the same dialog style as track deletion and names the effect. Cancel or dismissal leaves the chain and its settings unchanged.
@@ -92,6 +105,20 @@ Record-track settings can be prepared before a take or removed when no longer ne
 **Live audition.** Library entries and track slot editors offer a Live switch next to ▶. Live sends only the selected microphone (respecting USB input selection) through the effect or track chain to the output, with no project playback or metronome; parameter changes apply immediately. The clip preview remains, and is the only option for master chains. Before Live starts on the built-in loudspeaker or a Bluetooth output, a warning explains feedback or delay; the user may continue. A/B compares with and without the effect live as well.
 
 **Audio buffer.** Settings offer one global choice for calibration, takes and live monitoring as a compact Automatic | Short | Long switch without explanation: Automatic is the system's low-latency default and keeps existing calibrations, Short and Long use 1 or 4 device periods (desktop periods of 128 frames). A medium step is omitted because it matches Automatic on Android. Each choice is calibrated separately, so changing it shows the calibration notice until measured; a stored choice this version does not offer falls back to Automatic.
+
+## Amp models and cabinet IRs
+
+Implemented in 0.10.0 ([#1](https://github.com/bmartensen/my-audio/issues/1), milestone [0.10.x](https://github.com/bmartensen/my-audio/milestone/1)).
+
+**Tones from the user's own downloads.** Users download Neural Amp Modeler profiles (`.nam`) and impulse responses (WAV), for example from TONE3000, in their browser and import them into the app, either as single files or as the downloaded ZIP; every profile and WAV in a ZIP is imported. The app has no internet access and ships no third-party tones; the TONE3000 API is not used.
+
+**Two slot types.** An amp model slot runs a NAM profile (A1 in every size and A2); a cabinet slot convolves an impulse response. Both sit in track and master chains like every other effect, with bypass, reordering and level matching (default on). An amp model slot offers input and output level.
+
+**Tone library.** Importing copies the file once into a device-local tone library, identified by its content hash, so a second import of the same file adds nothing; a summary reports imported, already present and unusable files. Imported tones are selected for “Add effect” right away. The library lists them in the section “Amp models and cabinets” after the own effects, by name with type, gear and author from the profile's metadata, lets them be auditioned like effects and removed after confirmation; removing a tone that a project uses leaves those slots silent with a “Tone missing” hint. NAM profiles must be 48 kHz; IRs are resampled to 48 kHz.
+
+**Projects and backups.** A slot references its tone by content hash and keeps the display name. Project backups contain the tone files their slots use, and restoring a backup adds them to the tone library, so a project sounds the same on another device. Mix and track exports contain no tone files. App versions without these slot types keep them as preserved slots (“Requires a newer version”).
+
+**Live.** Amp model and cabinet slots run in live monitoring and Live audition like other effects, without a limit per chain.
 
 ## Volume envelope editor
 

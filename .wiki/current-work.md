@@ -1,6 +1,15 @@
 # Current work
 
-As of 2026-11-23: **My Audio 0.9.18 / versionCode 33, released** for Android and Windows: tag `v0.9.18` (commit `a3890a9`) and the published [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.9.18) with APK, MSI, checksums and the runtime source.
+As of 2026-11-23: **My Audio 0.10.3 / versionCode 37** for Android and Windows, released from `main` with tag `v0.10.3` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.10.3) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+
+## Release 0.10.3
+
+- Content: amp models (NAM A1/A2) and cabinet IRs from imported `.nam`/`.wav` files or ZIPs with a tone library and tones in project backups ([requirements](app-requirements.md#amp-models-and-cabinet-irs), [audio technology](audio-technology.md#amp-models-and-cabinets)); SoundCraft session export and import ([requirements](app-requirements.md#audio-import-and-sharing)); Android backup and device-transfer rules. See the [changelog](../CHANGELOG.md).
+- Built with `build.ps1 -Target All -AndroidConfiguration Release`: `MyAudio-0.10.3.apk` (SHA-256 `270a445f…39109955`) and `MyAudio-0.10.3.msi` (`bf88c711…87611724`). The MSI bundles the same Temurin 21.0.13 runtime as 0.9.18, so the same verified source archive accompanies the release. The merged APK manifest requests no `INTERNET` permission. `prepare_public_repo.py` inspected 2,282 files and Gitleaks found no leaks in the copied candidate.
+- 111 shared desktop tests (2 gated integration tests skipped without their environment) and 13 Android JVM tests pass; Android lint 0 errors, 14 warnings. `amp_cabinet_test` passes on the Pixel 9 (cabinet equals direct convolution, block-size independent; with a TONE3000 A2 profile: accepted, audible, 96-frame blocks equal the render).
+- SoundCraft: the gated `SoundCraftExportTest` with the desktop native library exports the synthetic demo song; SoundCraft 0.20.1 opens it (`soundcraft-cli info`: 4 audio tracks, 5 files) and bounces it to −15.7 LUFS, 1.7 dB below My Audio's −14 LUFS mix because EQ, compressor and reverb are approximated. Export → import → export keeps names, positions, volume, pan, mute, envelope size, mapped effects, tempo and notes; a session re-saved by SoundCraft with one clip moved by one second imports with exactly that start.
+- On the contributor's Pixel 9 (release APKs installed as updates over 0.9.18, projects preserved; 0.10.0 briefly lacked NAM's self-registering architectures, fixed by building NAM as an object library): a cabinet ZIP (4 IRs) and an A2 profile ZIP imported, the profile auditioned and used in a track and judged correct by the contributor; Share offers the SoundCraft session and hands over its ZIP. 0.10.3 is installed there.
+- Not checked: the Windows app (only its native library was built and exercised by tests), a project backup with tones on a second device, importing a SoundCraft session on the phone, opening the export in SoundCraft's window, and live latency or CPU with amp models inside the app.
 
 ## Release 0.9.18
 
@@ -33,4 +42,4 @@ Original work is MIT-licensed. [`licenses/`](../licenses/README.md) holds the th
 - All eight native tests, including `live_chain_test` (live chain and monitor sample-identical to the rendered chain), passed on the x86_64 emulator with 0.9.x native code, which 0.9.18 does not change; they have not yet run on the arm64 Pixel 9.
 - Before publishing 0.9.18, `prepare_public_repo.py` inspected 1,793 files and Gitleaks found no leaks in the copied candidate; the findings in the working tree were all in ignored local files (hash manifests in `.work/`, a JDK configuration under `build/`).
 
-These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; see the [backlog](backlog.md).
+These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; they are verified while working on the affected features.

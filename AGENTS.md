@@ -4,16 +4,15 @@ Shared policy for every contributor and every assistant client. Project knowledg
 
 ## Hard Rules
 - Forks and other repository owners are supported; there is no owner or remote-URL allowlist.
-- Use the branch and remote intended for the current checkout and task. Do not assume direct access to the upstream repository or require commits on `main`.
+- Branches: `main` is the default branch and holds the latest release, so visitors and GitHub Pages always see the released state. It is protected and changes only through a release pull request from `develop`, merged with a merge commit (see `.wiki/repository-rules.md#branches-and-releases`). All work is committed to `develop`; no feature branches for now. Never commit to or push `main` directly. Forks use the branch and remote intended for their checkout; do not assume direct access to the upstream repository.
 - Never commit or push on your own initiative. Save to Git only when the user explicitly asks for it or invokes `wrap`; that permission covers the one request, not later work. Finishing a task, a passing build or a user's "ok" is not a request to commit. Before an authorized push, inspect all actual push URLs of the selected remote and the source/destination branches. Confirm they match the intended destination; do not silently change remotes or push to another target.
 - Use GitHub CLI (`gh`) for repository-facing commit/push workflows where practical.
-- Do not use GitHub Issues for project planning. Keep the backlog in `.wiki/backlog.md`.
+- Open work, feature requests and bug reports are GitHub Issues; `start` gives an overview of the open ones. Creating, labelling or closing an issue is repository-facing: do it when the user asks or a workflow says so (`grill-me` opens issues for agreed work). A commit that completes an issue says `Closes #<n>`; GitHub closes it when the release reaches `main`.
 
 ## Wiki-First Workflow
-- Treat `.wiki/` as the source of project memory, decisions, backlog, and working notes.
+- Treat `.wiki/` as the source of project memory, decisions and working notes; GitHub Issues hold open work.
 - Update the wiki before or alongside meaningful implementation changes; document newly agreed behavior in `.wiki/app-requirements.md`.
 - `.wiki/decisions.md` is a **reverse-chronological log: newest entries at the top**, grouped under a dated heading. Keep entries terse: the durable decision and its rationale, not implementation minutiae that live in code. Fold a superseded decision into its replacement rather than leaving a dead entry behind.
-- `.wiki/backlog.md` tracks **open work only**: append new items at the bottom of the relevant section, and delete items once done (completion history lives in Git and `decisions.md`).
 - Describe the current state in code, wiki and descriptions. User-visible version history belongs in `CHANGELOG.md`; change narratives belong in Git history.
 
 ## Product Direction
@@ -33,9 +32,9 @@ Shared policy for every contributor and every assistant client. Project knowledg
 - Report verification with its scope: builds, tests, listening checks, signature checks and secret scans answer different questions.
 
 ## Shared Skills and Harness
-- `AGENTS.md` is the common policy; `.wiki/` is the only durable project memory, regardless of the tool in use.
+- `AGENTS.md` is the common policy; `.wiki/` is the only durable project memory and GitHub Issues the only list of open work, regardless of the tool in use.
 - The canonical workflows are `.agents/skills/start/SKILL.md`, `.agents/skills/wrap/SKILL.md` and `.agents/skills/grill-me/SKILL.md`. Edit workflows only there; client-specific entrypoints only delegate. Setup and discovery: `.agents/README.md`.
-- `start` alone is read-only; `grill-me` records agreed decisions without implementing them; `wrap` verifies and saves intended work subject to the user's current commit/push restrictions.
+- `start` alone is read-only and summarizes open issues; `grill-me` records agreed decisions and opens issues without implementing them; `wrap` verifies and saves intended work on `develop` subject to the user's current commit/push restrictions. Release pull requests into `main` happen only on explicit request.
 
 ## Publication Safety
 - Never version signing keys, certificates, passwords, tokens, local configuration, personal recordings, build artifacts or session transcripts. Signing credentials stay outside the checkout.

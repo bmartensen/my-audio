@@ -2,6 +2,13 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.10.3
+
+- Amp models and cabinets: import Neural Amp Modeler profiles (.nam) and cabinet impulse responses (.wav) you downloaded, for example from TONE3000, also as ZIP. They work like every other effect, live and in the mix, with **Input**, **Output** and **Match level**.
+- Project backups contain the amp models and cabinets they use.
+- **SoundCraft session:** a fourth share option exports the project with tracks at their positions, levels, pan, volume envelope and effects for the desktop DAW SoundCraft. **Import project** opens such a session again, with every track at its position.
+- Android's backup and transfer to a new phone include projects and the effect library; calibration stays on the device.
+
 ## 0.9.18
 
 - The record track is optional: delete the empty track and add one again with **New track**, also in an empty project. **Record** works without a prepared track as well.

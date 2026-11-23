@@ -1,5 +1,7 @@
 package com.martensening.my_audio.ui
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.resources.Res
 import com.martensening.my_audio.resources.*
 import org.jetbrains.compose.resources.DrawableResource
@@ -311,7 +313,8 @@ fun ProjectContent(
         )
     }
     val librarySelection by viewModel.effectLibrary.selection.collectAsState()
-    val effectChoices = remember(librarySelection) { EffectChoice.of(librarySelection) }
+    val tones by remember { ToneLibrary.current?.tones ?: MutableStateFlow(emptyList()) }.collectAsState()
+    val effectChoices = remember(librarySelection, tones) { EffectChoice.of(librarySelection, tones) }
     project?.tracks?.firstOrNull { it.id == editingTrack }?.let { track ->
         TrackSettingsDialog(
             track = track,
@@ -853,7 +856,8 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
             listOf(
                 Triple(ProjectArchive.Kind.Mix, Res.string.share_mix, Res.string.share_mix_summary),
                 Triple(ProjectArchive.Kind.Stems, Res.string.share_stems, Res.string.share_stems_summary),
-                Triple(ProjectArchive.Kind.Backup, Res.string.share_backup, Res.string.share_backup_summary)
+                Triple(ProjectArchive.Kind.Backup, Res.string.share_backup, Res.string.share_backup_summary),
+                Triple(ProjectArchive.Kind.SoundCraft, Res.string.share_soundcraft, Res.string.share_soundcraft_summary)
             ).forEach { (kind, title, summary) ->
                 DropdownMenuItem(
                     text = {
@@ -870,6 +874,7 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
                         ProjectArchive.Kind.Mix -> mixAvailable
                         ProjectArchive.Kind.Stems -> stemsAvailable
                         ProjectArchive.Kind.Backup -> true
+                        ProjectArchive.Kind.SoundCraft -> stemsAvailable
                     },
                     onClick = {
                         expanded = false

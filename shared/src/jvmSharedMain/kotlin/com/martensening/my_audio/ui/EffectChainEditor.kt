@@ -44,6 +44,9 @@ import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.EqEffect
 import com.martensening.my_audio.data.ReverbEffect
 import com.martensening.my_audio.data.TonePreset
+import com.martensening.my_audio.data.Tone
+import com.martensening.my_audio.data.ToneKind
+import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -55,15 +58,27 @@ data class EffectChoice(val id: String) {
     fun create(): ChainEffect = when (id) {
         EffectLibrary.TONE -> ChainEffect.Tone().with(TonePreset.Neutral)
         EffectLibrary.REVERB -> ChainEffect.Reverb()
-        else -> EffectLibrary.airwindowsName(id).let { name ->
+        else -> EffectLibrary.toneHash(id)?.let { hash ->
+            val tone = ToneLibrary.current?.find(hash)
+            when (tone?.kind) {
+                ToneKind.Cabinet -> ChainEffect.Cabinet(hash, tone.name)
+                else -> ChainEffect.AmpModel(hash, tone?.name.orEmpty())
+            }
+        } ?: EffectLibrary.airwindowsName(id).let { name ->
             ChainEffect.Airwindows(name.orEmpty(), AirwindowsCatalog.defaults(name.orEmpty()))
         }
     }
 
     companion object {
-        /** The library selection in the order of the library: My Audio first, then Airwindows by name. */
-        fun of(selection: Set<String>): List<EffectChoice> =
+        /**
+         * The library selection in the order of the library: My Audio first, then imported amp models and cabinets
+         * by name, then Airwindows by name.
+         */
+        fun of(selection: Set<String>, tones: List<Tone> = ToneLibrary.current?.tones?.value.orEmpty()): List<EffectChoice> =
             listOf(EffectLibrary.TONE, EffectLibrary.REVERB).filter { it in selection }.map(::EffectChoice) +
+                tones.filter { EffectLibrary.toneId(it.hash) in selection }
+                    .sortedWith(compareBy({ it.kind }, { it.name.lowercase() }))
+                    .map { EffectChoice(EffectLibrary.toneId(it.hash)) } +
                 selection.mapNotNull { id -> EffectLibrary.airwindowsName(id)?.takeIf { AirwindowsCatalog.find(it) != null } }
                     .sortedBy { it.lowercase() }.map { EffectChoice(EffectLibrary.airwindowsId(it)) }
     }
@@ -73,7 +88,8 @@ data class EffectChoice(val id: String) {
 fun effectName(id: String): String = when (id) {
     EffectLibrary.TONE -> stringResource(Res.string.effect_tone_name)
     EffectLibrary.REVERB -> stringResource(Res.string.effect_reverb_name)
-    else -> EffectLibrary.airwindowsName(id).orEmpty()
+    else -> EffectLibrary.toneHash(id)?.let { ToneLibrary.current?.find(it)?.name }
+        ?: EffectLibrary.airwindowsName(id).orEmpty()
 }
 
 @Composable
@@ -81,6 +97,8 @@ fun ChainEffect.displayName(): String = when (this) {
     is ChainEffect.Tone -> stringResource(Res.string.effect_tone_name)
     is ChainEffect.Reverb -> stringResource(Res.string.effect_reverb_name)
     is ChainEffect.Airwindows -> name
+    is ChainEffect.AmpModel -> name.ifEmpty { stringResource(Res.string.tone_kind_amp) }
+    is ChainEffect.Cabinet -> name.ifEmpty { stringResource(Res.string.tone_kind_cabinet) }
     is ChainEffect.Unknown -> type.ifEmpty { stringResource(Res.string.effect_unavailable) }
 }
 
@@ -93,6 +111,10 @@ private fun ChainEffect.summary(): String = when (this) {
         ?: formatResource(Res.string.value_seconds, reverb.seconds)
     is ChainEffect.Airwindows -> AirwindowsCatalog.find(name)?.let { "Airwindows · " + categoryName(it.category) }
         ?: stringResource(Res.string.effect_unavailable)
+    is ChainEffect.AmpModel -> if (ToneLibrary.current?.find(tone) == null) stringResource(Res.string.tone_missing)
+        else stringResource(Res.string.tone_kind_amp)
+    is ChainEffect.Cabinet -> if (ToneLibrary.current?.find(tone) == null) stringResource(Res.string.tone_missing)
+        else stringResource(Res.string.tone_kind_cabinet)
     is ChainEffect.Unknown -> stringResource(Res.string.effect_requires_newer)
 }
 
@@ -331,6 +353,8 @@ internal fun EffectControls(effect: ChainEffect, showDescription: Boolean = true
         is ChainEffect.Tone -> ToneControls(effect, onChange)
         is ChainEffect.Reverb -> ReverbControls(effect, onChange)
         is ChainEffect.Airwindows -> AirwindowsControls(effect, showDescription, onChange)
+        is ChainEffect.AmpModel -> AmpModelControls(effect, onChange)
+        is ChainEffect.Cabinet -> CabinetControls(effect, onChange)
         // Its parameters belong to a newer version; it can only be bypassed, moved or removed here.
         is ChainEffect.Unknown -> Text(
             stringResource(Res.string.effect_requires_newer_summary),
@@ -464,5 +488,57 @@ private fun AirwindowsControls(effect: ChainEffect.Airwindows, showDescription: 
     }
     TextButton(onClick = { onChange(effect.copy(values = AirwindowsCatalog.defaults(effect.name))) }) {
         Text(stringResource(Res.string.effect_reset))
+    }
+}
+
+/** Hint for a slot whose imported tone is not in this device's tone library; true when shown. */
+@Composable
+private fun MissingTone(hash: String): Boolean {
+    if (ToneLibrary.current?.find(hash) != null) return false
+    Text(
+        stringResource(Res.string.tone_missing_summary),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    return true
+}
+
+/** An imported amp model: level matching and the gain into and out of the model. */
+@Composable
+private fun AmpModelControls(effect: ChainEffect.AmpModel, onChange: (ChainEffect.AmpModel) -> Unit) {
+    if (MissingTone(effect.tone)) return
+    ToneLibrary.current?.find(effect.tone)?.details?.takeIf { it.isNotEmpty() }?.let { details ->
+        Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp))
+    }
+    CheckRow(Res.string.effect_level_match, effect.levelMatch, summary = stringResource(Res.string.effect_level_match_summary)) {
+        onChange(effect.copy(levelMatch = it))
+    }
+    val range = ChainEffect.AmpModel.GAIN_RANGE_DB
+    ValueSlider(
+        label = stringResource(Res.string.effect_input_gain),
+        valueText = formatResource(Res.string.value_db_signed, effect.inputDb),
+        value = effect.inputDb,
+        range = -range..range,
+        onChange = { onChange(effect.copy(inputDb = it.roundTo(0.5f))) }
+    )
+    ValueSlider(
+        label = stringResource(Res.string.effect_output_gain),
+        valueText = formatResource(Res.string.value_db_signed, effect.outputDb),
+        value = effect.outputDb,
+        range = -range..range,
+        onChange = { onChange(effect.copy(outputDb = it.roundTo(0.5f))) }
+    )
+    TextButton(onClick = { onChange(effect.copy(inputDb = 0f, outputDb = 0f)) }) {
+        Text(stringResource(Res.string.effect_reset))
+    }
+}
+
+/** An imported cabinet impulse response: level matching only. */
+@Composable
+private fun CabinetControls(effect: ChainEffect.Cabinet, onChange: (ChainEffect.Cabinet) -> Unit) {
+    if (MissingTone(effect.tone)) return
+    CheckRow(Res.string.effect_level_match, effect.levelMatch, summary = stringResource(Res.string.effect_level_match_summary)) {
+        onChange(effect.copy(levelMatch = it))
     }
 }

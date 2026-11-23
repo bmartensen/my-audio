@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in My Audio does not work as described in the user guide.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem. English or German are both fine. Please do not attach personal recordings you do not want to make public.
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown under About.
+      placeholder: "0.9.18"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [Android, Windows, Both]
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and audio route
+      description: Phone or computer model, Android/Windows version, and the input/output used (internal, wired headphones, Bluetooth, USB interface).
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open a project with …\n2. Tap …"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs
+      description: Optional. Screenshots, a short sample or Android logcat lines (tags MyAudio*).

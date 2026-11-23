@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+: projects and the effect library travel with cloud backups and device transfers.
+  Calibration, device selection and the buffer setting describe this phone's audio route and are excluded.
+  Keep in sync with backup_rules.xml (Android 10 and 11).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="calibration.xml" />
+        <exclude domain="sharedpref" path="audio_devices.xml" />
+        <exclude domain="file" path="audio.json" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="calibration.xml" />
+        <exclude domain="sharedpref" path="audio_devices.xml" />
+        <exclude domain="file" path="audio.json" />
+    </device-transfer>
+</data-extraction-rules>
