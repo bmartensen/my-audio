@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
 /**
- * The `project.json` reader as released in My Audio 0.8.5 and 0.8.6 (tags `v0.8.5`/`v0.8.6`), copied verbatim
+ * The `project.json` reader as released in My Audio 0.8.5 and 0.8.6 (commits `478cd6e`/`2cd9282`), copied verbatim
  * apart from this comment and the object name. Installed apps read projects with exactly these rules, so tests
  * use it to prove that projects written by the current version still open there. Never update it to match
  * the current reader; add a reader for a newer released version instead.

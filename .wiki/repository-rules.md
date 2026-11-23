@@ -26,7 +26,7 @@ Open work, feature requests and bug reports are [GitHub Issues](https://github.c
 .\build.ps1 -Target Windows
 ```
 
-Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build. Each released version gets an annotated tag `v<versionName>` (e.g. `v0.8.6`) on its release merge commit in `main`, whose tree equals the `develop` commit it was built from.
+Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows. Raise the patch version and versionCode before every distributed build. Each released version gets an annotated tag `v<versionName>` (e.g. `v0.10.4`) on its release merge commit in `main`, whose tree equals the `develop` commit it was built from.
 
 ```powershell
 .\tools\build_desktop_native.ps1
