@@ -4,14 +4,10 @@ User-visible changes by released version, newest first. Intermediate test builds
 
 ## 0.9.18
 
-- The recording controls sit on a plain screen-background area: full width below the tracks in portrait, a full-height rail on the right in landscape. In landscape, Record is centred in the window on Home and in projects; Home also gets the right-side rail, leaving the full height to the project list.
-- The record track is optional. After “Delete recording?”, the remaining empty track can be removed with “Delete track?”, which brings back “+ New track”. “+ New track” also works in an empty project, and Record works without a prepared track. This replaces “Reset?”.
-- Removing an effect from a track or master chain and resetting a whole volume curve ask for confirmation; deleting a single curve point stays immediate.
-- “+ New project” is a borderless add button like “+ New track”.
-- Effect library: subtitles no longer repeat the effect name, and row separators span the full width.
-- “Calibrate now” aligns to the right edge of its notice; long screen titles end with an ellipsis.
-- About links the My Audio privacy policy on GitHub Pages.
-- Installers are also available from the GitHub release, together with checksums and the source of the bundled Java runtime.
+- The record track is optional: delete the empty track and add one again with **New track**, also in an empty project. **Record** works without a prepared track as well.
+- Removing an effect and resetting a volume envelope ask for confirmation.
+- **About** links the privacy policy.
+- UI improvements in landscape, on the home screen and in the effect library.
 
 ## 0.9.8
 

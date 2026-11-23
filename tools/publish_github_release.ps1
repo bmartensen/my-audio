@@ -80,7 +80,7 @@ $($section.Groups[1].Value.Trim())
 
 ### Downloads
 
-- **Android** (10 or later): ``MyAudio-$version.apk``, signed. Installing over an earlier release keeps your projects.
+- **Android** (10 or later): ``MyAudio-$version.apk``, signed.
 - **Windows** (10/11, x64): ``MyAudio-$version.msi``. The installer is not code-signed, so SmartScreen may ask for confirmation.
 - ``$(Split-Path $source -Leaf)``: source code of the Java runtime included in the MSI (OpenJDK, GPLv2 with Classpath Exception), SHA-256 ``$sourceHash``.
 
