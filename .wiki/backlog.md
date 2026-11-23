@@ -60,7 +60,6 @@ Agreed scope: [requirements](app-requirements.md#record-track-and-live-effects).
 - Add instrumented/UI tests for project lists, recording flow and dialogs.
 - Exercise missing-tool installation on a clean Windows VM, including license prompts, elevation, interrupted downloads and reboot recovery.
 - Invoke the shared skills interactively in Antigravity, Gemini CLI, Codex and Claude Code and confirm discovery and question behavior.
-- Publish 0.9.18 once accepted on the phone and authorized: publication audit, commit, tag `v0.9.18`, `tools/publish_github_release.ps1`, then `release_downloads: true` and the Pages push; afterwards the operator deploys martensening.com. Order and checks: [Pages and releases](site-publication.md#publishing-a-version).
 - Provide the Java runtime source for the installers distributed before 0.9.18 (0.8.x–0.9.8 on martensening.com), or document which runtime versions they bundled.
 - Project settings still show multi-line explanations (notes scrolling, pre-roll) despite the brief-interface rule; shorten them to one line and move the explanation to the guide.
 - Decide Android backup behavior: `allowBackup="true"` without backup rules lets Android include projects in device backups (subject to its size limit). Either exclude recordings with backup rules or document it; the privacy policy currently mentions it.

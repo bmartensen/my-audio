@@ -8,7 +8,7 @@ repository_url: https://github.com/bmartensen/my-audio
 release: 0.9.18
 released: 2026-11-23
 # Enable direct GitHub downloads only after tools/check_site_downloads.ps1 -RequireGitHubRelease passes.
-release_downloads: false
+release_downloads: true
 # Mirror with identical files; offered alone until release assets are published, without claiming its version.
 download_page: https://www.martensening.com/myaudio/
 markdown: kramdown
