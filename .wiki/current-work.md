@@ -1,12 +1,13 @@
 # Current work
 
-As of 2026-11-23: **My Audio 0.10.3 / versionCode 37** for Android and Windows, released from `main` with tag `v0.10.3` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.10.3) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+As of 2026-11-23: **My Audio 0.10.4 / versionCode 38** for Android and Windows, released from `main` with tag `v0.10.4` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.10.4) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
 
-## Candidate 0.10.4 (develop)
+## Release 0.10.4
 
-- Faster Android import ([#15](https://github.com/bmartensen/my-audio/issues/15)): MediaCodec without per-packet waits, polyphase resampler with block-wise output, block-wise WAV writing, four files decoded in parallel. Pixel 9, 11 MP3 stems of 3:18: 42 s instead of 3 min 33 s (release APK 0.10.4 installed as an update; the contributor confirmed the speed). Resampler unit tests and the block-size-independence test pass.
-- Right-click opens track, record track and master options ([#31](https://github.com/bmartensen/my-audio/issues/31)), in addition to the long press; MSI 0.10.4 built (SHA-256 `a8895837…8a166619`), the right-click on Windows not yet tried.
-- Guide: portrait home screenshot with the contributor's song titles and a new share menu screenshot with the SoundCraft option, both from the Pixel 9 in status bar demo mode (restored afterwards).
+- Faster Android import ([#15](https://github.com/bmartensen/my-audio/issues/15)): MediaCodec without per-packet waits, polyphase resampler with block-wise output, block-wise WAV writing, four files decoded in parallel. Pixel 9, 11 MP3 stems of 3:18: 42 s instead of 3 min 33 s, confirmed by the contributor. Resampler unit tests and the block-size-independence test pass.
+- Right-click opens track, record track and master options ([#31](https://github.com/bmartensen/my-audio/issues/31)), in addition to the long press; not yet tried on Windows.
+- Guide: portrait home screenshot with the contributor's song titles and a share menu screenshot with the SoundCraft option, from the Pixel 9 in status bar demo mode (restored afterwards).
+- Built from the tagged merge commit with `build.ps1 -Target All -AndroidConfiguration Release`: `MyAudio-0.10.4.apk` (SHA-256 `c1e1d481…f77d990`) and `MyAudio-0.10.4.msi` (`a8895837…8a166619`, byte-identical to the candidate). Same Temurin 21.0.13 runtime and source archive as 0.10.3; no `INTERNET` permission. `prepare_public_repo.py` inspected 2,282 files and Gitleaks found no leaks. 111 shared desktop tests (2 gated skipped) and 13 Android JVM tests pass; lint 0 errors, 14 warnings. Installed on the Pixel 9 as an update.
 
 ## Release 0.10.3
 
