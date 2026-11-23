@@ -47,6 +47,8 @@ Manual fallback: install [Temurin 21](https://adoptium.net/temurin/releases/?ver
 
 ## Android development
 
+Use the [UI refinement and final acceptance workflow](repository-rules.md#ui-refinement-and-final-acceptance): iterate with debug builds in the emulator, then verify the final release build against existing, finished projects on the contributor's connected smartphone. A Pixel is not required.
+
 ```powershell
 .\build.ps1 -Target Android
 # Or initialize the current shell and use Gradle directly:
@@ -97,6 +99,6 @@ The native build discovers Visual Studio and the pinned CMake/Ninja installation
 
 The MIT license covers original project work. Preserve the third-party texts and About license view when distributing builds. The MSI carries the selected Java runtime's `runtime/legal` directory; do not strip it. OpenJDK is GPLv2 with the Classpath Exception, and distributing its binary also requires a corresponding-source distribution route under those terms. An upstream link alone is not a substitute for meeting those obligations.
 
-For Temurin, obtain the **matching full source archive** from the release in [temurin21-binaries](https://github.com/adoptium/temurin21-binaries/releases), check its published checksum, and provide it with the binary distribution (including runtime build scripts/configuration from that release). Keep the exact JDK version, source archive and checksums with release records outside Git. The JDK's `src.zip` alone is not the complete corresponding source. A different JDK distribution requires reviewing its own notices and source terms.
+For Temurin, obtain the **matching full source archive** from the release in [temurin21-binaries](https://github.com/adoptium/temurin21-binaries/releases), check its published checksum, and provide it with the binary distribution (including runtime build scripts/configuration from that release). Keep the exact JDK version, source archive and checksums with release records outside Git; `tools/publish_github_release.ps1` attaches the verified archive to each GitHub release (see [Pages and releases](site-publication.md#publishing-a-version)). The JDK's `src.zip` alone is not the complete corresponding source. A different JDK distribution requires reviewing its own notices and source terms.
 
 See [license inventory](../licenses/THIRD_PARTY_NOTICES.md) and [license provenance](../licenses/README.md). Android SDK/Visual Studio tool installers retain their vendor terms and are downloaded locally, not redistributed in this repository.

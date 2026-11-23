@@ -3,14 +3,7 @@ layout: default
 lang: en
 title: Multitrack recorder for music demos
 description: My Audio – record, mix and share track by track on Android and Windows. Free download.
-home: /en/
-other_lang: /
-other_lang_code: de
-nav:
-  - title: Download
-    url: /en/#download
-  - title: Guide
-    url: /en/guide/
+permalink: /en/
 ---
 
 <section class="hero" id="download">
@@ -18,17 +11,7 @@ nav:
   <h1>My Audio</h1>
   <p class="tagline">Your idea. Your demo.</p>
   <p class="lead">Record track by track, mix with effects and share – on your phone and on your PC. No account, no cloud, free and open source.</p>
-  <div class="buttons">
-    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.apk">
-      <span class="title">Android</span><span class="sub">APK · Android 10+ · signed</span>
-    </a>
-    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.msi">
-      <span class="title">Windows</span><span class="sub">MSI · Windows 10/11</span>
-    </a>
-  </div>
-  <p class="meta">Version {{ site.release }} of {{ site.released | date: "%Y-%m-%d" }} ·
-    <a href="{{ site.repository_url }}/releases/tag/v{{ site.release }}">checksums and release notes</a> ·
-    <a href="{{ site.repository_url }}/releases">all versions</a></p>
+  {% include downloads.html %}
 </section>
 
 <div class="cards">
@@ -48,7 +31,7 @@ nav:
 
 **Windows:** download the MSI and run it. The installer is not signed with a code-signing certificate, so Windows SmartScreen may ask (“More info” → “Run anyway”). My Audio is installed for your user only; projects live in *Documents/My Audio* and are kept when you uninstall.
 
-If you like, compare the file's SHA-256 checksum with the one in the [release]({{ site.repository_url }}/releases/tag/v{{ site.release }}).
+If you like, compare the file's SHA-256 checksum with the one {% if site.release_downloads %}in the [release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}on the [download page]({{ site.download_page }}?lang=en){% endif %}.
 
 ## How it works
 

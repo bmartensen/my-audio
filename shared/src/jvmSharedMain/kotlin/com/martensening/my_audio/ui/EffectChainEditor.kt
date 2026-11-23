@@ -116,6 +116,7 @@ fun EffectChainEditor(
     var nextKey by remember { mutableIntStateOf(chain.size) }
     val slots = remember { chain.mapIndexed { index, slot -> KeyedSlot(index, slot) }.toMutableStateList() }
     var expanded by remember { mutableStateOf<Int?>(null) }
+    var removing by remember { mutableStateOf<Int?>(null) }
     var dragging by remember { mutableStateOf<Int?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val heights = remember { mutableStateMapOf<Int, Int>() }
@@ -166,11 +167,7 @@ fun EffectChainEditor(
                     expanded = expanded == item.key,
                     onToggleExpanded = { expanded = if (expanded == item.key) null else item.key },
                     onCheckedChange = { replace(item.key, item.slot.copy(enabled = it)) },
-                    onRemove = {
-                        slots.removeAll { it.key == item.key }
-                        if (expanded == item.key) expanded = null
-                        publish()
-                    },
+                    onRemove = { removing = item.key },
                     handle = Modifier.pointerInput(item.key) {
                         detectDragGestures(
                             onDragStart = {
@@ -225,6 +222,19 @@ fun EffectChainEditor(
             expanded = key
             publish()
         }
+    }
+    slots.firstOrNull { it.key == removing }?.let { item ->
+        ConfirmDeleteDialog(
+            title = stringResource(Res.string.effect_remove_question),
+            message = formatResource(Res.string.effect_remove_info, item.slot.effect.displayName()),
+            confirmLabel = Res.string.effect_remove,
+            onConfirm = {
+                slots.removeAll { it.key == item.key }
+                if (expanded == item.key) expanded = null
+                publish()
+            },
+            onDismiss = { removing = null }
+        )
     }
 }
 

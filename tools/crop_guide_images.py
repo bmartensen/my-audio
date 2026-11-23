@@ -1,8 +1,11 @@
-"""Crops raw Pixel 9 screenshots (1080 x 2424) to the part the user guide explains and scales them for the web.
+"""Crops raw Pixel 9 screenshots (1080 x 2424, landscape 2424 x 1080) to the part the user guide explains and
+scales them for the web.
 
 Dialogs are found automatically: on the dimmed screen, their surface is the longest run of brighter rows near the
-left edge. Full-screen views use fixed boxes. Status and navigation bars are always cut off. The home screen keeps
-only its header, the first project (the demo) and the record button, so no other project names appear.
+left edge. Full-screen views use fixed boxes. Status and navigation bars and the landscape camera cutout are always
+cut off. The landscape home screen keeps the header, the first project (the demo), the New project action and the
+record rail: everything below the first card is replaced by the screen background with the New project action
+directly below it, exactly as the app lays out a library with one project. No other project names appear.
 
 Usage: python tools/crop_guide_images.py <raw screenshot dir> <output dir>
 """
@@ -18,24 +21,28 @@ WIDTH = 540    # published width: half the phone's pixels, sharp on most screens
 # Full-screen views: (top, bottom) in phone pixels.
 BOXES = {
     'project': (TOP, BOTTOM),
-    'project-record-track': (425, 1803),
-    'effect-preview': (726, 1234),
+    'project-record-track': (795, 1830),
+    'effect-preview': (860, 1300),
     'envelope': (TOP, 2120),
-    'notes': (170, 1815),
+    'notes': (170, 1840),
     'share': (TOP, 760),
     'settings': (TOP, 1622),
     'calibration': (TOP, 1520),
-    'library': (TOP, 1300),
-    'library-preview': (726, 1430),
+    'library': (TOP, 1570),
+    'library-preview': (960, 1420),
 }
+# Landscape views: (left, top, right, bottom) between the camera cutout, status bar and navigation bar.
+LANDSCAPE = (140, 80, 2290, 1080)
+# Landscape home: bottom edges of the first and last project card, the New project row (top, bottom) below the
+# last card, and the right edge of the list column.
+HOME_FIRST_CARD, HOME_LAST_CARD, HOME_ADD_ROW, HOME_LIST_RIGHT = 420, 795, (835, 932), 1850
 # Dialogs over a dimmed screen: wide effect dialogs (screen width minus margins) and standard dialogs.
 WIDE = (42, 1038, 82)      # dialog left, dialog right, column inside its padding
 NARROW = (120, 958, 160)
 DIALOGS = {'track-settings': WIDE, 'effect-reverb': WIDE, 'master': WIDE, 'effect-airwindows': WIDE,
            'metronome': NARROW, 'project-settings': NARROW, 'tuner': NARROW}
 # Fixed (left, top, right, bottom): short warnings, also on top of another dialog where detection does not fit.
-FIXED = {'live-warning': (158, 991, 921, 1479), 'monitor-warning': (158, 991, 921, 1479),
-         'reset-dialog': (172, 991, 907, 1479)}
+FIXED = {'live-warning': (151, 988, 929, 1482)}
 
 
 def luminance(pixel):
@@ -44,13 +51,17 @@ def luminance(pixel):
 
 
 def dialog_box(image, x):
-    """Top and bottom of the dialog surface: the longest run of rows brighter than the dimmed background at [x]."""
-    column = [luminance(image.getpixel((x, y))) for y in range(TOP, BOTTOM)]
-    # The rows just below the status bar are always dimmed screen: dialogs never reach that high.
-    background = max(column[:10])
+    """Top and bottom of the dialog surface: the longest run of rows at least as bright as the surface at [x].
+
+    The surface is the most frequent brightness in the column; dimmed content behind the dialog, such as the
+    calibration notice, stays darker and is therefore excluded even where it touches the dialog.
+    """
+    column = [round(luminance(image.getpixel((x, y)))) for y in range(TOP, BOTTOM)]
+    surface = max(set(column), key=column.count)
+    background = 0
     best, start = (0, 0), None
     for index, value in enumerate(column + [background]):
-        if value > background + 6:
+        if value >= surface - 3:
             if start is None:
                 start = index
         elif start is not None:
@@ -60,7 +71,14 @@ def dialog_box(image, x):
     if best[1] - best[0] < 200:
         raise ValueError('no dialog found')
     margin = 8  # the detection column crosses the rounded corners slightly inside
-    return max(TOP, TOP + best[0] - margin), min(BOTTOM, TOP + best[1] + margin)
+    top, bottom = max(TOP, TOP + best[0] - margin), min(BOTTOM, TOP + best[1] + margin)
+    # The straight top and bottom edges are crossed in the middle: drop margin rows that are not dialog surface.
+    centre = image.width // 2
+    while top < bottom and round(luminance(image.getpixel((centre, top)))) < surface - 3:
+        top += 1
+    while bottom > top and round(luminance(image.getpixel((centre, bottom - 1)))) < surface - 3:
+        bottom -= 1
+    return top, bottom
 
 
 def rounded(image, radius=73):
@@ -72,9 +90,9 @@ def rounded(image, radius=73):
     return result
 
 
-def scaled(image):
-    height = round(image.height * WIDTH / image.width)
-    return image.resize((WIDTH, height), Image.LANCZOS)
+def scaled(image, width=WIDTH):
+    height = round(image.height * width / image.width)
+    return image.resize((width, height), Image.LANCZOS)
 
 
 def main(source, target):
@@ -83,13 +101,16 @@ def main(source, target):
     for path in sorted(source.glob('*.png')):
         name = path.stem
         image = Image.open(path).convert('RGB')
-        if name == 'home-full':
-            top = image.crop((0, TOP, image.width, 535))
-            bottom = image.crop((0, 1940, image.width, BOTTOM))
-            joined = Image.new('RGB', (image.width, top.height + bottom.height), image.getpixel((5, 600)))
-            joined.paste(top, (0, 0))
-            joined.paste(bottom, (0, top.height))
-            result, name = joined, 'home'
+        if name == 'home-landscape-raw':
+            # The New project row keeps its distance to the card above it (the list's item spacing).
+            row_top, row_bottom = HOME_ADD_ROW
+            add_row = image.crop((0, row_top, HOME_LIST_RIGHT, row_bottom))
+            background = image.getpixel((600, image.height - 20))
+            ImageDraw.Draw(image).rectangle((0, HOME_FIRST_CARD + 4, HOME_LIST_RIGHT - 1, image.height), fill=background)
+            image.paste(add_row, (0, HOME_FIRST_CARD + row_top - HOME_LAST_CARD))
+            result, name = image.crop(LANDSCAPE), 'home'
+        elif name == 'project-landscape':
+            result = image.crop(LANDSCAPE)
         elif name in BOXES:
             result = image.crop((0, *BOXES[name][:1], image.width, BOXES[name][1]))
         elif name in DIALOGS:
@@ -101,7 +122,9 @@ def main(source, target):
         else:
             print(f'skipped {path.name}')
             continue
-        scaled(result).save(target / f'{name}.png', optimize=True)
+        # Landscape images keep half the phone's pixels as well, so text matches the portrait images.
+        width = result.width // 2 if result.width > image.height else WIDTH
+        scaled(result, width).save(target / f'{name}.png', optimize=True)
         print(f'{name}.png {result.width}x{result.height}')
 
 

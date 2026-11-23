@@ -1,18 +1,19 @@
 # Product requirements
 
-Agreed current behavior for My Audio 0.9.0. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
+Agreed current behavior for My Audio 0.9.18. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
 
 ## Purpose, identity and platforms
 
 My Audio is a studio from the smartphone: capture musical ideas, add overdubs and shape demos with effects. It does not aim to compete with professional DAWs. Windows complements the same direct recording workflow with a larger screen and mouse precision. Android/Windows versions stay synchronized; Linux is a later target, macOS undecided.
 
-The interface stays brief: settings and dialogs carry labels and at most one short line, never explanatory paragraphs; confirmations name what happens in one line. Explanations of what an option does live in the user guide (`docs/`, published with GitHub Pages).
+The interface stays brief: settings and dialogs carry labels and at most one short line, never explanatory paragraphs; confirmations name what happens in one line. Explanations of what an option does live in the user guide (`docs/`, published with GitHub Pages). About links the My Audio privacy policy on GitHub Pages (`/de/privacy/` or `/en/privacy/`, matching the interface language) and the product page on martensening.com.
 
 Application ID: `com.martensening.my_audio`. Branding combines a graphite/nickel microphone, black piano lacquer and ivory keys, with a small red recording light. Assets and localized store copy are in `branding/`. The interface supports English/German, light/dark themes and Android dynamic colors. Both portrait and landscape work. Core functionality is local, with no account or required network service. Projects use private app storage on Android and Documents/My Audio on Windows. Android API 29 is the provisional minimum. Pixel 9 is a reference test device; emulator timing is not an audio acceptance test.
 
 ## Home and project lifecycle
 
-- Home lists project cards with open, rename and delete actions. Project rename belongs here, not in the project view.
+- Home lists project cards with open, rename and delete actions. Project rename belongs here, not in the project view. New project is a centred, borderless add action using the same rounded hover/press state as New track, including the empty-library view.
+- In landscape, Home places quick recording in a right-side area filling the available height with the screen background colour, without a frame, shadow or outer gap. The project list keeps the available height, including its final new-project action. Portrait keeps the bottom-centered quick-record button. This applies to empty and populated libraries on Android and Windows.
 - The large bottom-centered Record button creates a date/time-named project and starts recording after microphone permission, also without calibration. “+ New project” creates an empty project without recording, including on an empty home screen; permission is deferred until the first take.
 - Each stopped take is immediately saved as a track. Delete failed takes through the track delete action. Both project and track deletion require confirmation.
 - Existing tracks play during a new recording. Record starts from project frame zero and toggles to stop; repeated recording adds tracks. Play starts at zero unless the practice loop is active. Tracks remain fixed on the timeline.
@@ -27,7 +28,9 @@ Built-in speaker/microphone overdubbing is supported. For Android two-channel US
 
 ## Project view and transport
 
-- Record is bottom-centered, with Play on the left once tracks exist and metronome on the right. Landscape places clock, level, Record and equal-size Play/metronome controls in a right-side column, with 32 dp content spacing.
+- The calibration notice's action aligns with its right edge, with inset spacing, even in wide windows. Long toolbar titles end in an ellipsis before the action icons.
+- Transport controls use a plain, opaque screen-background area: full width at the bottom in portrait, full available height on the right in landscape. No frame, shadow, rounded container, fade or outer gap. Tracks and notes occupy the remaining viewport and never show through the controls or system navigation area. Time sits closer to Record, with approximately half the former empty spacing; the input selector, level meter and countdown remain legible. In landscape on Android and Windows, Record is centred horizontally in the same-width rail and vertically in the entire usable window (excluding system bars), on Home and in a project. The toolbar, time, status and secondary controls do not shift that centre.
+- Record is bottom-centered, with Play on the left once tracks exist and metronome on the right. Landscape places clock, level, Record and equal-size Play/metronome controls in a right-side column, with symmetric insets. Transport panels reuse the track cards' corner radius and outline style.
 - Live dBFS meter: green through −12 dB, yellow through −3 dB, then red, with peak hold. A live recording waveform is recomputed from the saved file after stopping.
 - Track waveforms share the project timeline. Mute and multiple solo selections persist. If any track is solo, only solo tracks sound (including a solo track also marked muted); mute state remains stored. This applies to playback, overdub reference and mix export. Active buttons retain their primary-color filled state while transport disables editing; inactive controls fade.
 - Drag the timeline to select a practice loop of at least 0.5 s; a short tap clears it. The loop button toggles the stored range. Text distinguishes active, disabled and absent ranges. Active playback starts at the loop and wraps sample-accurately; Record never loops.
@@ -45,6 +48,8 @@ Share offers: the audible stereo mix as Ogg/Opus at 48 kHz; all individual track
 Home imports ZIPs as new projects. With project.json, validate and restore a backup. Without it, each supported audio entry becomes a track at frame zero. Ignore unrelated entries and platform metadata; reject unreadable audio without leaving a partial project. Project name is the ZIP basename. Track names omit a leading one/two-digit number, and ordering follows that number then name. Audio in subdirectories is supported. Never use archive entry paths as destination paths. [Data format](data-format.md) specifies persistence and compatibility.
 
 ## Mixing and effects
+
+Removing an effect from a track or master chain asks for confirmation in the same dialog style as track deletion and names the effect. Cancel or dismissal leaves the chain and its settings unchanged.
 
 Source audio is immutable; settings are non-destructive. Preparing the mix offline before transport is acceptable. Effects also process existing tracks during overdubs; a newly captured track receives its effects after stop. New takes default to cleanup off, while overdub references remain available for later use. Bleed removal uses exactly the playback recorded during that take, not today's mix.
 
@@ -65,21 +70,24 @@ The library exposes 478 embedded Airwindows effects plus My Audio EQ/compressor 
 
 ## Effect audition
 
+Library subtitles omit an exact repeated effect name at the beginning, while full descriptions
+remain searchable. Row separators and hover/press areas share the same full width.
+
 Library effects can be auditioned before selection. Tapping an entry unfolds its full description and parameters, one entry at a time, starting from the defaults; ▶ plays with the current values and changes are heard in the running loop. Values are discarded when the entry folds, so they never change the library selection or projects. Expanded track/master slots offer looping playback through the complete chain and A/B with/without that slot. Use roughly six seconds from the track or pre-master mix, preferring the loop range, otherwise playback position. Empty projects/library use the credited 7.2 s CC0 “Short Jazzy Tune No.1” clip by painted-panda (48 kHz PCM16 stereo, about −18.2 LUFS, peak −1.4 dBFS).
 
 Parameter changes rerender after roughly 150 ms idle, preserving playback position; level matching applies. Preview does not commit project changes. The native offline path includes reverb tails, and a separate player loops the result. Android performance and selected-device routing remain explicit acceptance work. Live input monitoring is described under the record track and live effects.
 
-## Planned for 0.9: record track and live effects
+## Record track and live effects
 
-Agreed on 2026-11-22 and implemented in 0.9.0; hardware acceptance is open. A reset record track takes the default name for the next track number, which keeps counting. A solo on the empty record track counts like any track solo.
+Record-track settings can be prepared before a take or removed when no longer needed. New empty tracks use the default name for the next track number, which keeps counting. A solo on the empty record track counts like any track solo.
 
-**Record track.** The last track is always the record track, shown even when empty; a new project starts with one empty track. Record captures into it when empty. When it already holds a take, Record appends a new record track that inherits the effect chain and input settings (not name, envelope, mute or solo; it starts muted) and records there. “+ empty track” appends an empty record track to prepare another instrument. Imports are inserted before an empty record track. An empty record track is excluded from mix, stems and the overdub reference.
+**Record track.** An explicitly prepared empty record track appears after the recorded tracks. Without one, show “+ New track”, including in a new or emptied project. That action prepares a fresh muted track for editing. Record remains available without preparing a track; it uses the default settings for an empty project or inherits the last take's effect chain and input settings (not name, envelope, mute or solo). A prepared track supplies its settings for the next take and is consumed when that take is saved. Imports are inserted before a prepared empty record track. Empty tracks are excluded from mix, stems and the overdub reference.
 
-**Deleting.** On the record track the trash is two-stage. With a take: “Delete recording?” removes the audio and its reference but keeps all settings. Without a take but with changed settings: “Reset?” restores the state of a newly created track: default name, effects, volume, pan, envelope, muted and not solo. Empty and at defaults: the trash is disabled. Older tracks keep whole-track deletion with one confirmation.
+**Deleting.** The last take, when no empty track follows it, keeps two-stage deletion: “Delete recording?” removes its audio/reference and preserves its settings as an empty record track. The empty track's trash then asks “Delete track?” and removes the whole prepared track and its settings, restoring “+ New track”. This also works for an untouched empty track. Cancelling preserves it. Existing recordings are unaffected by empty-track deletion, and recording remains possible immediately. Older tracks keep whole-track deletion with one confirmation.
 
 **Recording without calibration.** Record is always available when the device can capture, on Home (Android and Windows) and in the project, also after a route change during pre-roll. An uncalibrated route keeps the calibration banner and shows a non-blocking warning when a take starts; it no longer redirects to calibration. Such a take stores no latency compensation (its offset accounts only for the count-in) and is marked as uncalibrated; its track card shows a small hint. Later calibration does not move it.
 
-**Live monitoring while recording.** The record track's Mute switch controls monitoring. An empty record track starts muted, so nothing is monitored. Unmuting it monitors the microphone: dry without effects, otherwise through its effect chain in the real-time callback, heard together with the playback. After a take is saved, the track is unmuted automatically. Every newly created track starts muted, including one appended by Record or “+ empty track”. “Delete recording?” keeps the current Mute state with the other settings until it is changed or “Reset?” restores muted. Mute is an ordinary setting for the trash state: an empty, unmuted record track can be reset. Unmuting on the built-in loudspeaker or a Bluetooth output shows the feedback/delay warning. The saved take stays dry; after stop the identical chain is rendered offline. Normalization and click/bleed cleanup remain offline-only; level matching uses a fixed live estimate, so the live level may differ slightly from the rendered result.
+**Live monitoring while recording.** The record track's Mute switch controls monitoring. An empty record track starts muted, so nothing is monitored. Unmuting it monitors the microphone: dry without effects, otherwise through its effect chain in the real-time callback, heard together with the playback. After a take is saved, the track is unmuted automatically. Every newly created track starts muted, including one appended by Record or “+ New track”. “Delete recording?” keeps the current Mute state with the other settings until it is changed or the empty track is deleted. Adding a new empty track starts muted again. Unmuting on the built-in loudspeaker or a Bluetooth output shows the feedback/delay warning. The saved take stays dry; after stop the identical chain is rendered offline. Normalization and click/bleed cleanup remain offline-only; level matching uses a fixed live estimate, so the live level may differ slightly from the rendered result.
 
 **Live audition.** Library entries and track slot editors offer a Live switch next to ▶. Live sends only the selected microphone (respecting USB input selection) through the effect or track chain to the output, with no project playback or metronome; parameter changes apply immediately. The clip preview remains, and is the only option for master chains. Before Live starts on the built-in loudspeaker or a Bluetooth output, a warning explains feedback or delay; the user may continue. A/B compares with and without the effect live as well.
 
@@ -87,7 +95,7 @@ Agreed on 2026-11-22 and implemented in 0.9.0; hardware acceptance is open. A re
 
 ## Volume envelope editor
 
-A curve icon opens a dedicated per-track editor. Add/drag points in the waveform; points cannot cross neighbors and long press cannot capture a different point. Gain is 0–100% relative to track volume, with delete/reset/save actions. Existing-point capture radius is 48 dp. No additional position/gain sliders or explanatory text above the plot.
+A curve icon opens a dedicated per-track editor. Add/drag points in the waveform; points cannot cross neighbors and long press cannot capture a different point. Gain is 0–100% relative to track volume, with delete/reset/save actions. Resetting the whole curve asks for confirmation; cancelling keeps every point. Removing a single point remains immediate, without confirmation, because it is quick to restore. Reset edits the draft; the normal Save/Discard flow still applies. Existing-point capture radius is 48 dp. No additional position/gain sliders or explanatory text above the plot.
 
 The overview below the waveform shows the full track and visible range; tap to center, drag to scroll. Magnifiers halve/double zoom from 1× to 8×, keeping the selected point/playhead visible. Landscape puts playback/actions beside the card. Solo preview uses the draft envelope with track effects/gain; waveform taps seek while playing and point editing is disabled. Playback ends on stop/save/exit/end. Back with unsaved edits asks Save/Discard/Cancel; selection, zoom and seek alone do not mark the draft dirty.
 

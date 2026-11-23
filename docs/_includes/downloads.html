@@ -1,0 +1,22 @@
+{% if site.release_downloads %}
+  <div class="buttons">
+    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.apk">
+      <span class="title">Android</span><span class="sub">APK · {% if page.lang == 'de' %}ab Android 10 · signiert{% else %}Android 10+ · signed{% endif %}</span>
+    </a>
+    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.msi">
+      <span class="title">Windows</span><span class="sub">MSI · Windows 10/11</span>
+    </a>
+  </div>
+  <p class="meta">Version {{ site.release }} ·
+    <a href="{{ site.repository_url }}/releases/tag/v{{ site.release }}">{% if page.lang == 'de' %}Prüfsummen und Versionshinweise{% else %}Checksums and release notes{% endif %}</a> ·
+    <a href="{{ site.download_page }}{% if page.lang == 'en' %}?lang=en{% endif %}">{% if page.lang == 'de' %}Spiegel auf martensening.com{% else %}Mirror on martensening.com{% endif %}</a>
+  </p>
+{% else %}
+  <div class="buttons download-page">
+    <a class="btn" href="{{ site.download_page }}?lang={{ page.lang }}">
+      <span class="title">{% if page.lang == 'de' %}Zu den Downloads{% else %}Get My Audio{% endif %}</span>
+      <span class="sub">Android · Windows</span>
+    </a>
+  </div>
+  <p class="meta">{% if page.lang == 'de' %}Verfügbare Version und SHA-256-Prüfsummen auf martensening.com.{% else %}Available version and SHA-256 checksums on martensening.com.{% endif %}</p>
+{% endif %}

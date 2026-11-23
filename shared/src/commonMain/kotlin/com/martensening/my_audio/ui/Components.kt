@@ -1,11 +1,16 @@
 package com.martensening.my_audio.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,10 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.martensening.my_audio.resources.Res
 import com.martensening.my_audio.resources.*
 import com.martensening.my_audio.ui.theme.RecordRed
@@ -46,7 +54,7 @@ import kotlin.math.abs
 @Composable
 fun BackTopAppBar(title: String, onBack: () -> Unit, actions: @Composable () -> Unit = {}) {
     TopAppBar(
-        title = { Text(title, maxLines = 1) },
+        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
@@ -68,6 +76,16 @@ val PanelMaxWidth = 720.dp
 /** Width of the transport column at the right edge in landscape (project and envelope editor). */
 val TransportRailWidth = 168.dp
 
+/** Borderless add action with the same rounded hover/press state throughout the app. */
+@Composable
+fun AddItemButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+    TextButton(onClick = onClick, enabled = enabled) {
+        Icon(painterResource(Res.drawable.ic_add), contentDescription = null,
+            modifier = Modifier.padding(end = 8.dp))
+        Text(label)
+    }
+}
+
 /** Rounded, outlined panel in the style of the track cards. */
 @Composable
 fun PanelCard(
@@ -85,6 +103,53 @@ fun PanelCard(
             .widthIn(max = PanelMaxWidth),
         content = content
     )
+}
+
+/** Opaque screen background across the bottom or along the full-height transport rail. */
+@Composable
+fun TransportPanel(vertical: Boolean, content: @Composable () -> Unit) {
+    Box(
+        modifier = (if (vertical) Modifier else Modifier.fillMaxWidth())
+            .background(MaterialTheme.colorScheme.background)
+            .then(if (vertical) Modifier else Modifier.navigationBarsPadding())
+    ) {
+        content()
+    }
+}
+
+/** Keeps Record at the safe window's midpoint, independent of the toolbar and surrounding controls. */
+@Composable
+fun LandscapeTransportRail(
+    topBarHeight: Dp,
+    above: @Composable () -> Unit = {},
+    below: @Composable () -> Unit = {},
+    record: @Composable () -> Unit
+) {
+    Layout(
+        modifier = Modifier.width(TransportRailWidth).fillMaxHeight(),
+        content = {
+            Box(contentAlignment = Alignment.Center) { above() }
+            Box(contentAlignment = Alignment.Center) { record() }
+            Box(contentAlignment = Alignment.Center) { below() }
+        }
+    ) { measurables, constraints ->
+        // The list ends with 16 dp of padding. Mirror it at the outer edge so the visible
+        // card edge and the safe window edge have equal space around the controls.
+        val contentWidth = (constraints.maxWidth - 16.dp.roundToPx()).coerceAtLeast(0)
+        val slotConstraints = constraints.copy(minWidth = 0, minHeight = 0, maxWidth = contentWidth)
+        val (aboveSlot, recordSlot, belowSlot) = measurables.map { it.measure(slotConstraints) }
+        // The parent starts below the toolbar. Include that missing height when locating the
+        // safe window's centre; system insets have already been consumed by the Scaffold body.
+        val recordTop = (constraints.maxHeight - topBarHeight.roundToPx() - recordSlot.height) / 2
+        val gap = 4.dp.roundToPx()
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            aboveSlot.placeRelative((contentWidth - aboveSlot.width) / 2,
+                recordTop - gap - aboveSlot.height)
+            recordSlot.placeRelative((contentWidth - recordSlot.width) / 2, recordTop)
+            belowSlot.placeRelative((contentWidth - belowSlot.width) / 2,
+                recordTop + recordSlot.height + gap)
+        }
+    }
 }
 
 /** Large round record control; shows a stop square while [recording]. */

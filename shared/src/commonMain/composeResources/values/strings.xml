@@ -67,7 +67,7 @@
         <item quantity="other">%1$d tracks · %2$s</item>
     </plurals>
     <string name="record_track_empty">Empty</string>
-    <string name="record_track_add">Empty track</string>
+    <string name="record_track_add">New track</string>
     <string name="record_track_monitoring">Monitoring</string>
     <string name="live_start">Live</string>
     <string name="live_stop">Stop live</string>
@@ -93,8 +93,7 @@
     <string name="track_delete_info">“%1$s” and its recording will be deleted.</string>
     <string name="track_recording_delete_question">Delete recording?</string>
     <string name="track_recording_delete_info">The recording of “%1$s” will be deleted.</string>
-    <string name="track_reset_question">Reset?</string>
-    <string name="track_reset_info">“%1$s” will be reset.</string>
+    <string name="record_track_delete_info">“%1$s” and its settings will be deleted.</string>
     <string name="track_uncalibrated">Recorded without calibration</string>
     <string name="track_solo">Solo</string>
     <string name="track_unsolo">Solo off</string>
@@ -162,6 +161,8 @@
     <string name="effect_reverb_name">Reverb (My Audio)</string>
     <string name="effect_add">Add effect</string>
     <string name="effect_remove">Remove</string>
+    <string name="effect_remove_question">Remove effect?</string>
+    <string name="effect_remove_info">“%1$s” will be removed.</string>
     <string name="effect_move">Move</string>
     <plurals name="effect_chain_full">
         <item quantity="one">At most %1$d effect</item>
@@ -233,6 +234,8 @@
     <string name="envelope_point">Point: %1$.2f s · %2$d %%</string>
     <string name="envelope_remove_point">Remove selected point</string>
     <string name="envelope_reset">Reset to full volume</string>
+    <string name="envelope_reset_question">Reset volume curve?</string>
+    <string name="envelope_reset_info">All volume points will be removed.</string>
     <string name="audio_channel">Playback and recording</string>
     <string name="audio_recording">Recording continues in the background</string>
     <string name="audio_playing">Playback continues in the background</string>
@@ -298,7 +301,7 @@
     <string name="about_contact">Questions &amp; feedback</string>
     <string name="about_email" translatable="false">info@martensening.com</string>
     <string name="about_privacy">Privacy policy</string>
-    <string name="about_privacy_url">https://www.martensening.com/privacy_en.php</string>
+    <string name="about_privacy_url">https://bmartensen.github.io/my-audio/en/privacy/</string>
     <string name="about_website">My Audio on the web</string>
     <string name="about_website_url">https://www.martensening.com/myaudio/?lang=en</string>
     <string name="about_licenses">Open-source licenses</string>

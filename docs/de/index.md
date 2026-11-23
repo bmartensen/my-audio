@@ -3,14 +3,7 @@ layout: default
 lang: de
 title: Mehrspur-Recorder für Musikdemos
 description: My Audio – Spur für Spur aufnehmen, mischen und teilen auf Android und Windows. Kostenloser Download.
-home: /
-other_lang: /en/
-other_lang_code: en
-nav:
-  - title: Download
-    url: /#download
-  - title: Anleitung
-    url: /anleitung/
+permalink: /de/
 ---
 
 <section class="hero" id="download">
@@ -18,17 +11,7 @@ nav:
   <h1>My Audio</h1>
   <p class="tagline">Deine Idee. Dein Demo.</p>
   <p class="lead">Spur für Spur aufnehmen, mit Effekten mischen und teilen – auf dem Telefon und am PC. Ohne Konto, ohne Cloud, kostenlos und quelloffen.</p>
-  <div class="buttons">
-    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.apk">
-      <span class="title">Android</span><span class="sub">APK · ab Android 10 · signiert</span>
-    </a>
-    <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.msi">
-      <span class="title">Windows</span><span class="sub">MSI · Windows 10/11</span>
-    </a>
-  </div>
-  <p class="meta">Version {{ site.release }} vom {{ site.released | date: "%d.%m.%Y" }} ·
-    <a href="{{ site.repository_url }}/releases/tag/v{{ site.release }}">Prüfsummen und Versionshinweise</a> ·
-    <a href="{{ site.repository_url }}/releases">alle Versionen</a></p>
+  {% include downloads.html %}
 </section>
 
 <div class="cards">
@@ -48,8 +31,8 @@ nav:
 
 **Windows:** Lade die MSI herunter und starte sie. Da der Installer nicht mit einem Code-Signing-Zertifikat signiert ist, kann Windows SmartScreen nachfragen („Weitere Informationen“ → „Trotzdem ausführen“). My Audio wird nur für deinen Benutzer installiert; Projekte liegen unter *Dokumente/My Audio* und bleiben bei einer Deinstallation erhalten.
 
-Prüfe bei Bedarf die SHA-256-Prüfsumme der Datei mit den Angaben im [Release]({{ site.repository_url }}/releases/tag/v{{ site.release }}).
+Prüfe bei Bedarf die SHA-256-Prüfsumme der Datei mit den Angaben {% if site.release_downloads %}im [Release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}auf der [Download-Seite]({{ site.download_page }}){% endif %}.
 
 ## Wie es funktioniert
 
-Die [Anleitung]({{ '/anleitung/' | relative_url }}) erklärt jeden Bildschirm und jede Funktion, vom ersten Take bis zum geteilten Mix. Den Quelltext, die Lizenzen und die Versionsgeschichte findest du auf [GitHub]({{ site.repository_url }}).
+Die [Anleitung]({{ '/de/guide/' | relative_url }}) erklärt jeden Bildschirm und jede Funktion, vom ersten Take bis zum geteilten Mix. Den Quelltext, die Lizenzen und die Versionsgeschichte findest du auf [GitHub]({{ site.repository_url }}).

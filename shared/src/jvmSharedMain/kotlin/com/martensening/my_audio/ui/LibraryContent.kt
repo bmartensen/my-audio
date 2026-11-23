@@ -294,7 +294,7 @@ private fun LibraryRow(
                     }
                 }
                 Text(
-                    entry.description,
+                    entry.description.removePrefix(entry.name + " "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = if (expanded) Int.MAX_VALUE else 1,
@@ -311,6 +311,6 @@ private fun LibraryRow(
             Checkbox(checked = selected, onCheckedChange = onSelect)
         }
         if (expanded) Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) { controls() }
-        HorizontalDivider(modifier = Modifier.padding(start = 16.dp))
+        HorizontalDivider()
     }
 }

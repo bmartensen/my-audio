@@ -8,7 +8,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** The record track: always the last track, empty or holding the latest take, with retakes over the same settings. */
+/** Optional prepared tracks, direct recording, and retakes over the same settings. */
 class RecordTrackTest {
     @get:Rule
     val folder = TemporaryFolder()
@@ -102,19 +102,50 @@ class RecordTrackTest {
     }
 
     @Test
-    fun resetRestoresAFreshRecordTrack() {
+    fun deletingTheEmptyTrackPersistsAbsenceAndStillAllowsDirectRecording() {
         var project = repository.create("Demo", 48000, 1)
         project = repository.updateRecordTrack(project.id, RecordTrack(name = "X", muted = false, solo = true, pan = 1f, effects = TrackEffects(chain = chain)))!!
-        project = repository.resetRecordTrack(project.id)!!
-        assertEquals(RecordTrack(), project.recordTrack)
-        assertTrue(project.nextTake.isPristine)
+        project = repository.deleteRecordTrack(project.id)!!
+        assertNull(project.recordTrack)
+        assertEquals(project, repository.load(project.id))
+        assertEquals(RecordTrack(), project.nextTake)
+        project = repository.addTake(project.id, take(project))!!
+        assertEquals("Track 1", project.tracks.single().name)
+        assertTrue(project.tracks.single().effects.chain.isEmpty())
+        assertFalse(project.tracks.single().solo)
     }
 
     @Test
-    fun anEmptyTrackIsOnlyAddedAfterATake() {
+    fun anEmptyTrackCanBePreparedDeletedAndAddedAgainWithoutAnyTakes() {
         var project = repository.create("Demo", 48000, 1)
-        assertNull(repository.addEmptyTrack(project.id)!!.recordTrack)
+        project = repository.addEmptyTrack(project.id)!!
+        assertEquals(RecordTrack(), project.recordTrack)
+        assertEquals(project, repository.addEmptyTrack(project.id))
+        project = repository.deleteRecordTrack(project.id)!!
+        assertNull(project.recordTrack)
+        assertEquals(project, repository.load(project.id))
+        assertTrue(project.tracks.isEmpty())
+        project = repository.addEmptyTrack(project.id)!!
+        assertEquals(RecordTrack(), project.recordTrack)
+    }
+
+    @Test
+    fun deletingTheEmptyTrackPreservesRecordingsAndAllowsFreshPreparation() {
+        var project = repository.create("Demo", 48000, 1)
+        project = repository.updateRecordTrack(project.id, RecordTrack(effects = TrackEffects(chain = chain)))!!
         project = repository.addTake(project.id, take(project))!!
+        val savedTrack = project.tracks.single()
+        val audio = repository.trackFile(project.id, savedTrack)
+        val reference = ProjectRepository.referenceFileFor(audio)
+        project = repository.updateRecordTrack(project.id, RecordTrack(name = "Unused", solo = true))!!
+        project = repository.deleteRecordTrack(project.id)!!
+        assertNull(project.recordTrack)
+        assertEquals(listOf(savedTrack), project.tracks)
+        assertEquals(listOf(savedTrack), project.audibleTracks)
+        assertTrue(audio.isFile)
+        assertTrue(reference.isFile)
+        assertEquals(project, repository.load(project.id))
+        assertEquals(chain, project.nextTake.effects.chain)
         project = repository.addEmptyTrack(project.id)!!
         assertEquals(RecordTrack(), project.recordTrack)
         // Its effects are its own, not inherited from the take before it.

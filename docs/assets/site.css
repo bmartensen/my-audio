@@ -24,7 +24,8 @@ img { max-width: 100%; height: auto; }
 .site-header .lang { border: 1px solid #ffffff55; border-radius: 999px; padding: 0 0.6em; }
 
 .content { max-width: 52rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
-.content h1, .content h2, .content h3 { line-height: 1.25; }
+.content { overflow-wrap: break-word; }
+.content h1, .content h2, .content h3 { line-height: 1.25; hyphens: auto; }
 .content h2 { margin-top: 2.6rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
 .content h3 { margin-top: 1.8rem; }
 .content code { background: #efece4; padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
@@ -36,8 +37,9 @@ img { max-width: 100%; height: auto; }
 .shot { display: block; margin: 1.2rem auto; width: 340px; max-width: 100%; border-radius: 18px;
   box-shadow: 0 10px 30px #1214182e; background: var(--stage2); }
 .shot.wide { width: 420px; }
+.shot.landscape { width: 100%; }
 .shot.dialog { background: transparent; box-shadow: 0 10px 30px #12141838; }
-.shots { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
+.shots { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 1.2rem; }
 .shots .shot { margin: 0.6rem 0; }
 
 /* Landing page */
@@ -51,6 +53,7 @@ img { max-width: 100%; height: auto; }
 .hero .tagline { color: var(--nickel); font-style: italic; font-size: 1.15rem; margin: 0; }
 .hero .lead { color: #d6d1c6; max-width: 34rem; margin: 1rem auto 1.6rem; }
 .buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.8rem; max-width: 30rem; margin: 0 auto; }
+.buttons.download-page { max-width: 20rem; }
 .btn, .btn:visited {
   display: flex; flex-direction: column; align-items: flex-start; padding: 0.8rem 1.1rem; border-radius: 14px;
   background: var(--ivory); color: #1d2026; text-decoration: none; text-align: left; transition: transform 0.15s, box-shadow 0.15s;

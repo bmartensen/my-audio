@@ -3,20 +3,14 @@ layout: default
 lang: de
 title: Anleitung
 description: Die Anleitung zu My Audio – jeder Bildschirm und jede Funktion erklärt.
-permalink: /anleitung/
-home: /
-other_lang: /en/guide/
-other_lang_code: en
-nav:
-  - title: Download
-    url: /#download
-  - title: Anleitung
-    url: /anleitung/
+permalink: /de/guide/
 ---
 
 # Anleitung
 
 My Audio ist ein Studio auf dem Smartphone: Du hältst eine Idee fest, nimmst Spur für Spur dazu auf, gibst Effekte dazu und teilst das Ergebnis. Diese Anleitung erklärt jeden Bildschirm. Die Bilder stammen von Android; unter Windows sieht alles gleich aus und wird mit der Maus bedient.
+
+Stand: My Audio {{ site.release }}. Die verfügbaren Installationsdateien stehen auf der [Download-Seite]({{ '/de/#download' | relative_url }}).
 
 <nav class="toc" markdown="1">
 - [Erste Schritte](#erste-schritte)
@@ -45,7 +39,7 @@ My Audio ist ein Studio auf dem Smartphone: Du hältst eine Idee fest, nimmst Sp
 
 ## Erste Schritte
 
-1. **Installieren:** siehe [Download]({{ '/#download' | relative_url }}).
+1. **Installieren:** siehe [Download]({{ '/de/#download' | relative_url }}).
 2. **Einmessen:** Öffne *Einstellungen → Latenz einmessen* und tippe auf *Einmessung starten*. So liegen neue Aufnahmen genau im Takt zu den bestehenden Spuren. Aufnehmen kannst du auch ohne Einmessung; die Spuren können dann leicht verzögert sein.
 3. **Aufnehmen:** Tippe auf der Startseite auf den roten Aufnahmeknopf. My Audio legt ein neues Projekt an und beginnt sofort mit der ersten Spur.
 
@@ -53,11 +47,11 @@ Beim ersten Aufnehmen fragt Android nach dem Zugriff aufs Mikrofon. Kopfhörer s
 
 ## Startseite
 
-<img class="shot wide" src="{{ '/images/home.png' | relative_url }}" alt="Startseite mit Projekt und Aufnahmeknopf">
+<img class="shot landscape" src="{{ '/images/home.png' | relative_url }}" alt="Startseite im Querformat mit Demo-Projekt, Neues Projekt und Aufnahmeknopf">
 
 - **Projektkarte:** Tippen öffnet das Projekt. Darunter stehen die Zahl der Spuren und die Länge. Der Stift benennt das Projekt um, der Papierkorb löscht es nach einer Rückfrage mit allen Aufnahmen.
 - **Aufnahmeknopf (rot):** legt ein Projekt mit Datum und Uhrzeit als Namen an und startet die erste Aufnahme.
-- **Neues Projekt:** legt ein leeres Projekt an, ohne aufzunehmen.
+- **+ Neues Projekt** unter der Liste legt ein leeres Projekt an, ohne aufzunehmen.
 - **Effekt-Bibliothek** (Wellensymbol): alle Effekte zum Ausprobieren und Auswählen, siehe [Effekt-Bibliothek](#effekt-bibliothek).
 - **Projekt importieren** (Pfeil nach unten): öffnet eine ZIP-Datei. Eine Sicherung aus *Teilen → Projekt sichern* wird als Projekt wiederhergestellt. Ein ZIP mit Audiodateien (MP3, Ogg, WAV) wird zu einem neuen Projekt mit einer Spur je Datei; eine führende Nummer im Dateinamen („01 Drums.wav“) bestimmt die Reihenfolge.
 - **Einstellungen** (Zahnrad): Geräte, Audiopuffer, Einmessung und Infos.
@@ -76,6 +70,8 @@ Oben stehen **Zurück**, der Projektname, **Notizen**, **Teilen** und **Projekte
 
 Im Querformat wandern Zeit und Knöpfe in eine Spalte am rechten Rand, damit die Spuren mehr Platz haben.
 
+<img class="shot landscape" src="{{ '/images/project-landscape.png' | relative_url }}" alt="Projekt im Querformat mit mittig angeordnetem Aufnahmeknopf">
+
 ## Spuren
 
 <img class="shot" src="{{ '/images/project-record-track.png' | relative_url }}" alt="Spuren mit Effektzeile und Lautstärkeverlauf">
@@ -86,7 +82,7 @@ Jede Karte zeigt eine Aufnahme auf der gemeinsamen Zeitachse:
 - **Lautstärkeverlauf** (Kurvensymbol, farbig, wenn ein Verlauf gesetzt ist): öffnet den [Editor](#lautstärkeverlauf).
 - **S – Solo:** Sobald eine Spur auf Solo steht, klingen nur noch die Solo-Spuren. Mehrere Solos sind möglich.
 - **Lautsprecher – Stumm:** schaltet die Spur stumm; Solo hat Vorrang.
-- **Papierkorb:** löscht die Spur mit ihrer Aufnahme (*Spur löschen?*). Bei der letzten Spur gilt eine eigene Regel, siehe [Aufnahmespur](#die-aufnahmespur).
+- **Papierkorb:** öffnet eine Bestätigung zum Löschen.
 - **Effektzeile:** die eingeschalteten Effekte in Reihenfolge, gekürzt mit „…“, wenn sie nicht in eine Zeile passen.
 - **Wellenform:** auf einer dB-Skala, damit auch leise Aufnahmen gut sichtbar sind. Ein gesetzter Lautstärkeverlauf liegt als helle Linie darüber (oben 100 %, unten 0 %), die Übungsschleife als hellerer Bereich.
 - **Ohne Einmessung aufgenommen:** Diese Spur entstand ohne Latenzausgleich und kann leicht hinter den anderen liegen.
@@ -95,18 +91,12 @@ Ein **langer Druck** auf die Karte öffnet die [Spur-Einstellungen](#spur-einste
 
 ## Die Aufnahmespur
 
-Die letzte Spur ist immer die Aufnahmespur: Dort landet der nächste Take. In einem neuen Projekt ist sie leer und zeigt **Leer**. Du kannst sie schon vor der Aufnahme vorbereiten:
+Mit **+ Neue Spur** unter den Spuren bereitest du eine leere Aufnahmespur für den nächsten Take vor, auch in einem Projekt ohne Aufnahmen. Sie zeigt **Leer**, und du kannst das Instrument schon vor der Aufnahme einstellen. Der nächste Take landet in dieser Spur.
 
 - **Effekte** (Wellensymbol) oder langer Druck öffnet ihre Einstellungen: Name, Effekte, Lautstärke und Panorama.
 - **Stumm** bedeutet bei der leeren Aufnahmespur: Das Mikrofon wird beim Aufnehmen **nicht mitgehört**. Hebst du die Stummschaltung auf, steht **Mithören** auf der Karte, und du hörst dich beim Aufnehmen durch ihre Effekte (siehe [Live mithören](#live-mithören)). Neue Spuren starten immer stumm; nach einer Aufnahme ist die Spur nicht mehr stumm, damit du den Take hörst.
-- **Papierkorb** in zwei Stufen:
-  - Liegt eine Aufnahme auf der letzten Spur, fragt er **Aufnahme löschen?** und entfernt nur die Aufnahme. Name, Effekte und alle Einstellungen bleiben – der nächste Versuch läuft durch dieselben Effekte.
-  - Ist die Spur leer, aber verändert, fragt er **Zurücksetzen?** und stellt den Zustand einer neuen Spur wieder her.
-  - Ist sie leer und unverändert, ist der Papierkorb ausgegraut.
 
-<img class="shot dialog" src="{{ '/images/reset-dialog.png' | relative_url }}" alt="Rückfrage Zurücksetzen">
-
-Liegt auf der letzten Spur schon eine Aufnahme, startet *Aufnehmen* eine neue Spur. Sie übernimmt Effekte und Eingangseinstellungen der vorigen und startet stumm. Mit **+ Leere Spur** unter der letzten Spur legst du eine leere Aufnahmespur an, um das nächste Instrument vorzubereiten.
+Du kannst auch ohne vorbereitete Spur direkt auf *Aufnehmen* tippen. Dann übernimmt die neue Spur Effekte und Eingangseinstellungen der letzten Aufnahme.
 
 ## Aufnehmen und Abspielen
 
@@ -134,7 +124,7 @@ Ein langer Druck auf eine Spur öffnet ihre Einstellungen in Signalreihenfolge. 
 - **Effekt hinzufügen** bietet die in der [Bibliothek](#effekt-bibliothek) ausgewählten Effekte an.
 - **Griff links** (zwei Striche): ziehen ändert die Reihenfolge.
 - **Häkchen:** schaltet den Effekt aus, ohne seine Einstellungen zu verlieren.
-- **Papierkorb:** entfernt den Effekt.
+- **Papierkorb:** entfernt den Effekt nach einer Rückfrage.
 - **Tippen auf den Namen** klappt den Effekt mit seinen Reglern auf; es ist immer nur einer offen.
 
 **Kanal**
@@ -189,7 +179,7 @@ My Audio kann dein Mikrofon in Echtzeit durch Effekte schicken, während du spie
 1. **Beim Aufnehmen:** Hebe die Stummschaltung der leeren Aufnahmespur auf. Während der Aufnahme hörst du dich durch ihre Effekte, zusammen mit den anderen Spuren.
 2. **Beim Ausprobieren:** In der Bibliothek und in den Spur-Einstellungen startet **Live** das Mikrofon direkt durch den Effekt zum Ausgang – ohne Wiedergabe und ohne Aufnahme. *Mit / Ohne* vergleicht auch hier.
 
-<img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Warnung vor dem Mithören über den Lautsprecher">
+<img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Rückfrage vor dem Mithören über Bluetooth">
 
 - **Kopfhörer verwenden.** Am eingebauten Lautsprecher droht Rückkopplung (Pfeifen), über Bluetooth kommt der Klang deutlich verzögert an. My Audio fragt deshalb nach, bevor es dort mithört.
 - **Die Aufnahme bleibt trocken.** Gespeichert wird immer das unbearbeitete Mikrofon; die Effekte wirken danach genau so wie beim Mithören.
@@ -209,7 +199,7 @@ Der Master bearbeitet den ganzen Mix – mit derselben Effektkette wie eine Spur
 Mit dem Kurvensymbol einer Spur zeichnest du ein Ein- oder Ausblenden oder einzelne leisere Stellen:
 
 - **Tippen** in die Wellenform setzt einen Punkt, **Ziehen** verschiebt ihn. Punkte können ihre Nachbarn nicht überholen. Die Höhe reicht von 0 % (unten) bis 100 % (oben) der Spurlautstärke.
-- Der **Papierkorb** entfernt den gewählten Punkt, **Auf volle Lautstärke zurücksetzen** entfernt alle.
+- Der **Papierkorb** entfernt den gewählten Punkt. **Auf volle Lautstärke zurücksetzen** entfernt nach einer Rückfrage alle Punkte.
 - Die **Übersicht** unter der Wellenform zeigt die ganze Spur: Tippen zentriert, Ziehen verschiebt. Die **Lupen** zoomen von 1- bis 8-fach.
 - **Spur solo vorhören** (▶) spielt die Spur mit dem neuen Verlauf und ihren Effekten; währenddessen springst du durch Tippen in die Wellenform.
 - **Speichern** übernimmt den Verlauf. Gehst du mit ungespeicherten Änderungen zurück, fragt My Audio nach.
@@ -280,7 +270,6 @@ Die Bibliothek enthält *EQ (My Audio)*, *Hall (My Audio)* und 478 Airwindows-Ef
   - **Automatisch** nutzt den Standard des Systems für geringe Latenz. Für die meisten Geräte die beste Wahl.
   - **Kurz** verringert die Verzögerung beim Live-Mithören, kann aber zu Knacksern und Aussetzern führen.
   - **Lang** ist am robustesten, wenn es knackst – mit etwas mehr Verzögerung.
-  Jede Stufe wird **eigens eingemessen**, weil sich die Laufzeit ändert; nach einem Wechsel erscheint der Hinweis zur Einmessung, bis du neu misst.
 - **Latenz einmessen:** zeigt die gemessene Latenz und öffnet die Einmessung.
 - **Über My Audio:** Version, Mitwirkende, Kontakt und alle Lizenzen.
 
@@ -305,7 +294,7 @@ Die Windows-Version hat dieselben Funktionen und denselben Aufbau, bedient mit M
 
 ## Daten und Datenschutz
 
-My Audio braucht kein Konto und keinen Internetdienst. Projekte bleiben auf deinem Gerät (Android: privater App-Speicher, Windows: *Dokumente/My Audio*). Was du teilst, entscheidest du selbst über *Teilen*. Sicherungen enthalten alle Originalaufnahmen; neuere und ältere App-Versionen können Projekte gegenseitig öffnen.
+My Audio braucht kein Konto und keinen Internetdienst. Projekte bleiben auf deinem Gerät (Android: privater App-Speicher, Windows: *Dokumente/My Audio*). Was du teilst, entscheidest du selbst über *Teilen*. Sicherungen enthalten alle Originalaufnahmen; neuere und ältere App-Versionen können Projekte gegenseitig öffnen. Einzelheiten stehen in der [Datenschutzerklärung]({{ '/de/privacy/' | relative_url }}).
 
 ---
 

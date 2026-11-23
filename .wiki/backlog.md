@@ -4,15 +4,14 @@ Only outstanding work belongs here. Agreed scope is in [requirements](app-requir
 
 ## Version 0.9: record track and live effects
 
-Agreed scope: [requirements](app-requirements.md#planned-for-09-record-track-and-live-effects).
+Agreed scope: [requirements](app-requirements.md#record-track-and-live-effects).
 
 - Show a project-level hint when a project contains effects that require a newer version.
-- Check record track, two-stage trash and recording without calibration on Windows and on the Pixel 9 (emulator checked), including imports while an empty record track exists.
+- Check the optional record track (delete recording, delete empty track, + New track) and recording without calibration on Windows and on the Pixel 9 (emulator checked), including imports while an empty record track exists.
 - Accept live monitoring on the Pixel 9 (internal, wired, USB interface) and Windows: heard latency per buffer setting (Automatic/Short/Long, each calibrated), dropouts, callback CPU with six heavy Airwindows slots, Live in library and track dialogs, monitoring while recording, and that takes stay dry.
 - Decide from those measurements whether the buffer default should change and whether xruns during live audition need a visible notice; recording already stops on dropouts.
 - Stop live audition when the app goes to the background; it currently runs until the dialog or library closes.
 - Desktop cannot tell loudspeakers from headphones, so Windows shows no feedback warning; only the Live hint asks for headphones.
-- Tag `v0.9.0` on the commit the 0.9.0 installers were built from once it is saved.
 
 ## Product and hardware acceptance
 
@@ -55,9 +54,13 @@ Agreed scope: [requirements](app-requirements.md#planned-for-09-record-track-and
 - Decide whether preview should use unsaved normalization/cleanup changes in the open track dialog; it currently uses saved input settings until Done.
 - Route preview to the app-selected output when it differs from system default: Android AudioTrack preferred-device support and desktop Java Sound mixer selection.
 
+- Library subtitles now start in lower case where the repeated effect name was removed (“ist ein Beschleunigungsbegrenzer …”). Decide whether to capitalize the remainder, rephrase the generated descriptions or show the full text again.
 ## Development and public repository
 
 - Add instrumented/UI tests for project lists, recording flow and dialogs.
 - Exercise missing-tool installation on a clean Windows VM, including license prompts, elevation, interrupted downloads and reboot recovery.
 - Invoke the shared skills interactively in Antigravity, Gemini CLI, Codex and Claude Code and confirm discovery and question behavior.
-- Before distributing installers, satisfy the selected runtime's source-distribution terms and validate the matching runtime notices/source package; see [developer builds](developer-builds.md).
+- Publish 0.9.18 once accepted on the phone and authorized: publication audit, commit, tag `v0.9.18`, `tools/publish_github_release.ps1`, then `release_downloads: true` and the Pages push; afterwards the operator deploys martensening.com. Order and checks: [Pages and releases](site-publication.md#publishing-a-version).
+- Provide the Java runtime source for the installers distributed before 0.9.18 (0.8.x–0.9.8 on martensening.com), or document which runtime versions they bundled.
+- Project settings still show multi-line explanations (notes scrolling, pre-roll) despite the brief-interface rule; shorten them to one line and move the explanation to the guide.
+- Decide Android backup behavior: `allowBackup="true"` without backup rules lets Android include projects in device backups (subject to its size limit). Either exclude recordings with backup rules or document it; the privacy policy currently mentions it.

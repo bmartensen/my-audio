@@ -164,6 +164,7 @@ fun VolumeEnvelopeScreen(
     var windowStart by rememberSaveable(track.id) { mutableLongStateOf(0L) }
     var previewFrame by rememberSaveable(track.id) { mutableLongStateOf(0L) }
     var confirmingLeave by rememberSaveable(track.id) { mutableStateOf(false) }
+    var confirmingReset by rememberSaveable(track.id) { mutableStateOf(false) }
 
     val hasChanges = draft.points() != savedEnvelope
     val requestBack: () -> Unit = {
@@ -193,6 +194,15 @@ fun VolumeEnvelopeScreen(
     }
 
     PlatformBackHandler(onBack = requestBack)
+    if (confirmingReset) {
+        ConfirmDeleteDialog(
+            title = stringResource(Res.string.envelope_reset_question),
+            message = stringResource(Res.string.envelope_reset_info),
+            confirmLabel = Res.string.action_reset,
+            onConfirm = { if (!playing && !busy) draft.clear() },
+            onDismiss = { confirmingReset = false }
+        )
+    }
     if (confirmingLeave) {
         UnsavedChangesDialog(
             busy = busy,
@@ -299,7 +309,7 @@ fun VolumeEnvelopeScreen(
                     selected = draft.selected,
                     onPlay = { if (playing) stopPreview() else onPreview(draft.points(), previewFrame) },
                     onRemove = draft::removeSelected,
-                    onReset = draft::clear,
+                    onReset = { confirmingReset = true },
                     modifier = if (width != null) Modifier.width(width) else Modifier.fillMaxWidth().widthIn(max = PanelMaxWidth)
                 )
             }

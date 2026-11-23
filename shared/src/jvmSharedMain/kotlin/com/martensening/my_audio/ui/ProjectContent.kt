@@ -28,12 +28,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,6 +70,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.LinearProgressIndicator
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.Metronome
@@ -116,7 +119,7 @@ fun ProjectContent(
     val state by viewModel.state.collectAsState()
     var deletingTrack by rememberSaveable { mutableStateOf<Long?>(null) }
     var deletingRecording by rememberSaveable { mutableStateOf<Long?>(null) }
-    var resettingRecordTrack by rememberSaveable { mutableStateOf(false) }
+    var deletingRecordTrack by rememberSaveable { mutableStateOf(false) }
     var editingRecordTrack by rememberSaveable { mutableStateOf(false) }
     var monitorWarning by remember { mutableStateOf<LiveWarning?>(null) }
     var editingMetronome by rememberSaveable { mutableStateOf(false) }
@@ -164,16 +167,20 @@ fun ProjectContent(
 
     // In landscape the transport moves to a column at the right edge, so tracks keep the height.
     val landscape = LocalWindowInfo.current.containerSize.let { it.width > it.height }
-    val transport = @Composable { vertical: Boolean ->
-        TransportBar(
-            state = state.copy(preparingTransport = state.preparingTransport || state.tunerBusy || state.tunerOpen || state.importing),
-            vertical = vertical,
-            onPlay = viewModel::togglePlayback,
-            onRecord = { if (state.mode == TransportMode.Recording || countingDown) viewModel.toggleRecording() else requestRecording() },
-            onMetronome = { editingMetronome = true },
-            inputChannel = inputChannel,
-            onInputChannel = onInputChannel
-        )
+    val safeTop = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
+    val transport = @Composable { vertical: Boolean, topBarHeight: Dp ->
+        TransportPanel(vertical) {
+            TransportBar(
+                state = state.copy(preparingTransport = state.preparingTransport || state.tunerBusy || state.tunerOpen || state.importing),
+                vertical = vertical,
+                topBarHeight = topBarHeight,
+                onPlay = viewModel::togglePlayback,
+                onRecord = { if (state.mode == TransportMode.Recording || countingDown) viewModel.toggleRecording() else requestRecording() },
+                onMetronome = { editingMetronome = true },
+                inputChannel = inputChannel,
+                onInputChannel = onInputChannel
+            )
+        }
     }
     Scaffold(
         topBar = {
@@ -190,7 +197,7 @@ fun ProjectContent(
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = { if (!landscape) transport(false) }
+        bottomBar = { if (!landscape) transport(false, 0.dp) }
     ) { innerPadding ->
         Row(
             modifier = Modifier
@@ -229,7 +236,7 @@ fun ProjectContent(
                             else viewModel.setRecordTrackMuted(!project.nextTake.muted)
                         },
                         onRecordTrackSolo = { viewModel.setRecordTrackSolo(!project.nextTake.solo) },
-                        onRecordTrackReset = { resettingRecordTrack = true },
+                        onRecordTrackDelete = { deletingRecordTrack = true },
                         onRecordTrackEdit = { editingRecordTrack = true },
                         onAddEmptyTrack = viewModel::addEmptyTrack,
                         onEditMaster = { editingMaster = true },
@@ -239,7 +246,7 @@ fun ProjectContent(
                     )
                 }
             }
-            if (landscape) transport(true)
+            if (landscape) transport(true, (innerPadding.calculateTopPadding() - safeTop).coerceAtLeast(0.dp))
         }
     }
 
@@ -295,13 +302,12 @@ fun ProjectContent(
             onCancel = { monitorWarning = null }
         )
     }
-    if (resettingRecordTrack && project != null) {
+    if (deletingRecordTrack && project != null) {
         ConfirmDeleteDialog(
-            title = stringResource(Res.string.track_reset_question),
-            message = formatResource(Res.string.track_reset_info, recordTrackName(project)),
-            onConfirm = viewModel::resetRecordTrack,
-            onDismiss = { resettingRecordTrack = false },
-            confirmLabel = Res.string.action_reset
+            title = stringResource(Res.string.track_delete_question),
+            message = formatResource(Res.string.record_track_delete_info, recordTrackName(project)),
+            onConfirm = viewModel::deleteRecordTrack,
+            onDismiss = { deletingRecordTrack = false }
         )
     }
     val librarySelection by viewModel.effectLibrary.selection.collectAsState()
@@ -360,7 +366,7 @@ private fun TrackList(
     onEdit: (Track) -> Unit,
     onRecordTrackMute: () -> Unit,
     onRecordTrackSolo: () -> Unit,
-    onRecordTrackReset: () -> Unit,
+    onRecordTrackDelete: () -> Unit,
     onRecordTrackEdit: () -> Unit,
     onAddEmptyTrack: () -> Unit,
     onEditMaster: () -> Unit,
@@ -368,14 +374,14 @@ private fun TrackList(
     onSeek: (Long) -> Unit,
     modifier: Modifier
 ) {
-    // The last track records the next take: the empty record track, or else the last take itself.
-    val emptyRecordTrack = project.recordTrack != null || project.tracks.isEmpty()
+    // A prepared empty track receives the next take; without one, the last take offers the retake deletion.
+    val emptyRecordTrack = project.recordTrack != null
     val lastTake = project.tracks.lastOrNull()?.takeUnless { emptyRecordTrack }
     val editable = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting
     val seek = onSeek.takeIf { state.mode == TransportMode.Playing }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -418,16 +424,13 @@ private fun TrackList(
                     editable = editable,
                     onToggleMute = onRecordTrackMute,
                     onToggleSolo = onRecordTrackSolo,
-                    onReset = onRecordTrackReset,
+                    onDelete = onRecordTrackDelete,
                     onEdit = onRecordTrackEdit
                 )
             }
         } else {
             item(key = "addTrack") {
-                TextButton(onClick = onAddEmptyTrack, enabled = editable) {
-                    Icon(painterResource(Res.drawable.ic_add), contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text(stringResource(Res.string.record_track_add))
-                }
+                AddItemButton(stringResource(Res.string.record_track_add), onAddEmptyTrack, enabled = editable)
             }
         }
     }
@@ -455,7 +458,7 @@ private const val RECORD_TRACK_ID = -1L
 
 /**
  * The empty record track at the end: the next take goes here with its settings. A long press opens them; the
- * trash resets them and is disabled while nothing differs from a new track, so its state is visible.
+ * trash removes the empty track and its settings after confirmation, including at defaults.
  */
 @Composable
 private fun RecordTrackCard(
@@ -463,7 +466,7 @@ private fun RecordTrackCard(
     editable: Boolean,
     onToggleMute: () -> Unit,
     onToggleSolo: () -> Unit,
-    onReset: () -> Unit,
+    onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
     val record = project.nextTake
@@ -500,10 +503,10 @@ private fun RecordTrackCard(
                     enabled = editable,
                     onToggle = onToggleMute
                 )
-                IconButton(onClick = onReset, enabled = editable && !record.isPristine) {
+                IconButton(onClick = onDelete, enabled = editable) {
                     Icon(
                         painterResource(Res.drawable.ic_delete),
-                        contentDescription = stringResource(Res.string.track_reset_question)
+                        contentDescription = stringResource(Res.string.track_delete_question)
                     )
                 }
             }
@@ -593,7 +596,7 @@ private fun preRollSeconds(remainingMillis: Long) = ((remainingMillis + 999) / 1
 @Composable
 private fun CalibrationHint(onOpenCalibration: () -> Unit) {
     PanelCard(border = null, containerColor = MaterialTheme.colorScheme.secondaryContainer) {
-        Column(modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 4.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 4.dp)) {
             Text(stringResource(Res.string.project_calibration_hint), style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = onOpenCalibration, modifier = Modifier.align(Alignment.End)) {
                 Text(stringResource(Res.string.project_calibration_action))
@@ -993,6 +996,7 @@ private const val WAVEFORM_RANGE_DB = 48f
 private fun TransportBar(
     state: ProjectUiState,
     vertical: Boolean,
+    topBarHeight: Dp,
     onPlay: () -> Unit,
     onRecord: () -> Unit,
     onMetronome: () -> Unit,
@@ -1012,7 +1016,7 @@ private fun TransportBar(
             color = if (state.mode == TransportMode.Recording || preRoll != null) RecordRed else MaterialTheme.colorScheme.onSurface
         )
         // With the input switch the row is taller in every mode, so Record never moves.
-        Box(modifier = Modifier.height(if (inputChannel != null) 32.dp else 20.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.height(if (inputChannel != null) 32.dp else 16.dp), contentAlignment = Alignment.Center) {
             if (state.mode == TransportMode.Recording) {
                 LevelMeter(level = state.inputLevel, meterWidth = if (vertical) 96.dp else 180.dp)
             } else if (preRoll != null) {
@@ -1023,37 +1027,32 @@ private fun TransportBar(
         }
     }
     if (vertical) {
-        // Record in the middle, Play and Metronome side by side: fits the height of a phone in landscape.
-        // 16 dp from the track list plus 16 dp here mirror the 32 dp to the outer edge.
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-            modifier = Modifier
-                .fillMaxHeight()
-                .navigationBarsPadding()
-                .padding(start = 16.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
-        ) {
-            status()
-            RecordControl(state, onRecord)
-            // Without tracks there is no Play: the metronome alone stays centred under Record.
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (project?.tracks?.isNotEmpty() == true) PlayButton(state, onPlay)
-                MetronomeButton(state, onMetronome)
+        LandscapeTransportRail(
+            topBarHeight = topBarHeight,
+            above = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)) { status() }
+            },
+            below = {
+                // Without tracks the metronome alone stays centred under Record.
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    if (project?.tracks?.isNotEmpty() == true) PlayButton(state, onPlay)
+                    MetronomeButton(state, onMetronome)
+                }
             }
-        }
+        ) { RecordControl(state, onRecord) }
     } else {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(top = 8.dp, bottom = 24.dp)
         ) {
             status()
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier
             ) {
                 PlayButton(state, onPlay)
                 RecordControl(state, onRecord)

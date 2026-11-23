@@ -17,5 +17,6 @@ Product knowledge, durable decisions and open work for My Audio. Start with the 
 | [Audio quality](audio-quality.md) | Bleed-removal model and measurement limits |
 | [Audio import](audio-import.md) | Stereo decoding, tests and open listening checks |
 | [Publication checks](publication-checks.md) | Audit before publishing source |
+| [Pages and releases](site-publication.md) | Site structure, publishing a version, download checks and guide screenshots |
 
 Policy: [AGENTS.md](../AGENTS.md). Shared skills: [.agents](../.agents/README.md). Version history: [changelog](../CHANGELOG.md). Licenses: [inventory](../licenses/THIRD_PARTY_NOTICES.md).

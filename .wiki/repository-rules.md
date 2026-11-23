@@ -26,9 +26,24 @@ Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK se
 
 Outputs, logs, screenshots and personal test projects stay in ignored `.work/`. APK release packaging verifies its configured signing certificate. MSI redistribution requires the matching runtime notices and corresponding source described in the build guide.
 
+For Pages, guide or download-link changes, also run `tools/test_site_downloads.ps1` and
+`tools/check_site_downloads.ps1`; verify images, internal links and redirects in German and English
+at phone and desktop widths. Direct release downloads require uploaded, published assets, not just a
+tag; `tools/publish_github_release.ps1` creates the release only on explicit authorization. See
+[Pages and releases](site-publication.md).
+
 ## Device checks
 
 Only run installation/device commands when authorized for that device. Replacement installs preserve data only when signatures are compatible; never resolve a mismatch by automatic uninstall.
+
+### UI refinement and final acceptance
+
+1. Iterate on layout and interaction with debug builds in the emulator. Rebuild and replace the debug app there without incrementing the release version for each visual adjustment. Check screenshots with representative multitrack projects, portrait/landscape, light/dark themes and relevant navigation modes. Keep destructive-action tests in disposable demo data or discard unsaved changes.
+2. Once the emulator checks pass, prepare the release candidate with the next shared versionName/versionCode and build the Android release APK and Windows installer. Preserve every previously distributed package; further changes after a candidate has been installed for acceptance require a new version.
+3. Perform final acceptance with the release build on the contributor's connected smartphone, using their existing, finished projects and realistic track counts. The current maintainer uses a Pixel, but any contributor's compatible phone can serve this role. Select the intended device explicitly; no model or serial is a prerequisite. Use the contributor's configured signing identity, verify update compatibility and preserve their projects. Never substitute a debug installation over their release app.
+4. Inspect the actual phone screenshots and let the contributor assess the result in their normal workflow. Emulator checks, successful packaging and signature verification do not constitute final human acceptance or hardware audio acceptance. Record their scope separately in current work. Windows review uses the matching installer when the shared UI is affected.
+
+Keep the final phone pass focused on acceptance; return to the emulator for further polish rather than repeatedly distributing intermediate builds. Package preparation and local acceptance do not authorize a commit, push or publication.
 
 ```powershell
 .\tools\debug_launch.ps1 -Target emulator

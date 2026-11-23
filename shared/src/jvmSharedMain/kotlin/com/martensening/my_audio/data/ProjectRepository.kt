@@ -92,14 +92,14 @@ class ProjectRepository(root: File) {
         return project.copy(tracks = project.tracks - track, recordTrack = RecordTrack.keepingSettingsOf(track)).also(::save)
     }
 
-    /** Returns the empty record track to the state of a newly created one. */
+    /** Removes the prepared empty track and its settings without touching any recorded tracks. */
     @Synchronized
-    fun resetRecordTrack(projectId: Long): Project? = update(projectId) { it.copy(recordTrack = RecordTrack()) }
+    fun deleteRecordTrack(projectId: Long): Project? = update(projectId) { it.copy(recordTrack = null) }
 
     /** Adds an empty record track after the last take, to prepare the next instrument before recording. */
     @Synchronized
     fun addEmptyTrack(projectId: Long): Project? = update(projectId) { project ->
-        if (project.recordTrack != null || project.tracks.isEmpty()) project else project.copy(recordTrack = RecordTrack())
+        if (project.recordTrack != null) project else project.copy(recordTrack = RecordTrack())
     }
 
     @Synchronized

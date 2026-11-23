@@ -1,11 +1,16 @@
-# GitHub Pages site of My Audio: info, downloads and the user guide, in German and English.
+# GitHub Pages site of My Audio: info, downloads, user guide, privacy policy and legal notice in German
+# (/de/…) and English (/en/…) with identical slugs; / chooses by browser language.
 # Publish with Settings → Pages → Deploy from a branch → <branch> /docs.
 title: My Audio
 description: Mehrspur-Recorder für Musikdemos · Multitrack recorder for music demos
 repository_url: https://github.com/bmartensen/my-audio
-# The release whose signed APK and MSI the download buttons offer (GitHub release tag v<release>).
-release: 0.9.8
-released: 2026-11-22
+# Current app/guide version. A tag alone does not provide downloadable installers.
+release: 0.9.18
+released: 2026-11-23
+# Enable direct GitHub downloads only after tools/check_site_downloads.ps1 -RequireGitHubRelease passes.
+release_downloads: false
+# Mirror with identical files; offered alone until release assets are published, without claiming its version.
+download_page: https://www.martensening.com/myaudio/
 markdown: kramdown
 kramdown:
   auto_ids: true

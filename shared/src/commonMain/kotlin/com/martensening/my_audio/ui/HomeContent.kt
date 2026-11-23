@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -34,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -46,8 +52,9 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The start page, shared by Android and desktop: project cards with rename/delete and a "New
- * project" card below them, import and settings at the top, the big Record button (quick start:
- * new project and take at once) at the bottom. The platform supplies data and actions.
+ * project" action below them, import and settings at the top, the big Record button (quick start:
+ * new project and take at once) at the bottom, or in a right-side rail in landscape.
+ * The platform supplies data and actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +76,8 @@ fun HomeContent(
 ) {
     var renaming by rememberSaveable { mutableStateOf<Long?>(null) }
     var deleting by rememberSaveable { mutableStateOf<Long?>(null) }
+    val landscape = LocalWindowInfo.current.containerSize.let { it.width > it.height }
+    val safeTop = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
 
     Scaffold(
         modifier = modifier,
@@ -100,7 +109,7 @@ fun HomeContent(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Box(
+            if (!landscape) Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
@@ -111,27 +120,40 @@ fun HomeContent(
             }
         }
     ) { innerPadding ->
-        val list = projects
-        when {
-            list == null -> Unit
-            list.isEmpty() -> EmptyState(onNewProject, Modifier.padding(innerPadding))
-            else -> LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                items(list, key = { it.id }) { project ->
-                    ProjectCard(
-                        project = project,
-                        onOpen = { onOpenProject(project) },
-                        onRename = { renaming = project.id },
-                        onDelete = { deleting = project.id }
-                    )
+        Row(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)) {
+            Box(Modifier.weight(1f).fillMaxHeight()) {
+                val list = projects
+                when {
+                    list == null -> Unit
+                    list.isEmpty() -> EmptyState(onNewProject, Modifier)
+                    else -> LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(list, key = { it.id }) { project ->
+                            ProjectCard(
+                                project = project,
+                                onOpen = { onOpenProject(project) },
+                                onRename = { renaming = project.id },
+                                onDelete = { deleting = project.id }
+                            )
+                        }
+                        item(key = "new-project") {
+                            AddItemButton(stringResource(Res.string.home_new_project), onNewProject)
+                        }
+                    }
                 }
-                item(key = "new-project") { NewProjectCard(onNewProject) }
+            }
+            if (landscape) {
+                TransportPanel(vertical = true) {
+                    LandscapeTransportRail(
+                        topBarHeight = (innerPadding.calculateTopPadding() - safeTop).coerceAtLeast(0.dp)
+                    ) {
+                        RecordButton(recording = false, onClick = onRecord)
+                    }
+                }
             }
         }
     }
@@ -175,33 +197,8 @@ private fun EmptyState(onNewProject: () -> Unit, modifier: Modifier) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)
         )
-        Box(Modifier.padding(top = 24.dp)) { NewProjectCard(onNewProject) }
-    }
-}
-
-/** Like the Master card in the project: the last entry of the list, opens an empty project. */
-@Composable
-private fun NewProjectCard(onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 720.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
-        ) {
-            Icon(
-                painterResource(Res.drawable.ic_add),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(end = 12.dp)
-            )
-            Text(stringResource(Res.string.home_new_project), style = MaterialTheme.typography.titleMedium)
+        Box(Modifier.padding(top = 24.dp)) {
+            AddItemButton(stringResource(Res.string.home_new_project), onNewProject)
         }
     }
 }

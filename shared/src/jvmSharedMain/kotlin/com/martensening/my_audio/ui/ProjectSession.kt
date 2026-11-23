@@ -428,8 +428,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     /** Deletes only the audio of the last take; its settings stay as the empty record track for a retake. */
     fun deleteRecording(track: Track) = changeProject { repository.deleteRecording(projectId, track.id) }
 
-    /** Returns the empty record track to the state of a new track. */
-    fun resetRecordTrack() = changeProject { repository.resetRecordTrack(projectId) }
+    /** Removes the prepared empty track and its settings, preserving all recordings. */
+    fun deleteRecordTrack() = changeProject { repository.deleteRecordTrack(projectId) }
 
     /** An empty record track after the last take, to prepare the next instrument. */
     fun addEmptyTrack() = changeProject { repository.addEmptyTrack(projectId) }

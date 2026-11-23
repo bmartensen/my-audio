@@ -228,7 +228,7 @@ data class RecordTrack(
     val volumeEnvelope: List<VolumePoint> = emptyList(),
     val unknown: UnknownFields = UnknownFields.NONE
 ) {
-    /** Unchanged since it was created; then there is nothing to reset. Unknown fields do not count. */
+    /** Matches a newly prepared track; unknown fields do not count. */
     val isPristine get() = copy(unknown = UnknownFields.NONE) == RecordTrack()
 
     companion object {
@@ -298,8 +298,8 @@ data class Project(
     /** Effect chain on the whole mix, before the fixed loudness and limiter stage. */
     val masterChain: List<EffectSlot> = emptyList(),
     /**
-     * The empty record track after [tracks], or null. With null, a project without tracks still shows a fresh
-     * empty record track; otherwise the last track (which holds a take) is the record track.
+     * The prepared empty track after [tracks], or null to show the add-track action.
+     * Recording without a prepared track uses [nextTake] directly.
      */
     val recordTrack: RecordTrack? = null,
     val unknown: UnknownFields = UnknownFields.NONE

@@ -1,22 +1,37 @@
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: 'de' }}">
+{%- comment -%}
+  Pages live under /de/ and /en/ with identical slugs, so the other language is the same URL with the
+  prefix swapped. Navigation and footer texts come from the page language.
+{%- endcomment -%}
+{%- assign lang = page.lang | default: 'de' -%}
+{%- if lang == 'de' -%}
+  {%- assign other_code = 'en' -%}
+  {%- assign other_url = page.url | replace_first: '/de/', '/en/' -%}
+{%- else -%}
+  {%- assign other_code = 'de' -%}
+  {%- assign other_url = page.url | replace_first: '/en/', '/de/' -%}
+{%- endif -%}
+{%- assign base = '/' | append: lang | append: '/' -%}
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
   <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="alternate" hreflang="{{ other_code }}" href="{{ other_url | absolute_url }}">
   <link rel="icon" href="{{ '/assets/icon.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="{{ page.home | default: '/' | relative_url }}">
+    <a class="brand" href="{{ base | relative_url }}">
       <img src="{{ '/assets/icon.png' | relative_url }}" alt="" width="32" height="32"> My Audio
     </a>
     <nav>
-      {% for link in page.nav %}<a href="{{ link.url | relative_url }}">{{ link.title }}</a>{% endfor %}
+      <a href="{{ base | append: '#download' | relative_url }}">Download</a>
+      <a href="{{ base | append: 'guide/' | relative_url }}">{% if lang == 'de' %}Anleitung{% else %}Guide{% endif %}</a>
       <a href="{{ site.repository_url }}">GitHub</a>
-      {% if page.other_lang %}<a class="lang" href="{{ page.other_lang | relative_url }}" hreflang="{{ page.other_lang_code }}">{{ page.other_lang_code | upcase }}</a>{% endif %}
+      <a class="lang" href="{{ other_url | relative_url }}" hreflang="{{ other_code }}">{{ other_code | upcase }}</a>
     </nav>
   </header>
   <main class="content">
@@ -25,8 +40,14 @@
   <footer class="site-footer">
     <p>
       My Audio · <a href="{{ site.repository_url }}">{{ site.repository_url | remove: 'https://' }}</a> ·
-      <a href="{{ site.repository_url }}/blob/main/LICENSE">MIT</a> ·
-      <a href="https://www.martensening.com/myaudio/">martensening.com</a>
+      <a href="{{ site.repository_url }}/blob/main/LICENSE">MIT</a>
+    </p>
+    <p>
+      {% if lang == 'de' -%}
+      <a href="{{ '/de/legal/' | relative_url }}">Impressum</a> · <a href="{{ '/de/privacy/' | relative_url }}">Datenschutz</a>
+      {%- else -%}
+      <a href="{{ '/en/legal/' | relative_url }}">Legal notice</a> · <a href="{{ '/en/privacy/' | relative_url }}">Privacy policy</a>
+      {%- endif %}
     </p>
   </footer>
 </body>

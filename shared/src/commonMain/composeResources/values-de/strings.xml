@@ -66,7 +66,7 @@
         <item quantity="other">%1$d Spuren · %2$s</item>
     </plurals>
     <string name="record_track_empty">Leer</string>
-    <string name="record_track_add">Leere Spur</string>
+    <string name="record_track_add">Neue Spur</string>
     <string name="record_track_monitoring">Mithören</string>
     <string name="live_start">Live</string>
     <string name="live_stop">Live beenden</string>
@@ -92,8 +92,7 @@
     <string name="track_delete_info">„%1$s“ und die zugehörige Aufnahme werden gelöscht.</string>
     <string name="track_recording_delete_question">Aufnahme löschen?</string>
     <string name="track_recording_delete_info">Die Aufnahme von „%1$s“ wird gelöscht.</string>
-    <string name="track_reset_question">Zurücksetzen?</string>
-    <string name="track_reset_info">„%1$s“ wird zurückgesetzt.</string>
+    <string name="record_track_delete_info">„%1$s“ und ihre Einstellungen werden gelöscht.</string>
     <string name="track_uncalibrated">Ohne Einmessung aufgenommen</string>
     <string name="track_solo">Solo</string>
     <string name="track_unsolo">Solo aus</string>
@@ -161,6 +160,8 @@
     <string name="effect_reverb_name">Hall (My Audio)</string>
     <string name="effect_add">Effekt hinzufügen</string>
     <string name="effect_remove">Entfernen</string>
+    <string name="effect_remove_question">Effekt entfernen?</string>
+    <string name="effect_remove_info">„%1$s“ wird entfernt.</string>
     <string name="effect_move">Verschieben</string>
     <plurals name="effect_chain_full">
         <item quantity="one">Höchstens %1$d Effekt</item>
@@ -232,6 +233,8 @@
     <string name="envelope_point">Punkt: %1$.2f s · %2$d %%</string>
     <string name="envelope_remove_point">Ausgewählten Punkt entfernen</string>
     <string name="envelope_reset">Auf volle Lautstärke zurücksetzen</string>
+    <string name="envelope_reset_question">Verlauf zurücksetzen?</string>
+    <string name="envelope_reset_info">Alle Lautstärkepunkte werden entfernt.</string>
     <string name="audio_channel">Wiedergabe und Aufnahme</string>
     <string name="audio_recording">Aufnahme läuft auch im Hintergrund</string>
     <string name="audio_playing">Wiedergabe läuft auch im Hintergrund</string>
@@ -294,7 +297,7 @@
     <string name="about_sample_credit">Beispielklang „Short Jazzy Tune No.1“ von painted-panda, freesound.org (CC0)</string>
     <string name="about_contact">Fragen &amp; Feedback</string>
     <string name="about_privacy">Datenschutzerklärung</string>
-    <string name="about_privacy_url">https://www.martensening.com/privacy.php</string>
+    <string name="about_privacy_url">https://bmartensen.github.io/my-audio/de/privacy/</string>
     <string name="about_website">My Audio im Web</string>
     <string name="about_website_url">https://www.martensening.com/myaudio/</string>
     <string name="about_licenses">Open-Source-Lizenzen</string>

@@ -4,19 +4,13 @@ lang: en
 title: Guide
 description: The My Audio guide – every screen and function explained.
 permalink: /en/guide/
-home: /en/
-other_lang: /anleitung/
-other_lang_code: de
-nav:
-  - title: Download
-    url: /en/#download
-  - title: Guide
-    url: /en/guide/
 ---
 
 # Guide
 
 My Audio is a studio on your phone: capture an idea, record track by track, add effects and share the result. This guide explains every screen. The screenshots show the German interface; on Windows everything looks the same and is operated with the mouse.
+
+Guide version: My Audio {{ site.release }}. Available installers are listed on the [download page]({{ '/en/#download' | relative_url }}).
 
 <nav class="toc" markdown="1">
 - [Getting started](#getting-started)
@@ -53,11 +47,11 @@ The first time you record, Android asks for microphone access. Headphones are al
 
 ## Home screen
 
-<img class="shot wide" src="{{ '/images/home.png' | relative_url }}" alt="Home screen with project and record button">
+<img class="shot landscape" src="{{ '/images/home.png' | relative_url }}" alt="Landscape home screen with the demo project, New project and record button">
 
 - **Project card:** tap to open the project. Below it you see the number of tracks and the length. The pencil renames the project; the trash deletes it after a confirmation, including all recordings.
 - **Record button (red):** creates a project named after the date and time and starts the first recording.
-- **New project:** creates an empty project without recording.
+- **+ New project** below the list creates an empty project without recording.
 - **Effect library** (wave icon): all effects for browsing and selecting, see [Effect library](#effect-library).
 - **Import project** (down arrow): opens a ZIP file. A backup from *Share → Back up project* is restored as a project. A ZIP with audio files (MP3, Ogg, WAV) becomes a new project with one track per file; a leading number in the file name ("01 Drums.wav") determines the order.
 - **Settings** (gear): devices, audio buffer, calibration and info.
@@ -76,6 +70,8 @@ At the top are **Back**, the project name, **Notes**, **Share** and **Project se
 
 In landscape orientation the time and buttons move into a column on the right, giving the tracks more room.
 
+<img class="shot landscape" src="{{ '/images/project-landscape.png' | relative_url }}" alt="Landscape project with the record button centred vertically">
+
 ## Tracks
 
 <img class="shot" src="{{ '/images/project-record-track.png' | relative_url }}" alt="Tracks with effect row and volume envelope">
@@ -86,7 +82,7 @@ Each card shows a recording on the shared timeline:
 - **Volume envelope** (curve icon, coloured when an envelope is set): opens the [editor](#volume-envelope).
 - **S – Solo:** when any track is soloed, only the soloed tracks are heard. Multiple solos are possible.
 - **Speaker – Mute:** mutes the track; solo takes priority.
-- **Trash:** deletes the track with its recording (*Delete track?*). The last track follows its own rules, see [The record track](#the-record-track).
+- **Trash:** opens a delete confirmation.
 - **Effect row:** the enabled effects in order, abbreviated with "…" when they don't fit on one line.
 - **Waveform:** on a dB scale, so even quiet recordings are clearly visible. A set volume envelope appears as a light line over it (top = 100 %, bottom = 0 %); the practice loop shows as a lighter region.
 - **Recorded without calibration:** this track was recorded without latency compensation and may sit slightly behind the others.
@@ -95,18 +91,12 @@ A **long press** on the card opens the [track settings](#track-settings). During
 
 ## The record track
 
-The last track is always the record track: the next take lands there. In a new project it is empty and shows **Empty**. You can prepare it before recording:
+**+ New track** below the tracks prepares an empty record track for the next take, also in a project without recordings. It shows **Empty** and lets you set up the instrument before recording. The next take goes into this track.
 
 - **Effects** (wave icon) or long press opens its settings: name, effects, volume and panning.
 - **Mute** on the empty record track means the microphone will **not be monitored** while recording. Unmuting it shows **Monitoring** on the card, and you hear yourself through its effects while recording (see [Live monitoring](#live-monitoring)). New tracks always start muted; after a recording the track is automatically unmuted so you hear the take.
-- **Trash** in two stages:
-  - If the last track holds a recording, it asks **Delete recording?** and removes only the recording. Name, effects and all settings remain – the next attempt runs through the same effects.
-  - If the track is empty but changed, it asks **Reset?** and restores the state of a new track.
-  - If it is empty and unchanged, the trash is greyed out.
 
-<img class="shot dialog" src="{{ '/images/reset-dialog.png' | relative_url }}" alt="Reset confirmation">
-
-If the last track already holds a recording, *Record* starts a new track. It inherits the effects and input settings of the previous one and starts muted. **+ Empty track** below the last track creates an empty record track, so you can prepare the next instrument.
+You can also press *Record* without preparing a track. The new track then takes over the effects and input settings of the last recording.
 
 ## Recording and playback
 
@@ -134,7 +124,7 @@ A long press on a track opens its settings in signal order. The **pencil** renam
 - **Add effect** offers the effects selected in the [library](#effect-library).
 - **Handle on the left** (two lines): drag to reorder.
 - **Tick:** disables the effect without losing its settings.
-- **Trash:** removes the effect.
+- **Trash:** removes the effect after a confirmation.
 - **Tap the name** to expand the effect and its controls; only one is open at a time.
 
 **Channel**
@@ -189,7 +179,7 @@ My Audio can send your microphone through effects in real time while you play or
 1. **While recording:** unmute the empty record track. During recording you hear yourself through its effects, together with the other tracks.
 2. **While experimenting:** in the library and in the track settings, **Live** sends the microphone directly through the effect to the output – without playback and without recording. *With / Without* compares here as well.
 
-<img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Warning before monitoring over speakers">
+<img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Confirmation before monitoring over Bluetooth">
 
 - **Use headphones.** The built-in speaker can cause feedback (squealing); Bluetooth adds a noticeable delay. My Audio asks before monitoring through either.
 - **The recording stays dry.** The raw microphone signal is always saved; the effects are applied afterwards exactly as heard while monitoring.
@@ -209,7 +199,7 @@ The master processes the entire mix – with the same effect chain as a track, b
 The curve icon on a track lets you draw a fade-in, fade-out or quieter passages:
 
 - **Tap** in the waveform to place a point, **drag** to move it. Points cannot pass their neighbours. The height ranges from 0 % (bottom) to 100 % (top) of the track volume.
-- The **trash** removes the selected point; **Reset to full volume** removes all.
+- The **trash** removes the selected point. **Reset to full volume** removes all points after a confirmation.
 - The **overview** below the waveform shows the full track: tap to centre, drag to scroll. The **magnifiers** zoom from 1× to 8×.
 - **Solo preview** (▶) plays the track with the new envelope and its effects; while playing, tap the waveform to jump.
 - **Save** applies the envelope. If you go back with unsaved changes, My Audio asks.
@@ -280,7 +270,6 @@ The library contains *EQ (My Audio)*, *Reverb (My Audio)* and 478 Airwindows eff
   - **Automatic** uses the system default for low latency. The best choice for most devices.
   - **Short** reduces the delay during live monitoring, but may cause clicks and dropouts.
   - **Long** is the most robust when you hear clicks – with slightly more delay.
-  Each setting is **calibrated separately** because the round trip changes; after switching, the calibration notice appears until you calibrate again.
 - **Latency calibration:** shows the measured latency and opens the calibration.
 - **About My Audio:** version, contributors, contact and all licenses.
 
@@ -305,7 +294,7 @@ The Windows version has the same functions and layout, operated with mouse and k
 
 ## Data and privacy
 
-My Audio needs no account and no internet service. Projects stay on your device (Android: private app storage, Windows: *Documents/My Audio*). What you share is your choice through *Share*. Backups contain all original recordings; newer and older app versions can open each other's projects.
+My Audio needs no account and no internet service. Projects stay on your device (Android: private app storage, Windows: *Documents/My Audio*). What you share is your choice through *Share*. Backups contain all original recordings; newer and older app versions can open each other's projects. Details are in the [privacy policy]({{ '/en/privacy/' | relative_url }}).
 
 ---
 
