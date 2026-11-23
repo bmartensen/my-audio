@@ -49,7 +49,7 @@ Only when the contributor explicitly authorizes it; preparing, building or commi
 Capture from the release candidate on the contributor's phone (raw size 1080 × 2424 on the reference Pixel 9) with a synthetic demo project (`tools/demo_project.py`), never private recordings:
 
 - Enable Android's status bar demo mode for the session and restore it afterwards; never delete or modify the contributor's own projects. Close dialogs with Cancel.
-- Keep raw captures in ignored `.work/guide-raw/` and run `python tools/crop_guide_images.py .work/guide-raw .work/guide-out`. It crops status/navigation bars, detects dialogs and composes the landscape home screen so only the demo project appears. Adjust its boxes when a layout changes, inspect every output, then copy them to `docs/images/`.
+- Keep raw captures in ignored `.work/guide-raw/` and run `python tools/crop_guide_images.py .work/guide-raw .work/guide-out`. It crops status/navigation bars, detects dialogs and stacks the portrait home screen from the list (with New project) and the record button, cutting the empty band between them. Adjust its boxes when a layout changes, inspect every output, then copy them to `docs/images/`.
 - Do not fabricate calibration results; keep the previous calibration image when no real calibration can be shown.
 
 Preserve each image's aspect ratio (`.shots` uses `align-items: flex-start`). Remove images no page references. Check both languages at 320, 390 and 1440 px: no horizontal overflow, missing images or broken anchors, and working redirects.

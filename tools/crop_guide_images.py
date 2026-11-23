@@ -3,9 +3,8 @@ scales them for the web.
 
 Dialogs are found automatically: on the dimmed screen, their surface is the longest run of brighter rows near the
 left edge. Full-screen views use fixed boxes. Status and navigation bars and the landscape camera cutout are always
-cut off. The landscape home screen keeps the header, the first project (the demo), the New project action and the
-record rail: everything below the first card is replaced by the screen background with the New project action
-directly below it, exactly as the app lays out a library with one project. No other project names appear.
+cut off. The portrait home screen keeps the header, the project list with the New project action and the record
+button; the empty band between them is cut out, so the record button sits closer to the list.
 
 Usage: python tools/crop_guide_images.py <raw screenshot dir> <output dir>
 """
@@ -25,7 +24,7 @@ BOXES = {
     'effect-preview': (860, 1300),
     'envelope': (TOP, 2120),
     'notes': (170, 1840),
-    'share': (TOP, 760),
+    'share': (TOP, 905),
     'settings': (TOP, 1622),
     'calibration': (TOP, 1520),
     'library': (TOP, 1570),
@@ -33,9 +32,9 @@ BOXES = {
 }
 # Landscape views: (left, top, right, bottom) between the camera cutout, status bar and navigation bar.
 LANDSCAPE = (140, 80, 2290, 1080)
-# Landscape home: bottom edges of the first and last project card, the New project row (top, bottom) below the
-# last card, and the right edge of the list column.
-HOME_FIRST_CARD, HOME_LAST_CARD, HOME_ADD_ROW, HOME_LIST_RIGHT = 420, 795, (835, 932), 1850
+# Portrait home: (top, bottom) bands that are stacked: header and list with New project (five projects; each
+# further project adds 189 px), then the record button.
+HOME_BANDS = [(TOP, 1471), (1950, 2275)]
 # Dialogs over a dimmed screen: wide effect dialogs (screen width minus margins) and standard dialogs.
 WIDE = (42, 1038, 82)      # dialog left, dialog right, column inside its padding
 NARROW = (120, 958, 160)
@@ -101,14 +100,13 @@ def main(source, target):
     for path in sorted(source.glob('*.png')):
         name = path.stem
         image = Image.open(path).convert('RGB')
-        if name == 'home-landscape-raw':
-            # The New project row keeps its distance to the card above it (the list's item spacing).
-            row_top, row_bottom = HOME_ADD_ROW
-            add_row = image.crop((0, row_top, HOME_LIST_RIGHT, row_bottom))
-            background = image.getpixel((600, image.height - 20))
-            ImageDraw.Draw(image).rectangle((0, HOME_FIRST_CARD + 4, HOME_LIST_RIGHT - 1, image.height), fill=background)
-            image.paste(add_row, (0, HOME_FIRST_CARD + row_top - HOME_LAST_CARD))
-            result, name = image.crop(LANDSCAPE), 'home'
+        if name == 'home':
+            bands = [image.crop((0, top, image.width, bottom)) for top, bottom in HOME_BANDS]
+            result = Image.new('RGB', (image.width, sum(band.height for band in bands)))
+            y = 0
+            for band in bands:
+                result.paste(band, (0, y))
+                y += band.height
         elif name == 'project-landscape':
             result = image.crop(LANDSCAPE)
         elif name in BOXES:

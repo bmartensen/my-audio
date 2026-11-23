@@ -23,6 +23,9 @@ import com.martensening.my_audio.audio.InputChannel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
@@ -477,6 +480,7 @@ private fun RecordTrackCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier
             .clip(PanelShape)
+            .onSecondaryClick(editable, onEdit)
             .combinedClickable(enabled = editable, onClick = {}, onLongClick = onEdit)
     ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 12.dp)) {
@@ -625,8 +629,9 @@ private fun TrackCard(
 ) {
     PanelCard(
         modifier = Modifier
-            // Long press opens volume and effects of the track.
+            // Long press, or a right-click with a mouse, opens volume and effects of the track.
             .clip(PanelShape)
+            .onSecondaryClick(editable, onEdit)
             .combinedClickable(enabled = editable, onClick = {}, onLongClick = onEdit)
     ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 12.dp)) {
@@ -728,6 +733,7 @@ private fun MasterCard(chain: List<EffectSlot>, editable: Boolean, onEdit: () ->
     PanelCard(
         modifier = Modifier
             .clip(PanelShape)
+            .onSecondaryClick(editable, onEdit)
             .combinedClickable(enabled = editable, onClick = onEdit, onLongClick = onEdit)
     ) {
         Row(
@@ -1157,3 +1163,20 @@ private fun MetronomeButton(state: ProjectUiState, onMetronome: () -> Unit) {
         }
     }
 }
+
+/**
+ * A right-click (secondary mouse button) runs [action] at once, in addition to the long press that touch screens
+ * use; desktop users expect the context click, not holding the button.
+ */
+private fun Modifier.onSecondaryClick(enabled: Boolean, action: () -> Unit): Modifier =
+    if (!enabled) this else pointerInput(action) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+                    event.changes.forEach { it.consume() }
+                    action()
+                }
+            }
+        }
+    }

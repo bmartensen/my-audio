@@ -70,21 +70,22 @@ object AudioImport {
             run {
                 while (true) {
                     coroutineContext.ensureActive()
-                    if (!inputDone) {
-                        val inputIndex = codec.dequeueInputBuffer(TIMEOUT_US)
-                        if (inputIndex >= 0) {
-                            val input = codec.getInputBuffer(inputIndex)!!
-                            val size = extractor.readSampleData(input, 0)
-                            if (size < 0) {
-                                codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
-                                inputDone = true
-                            } else {
-                                codec.queueInputBuffer(inputIndex, 0, size, extractor.sampleTime, 0)
-                                extractor.advance()
-                            }
+                    // Fill every free input buffer without waiting, then wait only briefly for output while
+                    // input remains: waiting 10 ms per packet made long imports take minutes.
+                    while (!inputDone) {
+                        val inputIndex = codec.dequeueInputBuffer(0)
+                        if (inputIndex < 0) break
+                        val input = codec.getInputBuffer(inputIndex)!!
+                        val size = extractor.readSampleData(input, 0)
+                        if (size < 0) {
+                            codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                            inputDone = true
+                        } else {
+                            codec.queueInputBuffer(inputIndex, 0, size, extractor.sampleTime, 0)
+                            extractor.advance()
                         }
                     }
-                    val outputIndex = codec.dequeueOutputBuffer(info, TIMEOUT_US)
+                    val outputIndex = codec.dequeueOutputBuffer(info, if (inputDone) TIMEOUT_US else SHORT_TIMEOUT_US)
                     if (outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                         val output = codec.outputFormat
                         outputRate = output.getInteger(MediaFormat.KEY_SAMPLE_RATE)
@@ -159,4 +160,5 @@ object AudioImport {
     private const val PCM_24BIT_PACKED = 21
     private const val PCM_32BIT = 22
     private const val TIMEOUT_US = 10_000L
+    private const val SHORT_TIMEOUT_US = 1_000L
 }

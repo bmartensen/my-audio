@@ -2,6 +2,12 @@
 
 As of 2026-11-23: **My Audio 0.10.3 / versionCode 37** for Android and Windows, released from `main` with tag `v0.10.3` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.10.3) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
 
+## Candidate 0.10.4 (develop)
+
+- Faster Android import ([#15](https://github.com/bmartensen/my-audio/issues/15)): MediaCodec without per-packet waits, polyphase resampler with block-wise output, block-wise WAV writing, four files decoded in parallel. Pixel 9, 11 MP3 stems of 3:18: 42 s instead of 3 min 33 s (release APK 0.10.4 installed as an update; the contributor confirmed the speed). Resampler unit tests and the block-size-independence test pass.
+- Right-click opens track, record track and master options ([#31](https://github.com/bmartensen/my-audio/issues/31)), in addition to the long press; MSI 0.10.4 built (SHA-256 `a8895837…8a166619`), the right-click on Windows not yet tried.
+- Guide: portrait home screenshot with the contributor's song titles and a new share menu screenshot with the SoundCraft option, both from the Pixel 9 in status bar demo mode (restored afterwards).
+
 ## Release 0.10.3
 
 - Content: amp models (NAM A1/A2) and cabinet IRs from imported `.nam`/`.wav` files or ZIPs with a tone library and tones in project backups ([requirements](app-requirements.md#amp-models-and-cabinet-irs), [audio technology](audio-technology.md#amp-models-and-cabinets)); SoundCraft session export and import ([requirements](app-requirements.md#audio-import-and-sharing)); Android backup and device-transfer rules. See the [changelog](../CHANGELOG.md).

@@ -28,6 +28,20 @@ class PcmWavWriter(private val file: File, private val sampleRate: Int, val chan
         samples++
     }
 
+    private var bytes = ByteArray(0)
+
+    /** Writes the first [count] interleaved samples of [block] at once, quantised exactly like [write]. */
+    fun write(block: FloatArray, count: Int) {
+        if (bytes.size < count * 2) bytes = ByteArray(count * 2)
+        for (i in 0 until count) {
+            val value = (block[i].coerceIn(-1f, 1f) * 32767f).roundToInt()
+            bytes[i * 2] = value.toByte()
+            bytes[i * 2 + 1] = (value shr 8).toByte()
+        }
+        output.write(bytes, 0, count * 2)
+        samples += count
+    }
+
     override fun close() {
         output.close()
         check(samples % channels == 0L) { "Incomplete PCM frame" }

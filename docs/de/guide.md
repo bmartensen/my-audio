@@ -49,7 +49,7 @@ Kopfhörer sind beim Überspielen und Mithören immer die beste Wahl.
 
 ## Startseite
 
-<img class="shot landscape" src="{{ '/images/home.png' | relative_url }}" alt="Startseite im Querformat mit Demo-Projekt, Neues Projekt und Aufnahmeknopf">
+<img class="shot" src="{{ '/images/home.png' | relative_url }}" alt="Startseite mit Projekten, Neues Projekt und Aufnahmeknopf">
 
 - **Projektkarte:** Tippen öffnet das Projekt. Darunter stehen die Zahl der Spuren und die Länge. Der Stift benennt das Projekt um, der Papierkorb löscht es mit allen Aufnahmen.
 - **Aufnahmeknopf (rot):** legt ein Projekt mit Datum und Uhrzeit als Namen an und startet die erste Aufnahme.
@@ -302,6 +302,7 @@ Jedes Gerät braucht etwas Zeit, bis ein Ton aus dem Lautsprecher kommt und wied
 ## Windows
 
 Die Windows-Version hat dieselben Funktionen und denselben Aufbau, bedient mit Maus und Tastatur:
+- Ein Rechtsklick auf eine Spur oder den **Master** öffnet ihre Einstellungen, wie langes Drücken.
 - Geräte, Audiopuffer und Einmessung liegen im Einstellungsdialog (Zahnrad).
 - Projekte liegen unter *Dokumente/My Audio*. ZIP-Dateien lassen sich auch per Drag-and-drop importieren. Speichern und Teilen öffnen einen Speichern-Dialog.
 - **F1** öffnet **Über My Audio**.

@@ -49,7 +49,7 @@ Headphones are always the best choice when overdubbing or monitoring.
 
 ## Home screen
 
-<img class="shot landscape" src="{{ '/images/home.png' | relative_url }}" alt="Landscape home screen with the demo project, New project and record button">
+<img class="shot" src="{{ '/images/home.png' | relative_url }}" alt="Home screen with projects, New project and record button">
 
 - **Project card:** tap to open the project. Below it you see the number of tracks and the length. The pencil renames the project. The trash deletes it, including all recordings.
 - **Record button (red):** creates a project named after the date and time and starts the first recording.
@@ -302,6 +302,7 @@ Every device needs some time for a sound to leave the speaker and arrive back at
 ## Windows
 
 The Windows version has the same functions and layout, operated with mouse and keyboard:
+- A right-click on a track or the **Master** opens its settings, like a long press.
 - Devices, audio buffer and calibration are in the settings dialog (gear).
 - Projects live in *Documents/My Audio*. ZIP files can also be imported by drag and drop. Save and share open a save dialog.
 - **F1** opens **About My Audio**.

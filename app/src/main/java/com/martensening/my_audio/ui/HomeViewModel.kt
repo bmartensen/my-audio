@@ -16,6 +16,9 @@ import com.martensening.my_audio.data.get
 import java.io.File
 import java.nio.charset.Charset
 import java.util.zip.ZipFile
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.async
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -100,23 +103,33 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     /** One track per audio file of [zipFile], each converted like "Import track"; all or nothing. */
     private suspend fun importAudio(zipFile: File, work: File, zipName: String?): Project? {
         val app = getApplication<Application>()
-        val takes = openZip(zipFile).use { zip ->
+        // Unpack first, then decode several files at once: each MediaCodec decoder and resampler is single-threaded.
+        val sources = openZip(zipFile).use { zip ->
             val names = ProjectArchive.audioEntries(zip.entries().toList().map { it.name })
             if (names.isEmpty()) return null
             names.mapIndexed { index, name ->
                 // Entry paths never become target paths; each file is unpacked under a fixed name.
-                val source = File(work, "source.${name.substringAfterLast('.').lowercase()}")
+                val source = File(work, "source-$index.${name.substringAfterLast('.').lowercase()}")
                 zip.getInputStream(zip.getEntry(name)).use { input -> source.outputStream().use { input.copyTo(it) } }
-                val target = File(work, "$index.wav")
-                val frames = try {
-                    AudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE)
-                } finally {
-                    source.delete()
-                }
-                val trackName = ProjectArchive.trackName(name) ?: app.getString(R.string.track_default_name, index + 1)
-                Log.i(TAG, "Imported $name as $trackName: $frames frames")
-                ProjectRepository.ImportedTake(trackName, target, frames, com.martensening.my_audio.audio.PcmWavInfo.read(target).channels)
+                name to source
             }
+        }
+        val decoding = Dispatchers.Default.limitedParallelism(PARALLEL_DECODES)
+        val takes = coroutineScope {
+            sources.mapIndexed { index, (name, source) ->
+                async(decoding) {
+                    val target = File(work, "$index.wav")
+                    val started = System.nanoTime()
+                    val frames = try {
+                        AudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE)
+                    } finally {
+                        source.delete()
+                    }
+                    val trackName = ProjectArchive.trackName(name) ?: app.getString(R.string.track_default_name, index + 1)
+                    Log.i(TAG, "Imported $name as $trackName: $frames frames in ${(System.nanoTime() - started) / 1_000_000} ms")
+                    ProjectRepository.ImportedTake(trackName, target, frames, com.martensening.my_audio.audio.PcmWavInfo.read(target).channels)
+                }
+            }.awaitAll()
         }
         val now = System.currentTimeMillis()
         val name = zipName ?: app.getString(R.string.import_default_name)
@@ -139,6 +152,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         const val TAG = "MyAudioImport"
+        /** Files decoded at once; the decoders run on separate cores. */
+        const val PARALLEL_DECODES = 4
     }
 
     private fun launchIo(change: () -> Unit) {

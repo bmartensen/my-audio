@@ -142,6 +142,8 @@ The tuner uses the selected microphone without calibration, only with transport 
 
 Use the same UI layout and feature scope, with mouse editing, native file dialogs and drag/drop project import. First window is centered at 1280×800 (16:10); later size/position are restored if visible on a connected screen. Output/input choices are separate, with visible fallback for disconnected devices and per-pair calibration. Distribution uses a per-user MSI with Start-menu/desktop shortcuts and preserves projects on uninstall. Android-only OS features include the notification service, Bluetooth routing and hardware media-volume keys.
 
+A right-click on a track card, the record track or the master card opens its options at once, in addition to the long press, which keeps working with mouse and touch on both platforms.
+
 ## Explicit scope boundaries and open decisions
 
 No punch-in, loop recording, stereo microphone recording, take lists, cloud storage, markers, plugin hosting (VST3/CLAP), TONE3000, NAM/IR import or reverb sends are agreed. Track fades use envelopes instead of a dedicated trim tool. Manual timing nudge remains a proposal. Minimum Android version and future platform expansion remain open decisions.
