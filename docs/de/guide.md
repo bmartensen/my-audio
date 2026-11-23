@@ -78,7 +78,7 @@ Jede Karte zeigt eine Aufnahme auf der gemeinsamen Zeitachse:
 
 - **Name und Länge**, dahinter die Lautstärke, wenn sie von 0 dB abweicht.
 - **Lautstärkeverlauf** (Kurvensymbol, farbig, wenn ein Verlauf gesetzt ist): öffnet den [Editor](#lautstärkeverlauf).
-- **S – Solo:** Sobald eine Spur auf Solo steht, klingen nur noch die Solo-Spuren. Mehrere Solos sind möglich.
+- **S – Solo:** Sobald eine Spur auf Solo steht, klingen nur noch die Solo-Spuren.
 - **Lautsprecher – Stumm:** schaltet die Spur stumm. Solo hat Vorrang.
 - **Papierkorb:** löscht die Spur.
 - **Effektzeile:** die eingeschalteten Effekte in Reihenfolge.
@@ -98,7 +98,7 @@ Du kannst auch ohne vorbereitete Spur direkt auf **Aufnehmen** tippen. Dann übe
 ## Aufnehmen und Abspielen
 
 - **Abspielen** startet am Anfang oder am Beginn der aktiven Schleife. Nochmal tippen stoppt.
-- **Aufnehmen** startet einen Take. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein **Vorlauf** eingestellt, zählt erst ein stiller Countdown herunter. Ist das Metronom an, zählt es einen Takt vor. Während der Aufnahme siehst du die Wellenform live und einen Pegelmesser.
+- **Aufnehmen** startet einen Take. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein **Vorlauf** eingestellt, zählt erst ein stiller Countdown herunter. Ist das Metronom an, zählt es einen Takt vor.
 - **Metronom** öffnet die [Metronom-Einstellungen](#metronom).
 - Mit einem USB-Interface mit zwei Eingängen erscheint unter der Zeit die Wahl **Eingang 1**, **Eingang 2** oder **Eingang 1 und 2 gemischt**. Aufnahmen sind immer mono.
 
@@ -263,7 +263,6 @@ Die Bibliothek enthält **EQ (My Audio)**, **Hall (My Audio)** und 478 Airwindow
   - **Kurz** verringert die Verzögerung beim Live-Mithören, kann aber zu Knacksern und Aussetzern führen.
   - **Lang** ist am robustesten, wenn es knackst – mit etwas mehr Verzögerung.
 - **Latenz einmessen:** zeigt die gemessene Latenz und öffnet die Einmessung.
-- **Über My Audio:** Version, Mitwirkende, Kontakt und alle Lizenzen.
 
 ## Latenz einmessen
 
@@ -281,7 +280,7 @@ Die Windows-Version hat dieselben Funktionen und denselben Aufbau, bedient mit M
 - Geräte, Audiopuffer und Einmessung liegen im Einstellungsdialog (Zahnrad).
 - Projekte liegen unter *Dokumente/My Audio*. ZIP-Dateien lassen sich auch per Drag-and-drop importieren. Speichern und Teilen öffnen einen Speichern-Dialog.
 - **F1** öffnet **Über My Audio**.
-- Windows unterscheidet Lautsprecher und Kopfhörer nicht. Achte beim Live-Mithören selbst auf Kopfhörer.
+- Windows unterscheidet Lautsprecher und Kopfhörer nicht. Achte beim Live-Mithören selbst auf Kopfhörer, damit keine Rückkopplung entsteht.
 
 ## Daten und Datenschutz
 

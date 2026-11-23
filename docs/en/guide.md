@@ -78,7 +78,7 @@ Each card shows a recording on the shared timeline:
 
 - **Name and length**, followed by the volume when it differs from 0 dB.
 - **Volume envelope** (curve icon, coloured when an envelope is set): opens the [editor](#volume-envelope).
-- **S – Solo:** when any track is soloed, only the soloed tracks are heard. Multiple solos are possible.
+- **S – Solo:** when any track is soloed, only the soloed tracks are heard.
 - **Speaker – Mute:** mutes the track. Solo takes priority.
 - **Trash:** deletes the track.
 - **Effect row:** the enabled effects in order.
@@ -98,7 +98,7 @@ You can also press **Record** without preparing a track. The new track then take
 ## Recording and playback
 
 - **Play** starts at the beginning or at the start of the active loop. Tap again to stop.
-- **Record** starts a take. All audible tracks play along while the new track is recorded. If a **pre-roll** is set, a silent countdown runs first. If the metronome is on, it counts one bar in. During recording you see the waveform live and a level meter.
+- **Record** starts a take. All audible tracks play along while the new track is recorded. If a **pre-roll** is set, a silent countdown runs first. If the metronome is on, it counts one bar in.
 - **Metronome** opens the [metronome settings](#metronome).
 - With a USB interface with two inputs, the choice **Input 1**, **Input 2** or **Input 1 and 2 mixed** appears below the time. Recordings are always mono.
 
@@ -263,7 +263,6 @@ The library contains **EQ (My Audio)**, **Reverb (My Audio)** and 478 Airwindows
   - **Short** reduces the delay during live monitoring, but may cause clicks and dropouts.
   - **Long** is the most robust when you hear clicks – with slightly more delay.
 - **Latency calibration:** shows the measured latency and opens the calibration.
-- **About My Audio:** version, contributors, contact and all licenses.
 
 ## Latency calibration
 
@@ -281,7 +280,7 @@ The Windows version has the same functions and layout, operated with mouse and k
 - Devices, audio buffer and calibration are in the settings dialog (gear).
 - Projects live in *Documents/My Audio*. ZIP files can also be imported by drag and drop. Save and share open a save dialog.
 - **F1** opens **About My Audio**.
-- Windows cannot distinguish speakers from headphones. Pay attention to headphones yourself when monitoring live.
+- Windows cannot distinguish speakers from headphones. Pay attention to headphones yourself when monitoring live, to avoid feedback.
 
 ## Data and privacy
 
