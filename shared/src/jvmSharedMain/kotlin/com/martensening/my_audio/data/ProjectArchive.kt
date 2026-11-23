@@ -5,13 +5,14 @@ import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/** File names and ZIP files for sharing: mix, stems and project backups. */
+/** File names and ZIP files for sharing: mix, stems, project backups and SoundCraft sessions. */
 object ProjectArchive {
     /** What "Share" hands out; each has its own file name suffix and MIME type. */
     enum class Kind(val suffix: String, val extension: String, val mimeType: String) {
         Mix("", "ogg", "audio/ogg"),
         Stems(" - Spuren", "zip", "application/zip"),
-        Backup(" - Projekt", "zip", "application/zip")
+        Backup(" - Projekt", "zip", "application/zip"),
+        SoundCraft(" - SoundCraft", "zip", "application/zip")
     }
 
     /** Characters other apps stumble over become "_"; an empty result falls back to "My Audio". */

@@ -51,6 +51,32 @@ object AudioEngine {
         }
 
     /**
+     * DAW session export of all tracks: dry takes to [dry], takes through [renderChains] to [wet] where a chain is
+     * not empty. Per track start frame, dry frames, rendered frames and channels; null on a write error.
+     */
+    suspend fun exportDawTracks(project: Project, repository: ProjectRepository, renderChains: List<List<EffectSlot>>,
+                                dry: List<File>, wet: List<File>): LongArray? =
+        lock.withLock {
+            withContext(Dispatchers.Default) {
+                val tracks = TrackArguments(project, project.tracks, repository)
+                NativeAudio.exportDawTracks(tracks.paths, tracks.frames, tracks.parameters, tracks.chains, tracks.envelopes,
+                    tracks.gains, renderChains.map(::encodeChain).toTypedArray(),
+                    dry.map { it.absolutePath }.toTypedArray(), wet.map { it.absolutePath }.toTypedArray())
+            }
+        }
+
+    /** Loudness (LUFS) of the audible mix through the master chain, before the fixed master stage. */
+    suspend fun mixLoudness(project: Project, repository: ProjectRepository): Double =
+        lock.withLock {
+            if (project.audibleTracks.isEmpty()) return@withLock Double.NEGATIVE_INFINITY
+            withContext(Dispatchers.Default) {
+                val tracks = TrackArguments(project, project.audibleTracks, repository)
+                NativeAudio.mixLoudness(tracks.paths, tracks.frames, tracks.parameters, tracks.chains, tracks.envelopes,
+                    tracks.gains, encodeChain(project.masterChain))
+            }
+        }
+
+    /**
      * Effect preview source: [frames] of [track] from project frame [startFrame], cleaned and
      * normalised as the mix does, before its effects. False if the take cannot be read.
      */

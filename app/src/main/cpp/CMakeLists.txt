@@ -15,6 +15,7 @@ add_library(myaudio SHARED
         AirwindowsEffects.cpp
         AmpCabinet.cpp
         CalibrationSession.cpp
+        DawExport.cpp
         Correlation.cpp
         JniBridge.cpp
         LiveChain.cpp

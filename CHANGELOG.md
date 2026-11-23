@@ -6,6 +6,7 @@ User-visible changes by released version, newest first. Intermediate test builds
 
 - Amp models and cabinets: import Neural Amp Modeler profiles (.nam) and cabinet impulse responses (.wav) you downloaded, for example from TONE3000, also as ZIP. They work like every other effect, live and in the mix, with **Input**, **Output** and **Match level**.
 - Project backups contain the amp models and cabinets they use.
+- **SoundCraft session:** a fourth share option exports the project with tracks at their positions, levels, pan, volume envelope and effects for the desktop DAW SoundCraft.
 - Android's backup and transfer to a new phone include projects and the effect library; calibration stays on the device.
 
 ## 0.9.18

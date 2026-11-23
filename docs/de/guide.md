@@ -237,6 +237,7 @@ Schlage eine leere Saite an. Das Stimmgerät erkennt die Saite automatisch (Stan
 - **Mix teilen:** genau das, was **Abspielen** hören lässt, als Stereo-Ogg/Opus – klein genug für Messenger.
 - **Einzelspuren:** jede Spur als bereinigte WAV-Datei ab Projektanfang, ohne Effekte, Lautstärke und Panorama, in einem ZIP – zum Weiterarbeiten in einer DAW.
 - **Projekt sichern:** das ganze Projekt mit allen Originalaufnahmen und Einstellungen als ZIP. **Projekt importieren** auf der Startseite stellt es wieder her, auch auf einem anderen Gerät.
+- **SoundCraft-Sitzung:** das Projekt als Sitzung für die Desktop-DAW [SoundCraft](https://github.com/storytold/soundcraft), als ZIP. Entpacke es und öffne die *.scraft*-Datei. Jede Spur liegt an ihrer Stelle im Song und lässt sich dort verschieben. EQ, Kompressor und Hall kommen als SoundCraft-Effekte mit, andere Effekte sind in die Spur eingerechnet, die unbearbeitete Aufnahme liegt in der Playlist „Dry“.
 
 Wechselst du auf ein neues Android-Telefon, nimmt die Datenübertragung von Android deine Projekte und die Effekt-Bibliothek mit. Auf dem neuen Telefon misst du neu ein.
 

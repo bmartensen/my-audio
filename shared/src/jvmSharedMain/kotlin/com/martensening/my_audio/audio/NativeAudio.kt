@@ -127,4 +127,17 @@ object NativeAudio {
 
     /** Loads a tone file once for effect chains; its handle, or -1 if it cannot be used. Blocks. */
     external fun loadTone(path: String, kind: Int): Int
+
+    /**
+     * DAW session export: per track in the [setTracks] layout, the dry take to [dryTargets] and, for a non-empty
+     * [renderChains] entry, the take through that chain to [wetTargets] (32-bit float WAVs). Returns per track
+     * start frame, dry frames, rendered frames (0 = none) and channels; null on a write error. Blocks.
+     */
+    external fun exportDawTracks(paths: Array<String>, frames: LongArray, parameters: FloatArray, chains: Array<FloatArray>,
+                                 envelopes: Array<LongArray>, envelopeGains: Array<FloatArray>,
+                                 renderChains: Array<FloatArray>, dryTargets: Array<String>, wetTargets: Array<String>): LongArray?
+
+    /** Integrated loudness (LUFS) of the tracks' mix through the encoded [master] chain, before the master stage. Blocks. */
+    external fun mixLoudness(paths: Array<String>, frames: LongArray, parameters: FloatArray, chains: Array<FloatArray>,
+                             envelopes: Array<LongArray>, envelopeGains: Array<FloatArray>, master: FloatArray): Double
 }

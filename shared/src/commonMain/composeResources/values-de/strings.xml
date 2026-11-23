@@ -331,4 +331,6 @@
     <string name="tone_missing_summary">Dieser Tone ist nicht auf diesem Gerät. Importiere ihn erneut in der Bibliothek.</string>
     <string name="effect_input_gain">Eingang</string>
     <string name="effect_output_gain">Ausgang</string>
+    <string name="share_soundcraft">SoundCraft-Sitzung</string>
+    <string name="share_soundcraft_summary">Spuren, Positionen und Effekte für SoundCraft (ZIP)</string>
 </resources>

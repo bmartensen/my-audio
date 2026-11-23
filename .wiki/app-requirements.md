@@ -49,6 +49,17 @@ Home imports ZIPs as new projects. With project.json, validate and restore a bac
 
 Android's cloud backup and device-to-device transfer include projects and the effect library (and the tone library from 0.10.x), so they move to a new phone; calibration, device selection and the buffer setting stay on the device.
 
+**Export for SoundCraft.** A fourth share option writes the project as a session for [SoundCraft](https://github.com/storytold/soundcraft), so it can be rearranged and finished there: one ZIP holding a folder with `<project>.scraft` and `Audio Files/`, opened in SoundCraft after unzipping. Android shares it, Windows saves it.
+- Every recorded track becomes an audio track (mono or stereo) with one clip at its real song position: latency compensated, cleanup applied, count-in removed, so it can be moved and trimmed directly. Name, volume, pan, mute and solo carry over; the volume envelope becomes volume automation. The empty record track is left out.
+- Effects follow a hybrid: My Audio EQ/compressor and reverb become approximate SoundCraft inserts (`eq_7band`, `compressor`, `room_reverb`/`plate_reverb`); Airwindows, amp model and cabinet slots are rendered into the clip audio, up to and including the last such slot, and only the mappable slots after it stay inserts. The untouched take is kept as a second playlist “Dry”. Bypassed slots are not exported.
+- The master chain is treated like a track chain on SoundCraft's master, and the fixed −14 LUFS stage becomes a `maximizer` there, so the level is close to My Audio's mix.
+- The metronome tempo becomes the session tempo; notes become session comments. The metronome itself is not exported.
+
+**Import of a SoundCraft session (planned for 0.10.x).** Home's project import also accepts such a ZIP (or a `.scraft` with its `Audio Files/`), so a session can be continued on the phone: recording new tracks, adding effects and exporting it again with every position kept.
+- Each audio track's active playlist becomes one track; several clips are rendered into one take starting at the first clip, honouring clip offsets, gain and fades. Its position is fixed: imported takes keep their offset and cannot be moved in My Audio.
+- Name, volume, pan, mute, solo and volume automation (as envelope) carry over. `eq_7band`, `compressor`, `room_reverb` and `plate_reverb` map back to approximate My Audio effects; other plugins are not imported and are named after the import. Effects that the export rendered into the audio stay in it.
+- Tempo and session comments become metronome tempo and notes. MIDI, instrument, video and bus tracks are ignored.
+
 ## Mixing and effects
 
 Removing an effect from a track or master chain asks for confirmation in the same dialog style as track deletion and names the effect. Cancel or dismissal leaves the chain and its settings unchanged.

@@ -35,6 +35,7 @@ add_library(myaudio SHARED
         ${SHARED_DIR}/AmpCabinet.cpp
         ${SHARED_DIR}/BleedRemoval.cpp
         ${SHARED_DIR}/Correlation.cpp
+        ${SHARED_DIR}/DawExport.cpp
         ${SHARED_DIR}/JniBridge.cpp
         ${SHARED_DIR}/Metronome.cpp
         ${SHARED_DIR}/EffectPreview.cpp

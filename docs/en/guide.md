@@ -237,6 +237,7 @@ Play an open string. The tuner detects the string automatically (standard tuning
 - **Share mix:** exactly what **Play** lets you hear, as stereo Ogg/Opus – small enough for messengers.
 - **Stems:** each track as a cleaned WAV file from the project start, without effects, volume or panning, in a ZIP – for further work in a DAW.
 - **Back up project:** the whole project with all original recordings and settings as a ZIP. **Import project** on the home screen restores it, also on a different device.
+- **SoundCraft session:** the project as a session for the desktop DAW [SoundCraft](https://github.com/storytold/soundcraft), as a ZIP. Unzip it and open the *.scraft* file. Every track sits at its place in the song and can be moved there. EQ, compressor and reverb come along as SoundCraft effects, other effects are rendered into the track, and the untouched take is in the playlist “Dry”.
 
 When you move to a new Android phone, Android's data transfer takes your projects and the effect library along. Calibrate again on the new phone.
 

@@ -856,7 +856,8 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
             listOf(
                 Triple(ProjectArchive.Kind.Mix, Res.string.share_mix, Res.string.share_mix_summary),
                 Triple(ProjectArchive.Kind.Stems, Res.string.share_stems, Res.string.share_stems_summary),
-                Triple(ProjectArchive.Kind.Backup, Res.string.share_backup, Res.string.share_backup_summary)
+                Triple(ProjectArchive.Kind.Backup, Res.string.share_backup, Res.string.share_backup_summary),
+                Triple(ProjectArchive.Kind.SoundCraft, Res.string.share_soundcraft, Res.string.share_soundcraft_summary)
             ).forEach { (kind, title, summary) ->
                 DropdownMenuItem(
                     text = {
@@ -873,6 +874,7 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
                         ProjectArchive.Kind.Mix -> mixAvailable
                         ProjectArchive.Kind.Stems -> stemsAvailable
                         ProjectArchive.Kind.Backup -> true
+                        ProjectArchive.Kind.SoundCraft -> stemsAvailable
                     },
                     onClick = {
                         expanded = false

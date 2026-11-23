@@ -6,6 +6,7 @@
 #include "AirwindowsEffects.h"
 #include "AmpCabinet.h"
 #include "CalibrationSession.h"
+#include "DawExport.h"
 #include "EffectPreview.h"
 #include "LiveChain.h"
 #include "Log.h"
@@ -318,4 +319,44 @@ Java_com_martensening_my_1audio_audio_NativeAudio_inspectTone(JNIEnv *env, jobje
 extern "C" JNIEXPORT jint JNICALL
 Java_com_martensening_my_1audio_audio_NativeAudio_loadTone(JNIEnv *env, jobject /* this */, jstring path, jint kind) {
     return myaudio::loadTone(toString(env, path), static_cast<myaudio::ToneKind>(kind));
+}
+
+// Export for a DAW session (DawExport.h).
+
+extern "C" JNIEXPORT jlongArray JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_exportDawTracks(JNIEnv *env, jobject /* this */, jobjectArray paths,
+                                                                jlongArray frames, jfloatArray parameters, jobjectArray chains,
+                                                                jobjectArray envelopes, jobjectArray envelopeGains,
+                                                                jobjectArray renderChains, jobjectArray dryTargets,
+                                                                jobjectArray wetTargets) {
+    const auto sources = readSources(env, paths, frames, parameters, chains, envelopes, envelopeGains);
+    std::vector<std::vector<myaudio::EffectSlot>> render;
+    std::vector<std::string> dry, wet;
+    for (jsize i = 0; i < env->GetArrayLength(renderChains); ++i) {
+        auto chain = static_cast<jfloatArray>(env->GetObjectArrayElement(renderChains, i));
+        render.push_back(readChain(env, chain));
+        env->DeleteLocalRef(chain);
+        auto d = static_cast<jstring>(env->GetObjectArrayElement(dryTargets, i));
+        auto w = static_cast<jstring>(env->GetObjectArrayElement(wetTargets, i));
+        dry.push_back(toString(env, d));
+        wet.push_back(toString(env, w));
+        env->DeleteLocalRef(d);
+        env->DeleteLocalRef(w);
+    }
+    std::vector<myaudio::DawTrack> tracks;
+    if (!myaudio::exportDawTracks(sources, render, dry, wet, tracks)) return nullptr;
+    std::vector<jlong> values;
+    for (const auto &t : tracks) values.insert(values.end(), {t.start, t.dryFrames, t.wetFrames, t.channels});
+    jlongArray array = env->NewLongArray(static_cast<jsize>(values.size()));
+    if (array != nullptr) env->SetLongArrayRegion(array, 0, static_cast<jsize>(values.size()), values.data());
+    return array;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_mixLoudness(JNIEnv *env, jobject /* this */, jobjectArray paths,
+                                                            jlongArray frames, jfloatArray parameters, jobjectArray chains,
+                                                            jobjectArray envelopes, jobjectArray envelopeGains,
+                                                            jfloatArray master) {
+    return myaudio::mixLoudness(readSources(env, paths, frames, parameters, chains, envelopes, envelopeGains),
+                                readChain(env, master));
 }
