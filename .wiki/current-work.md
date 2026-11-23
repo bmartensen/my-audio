@@ -2,6 +2,8 @@
 
 As of 2026-11-23: **My Audio 0.9.18 / versionCode 33, released** for Android and Windows: tag `v0.9.18` (commit `a3890a9`) and the published [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.9.18) with APK, MSI, checksums and the runtime source.
 
+Development continues on `develop` toward **0.10.0** (amp models and cabinet IRs from user-imported tones, see [requirements](app-requirements.md#amp-models-and-cabinet-irs-planned-for-0100)); `main` holds 0.9.18. Open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+
 ## Release 0.9.18
 
 - Content: optional record track, plain full-width/full-height recording area with Record centred in landscape, confirmations for effect removal and envelope reset, consistent add buttons, library refinements, About linking the Pages privacy policy. See the [changelog](../CHANGELOG.md).
@@ -33,4 +35,4 @@ Original work is MIT-licensed. [`licenses/`](../licenses/README.md) holds the th
 - All eight native tests, including `live_chain_test` (live chain and monitor sample-identical to the rendered chain), passed on the x86_64 emulator with 0.9.x native code, which 0.9.18 does not change; they have not yet run on the arm64 Pixel 9.
 - Before publishing 0.9.18, `prepare_public_repo.py` inspected 1,793 files and Gitleaks found no leaks in the copied candidate; the findings in the working tree were all in ignored local files (hash manifests in `.work/`, a JDK configuration under `build/`).
 
-These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; see the [backlog](backlog.md).
+These are build and automated results, not hardware acceptance. Live latency, dropouts, CPU, listening and routing checks on the Pixel 9 and Windows are open; see the [acceptance issues](https://github.com/bmartensen/my-audio/issues?q=is%3Aopen+label%3Aacceptance).

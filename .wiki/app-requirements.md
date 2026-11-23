@@ -1,6 +1,6 @@
 # Product requirements
 
-Agreed current behavior for My Audio 0.9.18. Implementation acceptance is tracked separately in [current work](current-work.md) and [backlog](backlog.md). Proposals below are not commitments.
+Agreed current behavior for My Audio 0.9.18. Implementation acceptance is tracked separately in [current work](current-work.md) and [issues](https://github.com/bmartensen/my-audio/issues). Proposals below are not commitments.
 
 ## Purpose, identity and platforms
 
@@ -92,6 +92,20 @@ Record-track settings can be prepared before a take or removed when no longer ne
 **Live audition.** Library entries and track slot editors offer a Live switch next to ▶. Live sends only the selected microphone (respecting USB input selection) through the effect or track chain to the output, with no project playback or metronome; parameter changes apply immediately. The clip preview remains, and is the only option for master chains. Before Live starts on the built-in loudspeaker or a Bluetooth output, a warning explains feedback or delay; the user may continue. A/B compares with and without the effect live as well.
 
 **Audio buffer.** Settings offer one global choice for calibration, takes and live monitoring as a compact Automatic | Short | Long switch without explanation: Automatic is the system's low-latency default and keeps existing calibrations, Short and Long use 1 or 4 device periods (desktop periods of 128 frames). A medium step is omitted because it matches Automatic on Android. Each choice is calibrated separately, so changing it shows the calibration notice until measured; a stored choice this version does not offer falls back to Automatic.
+
+## Amp models and cabinet IRs (planned for 0.10.0)
+
+Agreed scope, not yet implemented. Tracked in the [0.10.0 milestone](https://github.com/bmartensen/my-audio/milestone/1).
+
+**Tones from the user's own downloads.** Users download Neural Amp Modeler profiles (`.nam`) and impulse responses (WAV), for example from TONE3000, in their browser and import them into the app. The app has no internet access and ships no third-party tones; the TONE3000 API is not used.
+
+**Two slot types.** An amp model slot runs a NAM profile (A1 in every size and A2); a cabinet slot convolves an impulse response. Both sit in track and master chains like every other effect, with bypass, reordering and level matching (default on). An amp model slot offers input and output level.
+
+**Tone library.** Importing copies the file once into a device-local tone library, identified by its content hash, so a second import of the same file adds nothing. The library lists tones by name and type next to the effects, lets them be auditioned like effects and removed; removing a tone that a project uses leaves those slots silent with a “Tone missing” hint. NAM profiles must be 48 kHz; IRs are resampled to 48 kHz.
+
+**Projects and backups.** A slot references its tone by content hash and keeps the display name. Project backups contain the tone files their slots use, and restoring a backup adds them to the tone library, so a project sounds the same on another device. Mix and track exports contain no tone files. App versions without these slot types keep them as preserved slots (“Requires a newer version”).
+
+**Live.** Amp model and cabinet slots run in live monitoring and Live audition like other effects. If measurements on the Pixel 9 require it, the number of amp model slots per chain is limited; offline rendering is never limited.
 
 ## Volume envelope editor
 

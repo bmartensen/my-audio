@@ -34,4 +34,4 @@ My Audio reverb uses a 16-line feedback delay network with prime delay lengths s
 
 ## Verification boundaries
 
-Native tests exercise deterministic processing and warmup/timeline boundaries. JVM tests cover parameters, format and calibration evaluation. Emulator tests cover UI and imports; physical devices are required for latency, routing, drift, CPU load and listening. Provisional minimum Android API is 29; hardware breadth and playback-underflow instrumentation remain in the backlog.
+Native tests exercise deterministic processing and warmup/timeline boundaries. JVM tests cover parameters, format and calibration evaluation. Emulator tests cover UI and imports; physical devices are required for latency, routing, drift, CPU load and listening. Provisional minimum Android API is 29; hardware breadth and playback-underflow instrumentation remain open.

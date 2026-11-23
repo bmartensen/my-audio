@@ -1,16 +1,15 @@
 # Project wiki
 
-Product knowledge, durable decisions and open work for My Audio. Start with the current state and follow topic links.
+Product knowledge and durable decisions for My Audio. Open work, feature requests and bugs are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Start with the current state and follow topic links.
 
 | Page | Purpose |
 |---|---|
 | [Current work](current-work.md) | Implemented state, verification and limits |
 | [Requirements](app-requirements.md) | Agreed product behavior and explicit exclusions |
-| [Backlog](backlog.md) | Open work only |
 | [Decisions](decisions.md) | Durable choices and reasons, newest first |
 | [Collaboration](collaboration.md) | Conduct, credits, assistants and privacy |
 | [Developer builds](developer-builds.md) | Tool setup, Android/Windows builds and optional signing |
-| [Repository commands](repository-rules.md) | Verification and working conventions |
+| [Repository commands](repository-rules.md) | Branches, releases, issues, verification and working conventions |
 | [Modeling](modeling.md) | Domain concepts and implementation boundaries |
 | [Data format](data-format.md) | Persistent contracts and compatibility |
 | [Audio technology](audio-technology.md) | Transport, calibration and processing |

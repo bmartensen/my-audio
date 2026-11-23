@@ -14,8 +14,8 @@ Claude Code adapters repeat the canonical `name` and `description`; update them 
 
 | Skill | Does | Does not |
 |---|---|---|
-| `start` | Reads policy, wiki and Git state; orients the session | Implement anything on its own |
-| `grill-me` | Investigates a named question, asks decision questions, records agreed outcomes in the wiki | Implement the decisions |
-| `wrap` | Reconciles wiki and code, verifies, commits and pushes within the user's authorization | Override a no-commit/no-push instruction |
+| `start` | Reads policy, wiki, Git state and open issues; proposes a session focus | Implement anything or change issues |
+| `grill-me` | Investigates a named question, asks decision questions, records agreed outcomes in the wiki and opens issues for the work | Implement the decisions |
+| `wrap` | Reconciles wiki and code, verifies, commits to `develop` and pushes within the user's authorization | Commit to `main`, open release pull requests or override a no-commit/no-push instruction |
 
-Discovery paths verified against the client documentation on 2026-11-19: [Antigravity skills](https://antigravity.google/docs/skills), [Antigravity rules](https://antigravity.google/docs/rules), [Gemini CLI skills](https://geminicli.com/docs/cli/skills/), [Gemini CLI context](https://geminicli.com/docs/cli/gemini-md/), [Codex skills](https://developers.openai.com/codex/skills). An interactive invocation in each client has not been tested yet; see the [backlog](../.wiki/backlog.md).
+Discovery paths verified against the client documentation on 2026-11-19: [Antigravity skills](https://antigravity.google/docs/skills), [Antigravity rules](https://antigravity.google/docs/rules), [Gemini CLI skills](https://geminicli.com/docs/cli/skills/), [Gemini CLI context](https://geminicli.com/docs/cli/gemini-md/), [Codex skills](https://developers.openai.com/codex/skills). An interactive invocation in each client has not been tested yet ([#23](https://github.com/bmartensen/my-audio/issues/23)).
