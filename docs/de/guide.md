@@ -8,7 +8,7 @@ permalink: /de/guide/
 
 # Anleitung
 
-My Audio ist ein Studio auf dem Smartphone: Du hältst eine Idee fest, nimmst Spur für Spur dazu auf, gibst Effekte dazu und teilst das Ergebnis. Diese Anleitung erklärt jeden Bildschirm. Die Bilder stammen von Android; unter Windows sieht alles gleich aus und wird mit der Maus bedient.
+My Audio ist ein Studio auf dem Smartphone. Du hältst eine Idee fest, nimmst Spur für Spur dazu auf, gibst Effekte dazu und teilst das Ergebnis. Diese Anleitung erklärt jeden Bildschirm. Die Bilder stammen von Android. Unter Windows sieht alles gleich aus und wird mit der Maus bedient.
 
 Stand: My Audio {{ site.release }}. Die verfügbaren Installationsdateien stehen auf der [Download-Seite]({{ '/de/#download' | relative_url }}).
 
@@ -62,13 +62,11 @@ Beim ersten Aufnehmen fragt Android nach dem Zugriff aufs Mikrofon. Kopfhörer s
 
 Oben stehen **Zurück**, der Projektname, **Notizen**, **Teilen** und **Projekteinstellungen**. Darunter folgen:
 
-- **Hinweis zur Einmessung**, falls die gewählten Geräte noch nicht eingemessen sind, mit *Jetzt einmessen*.
+- **Hinweis zur Einmessung**, falls die gewählten Geräte noch nicht eingemessen sind.
 - **Übungsschleife:** Ziehe auf der Leiste einen Bereich von mindestens einer halben Sekunde auf; ein kurzes Tippen entfernt ihn. Der Knopf links schaltet die Schleife ein und aus, der Text zeigt ihren Bereich. Ist sie aktiv, beginnt *Abspielen* am Schleifenanfang und wiederholt den Bereich nahtlos. Aufnahmen laufen nie in der Schleife.
-- **Master:** die Effekte auf dem ganzen Mix; Tippen öffnet sie (siehe [Master](#master)).
+- **Master:** die Effekte auf dem ganzen Mix. Tippen öffnet sie (siehe [Master](#master)).
 - **Spuren** und ganz unten die **Aufnahmespur**.
 - **Transportleiste:** Zeit, Abspielen, Aufnehmen und Metronom.
-
-Im Querformat wandern Zeit und Knöpfe in eine Spalte am rechten Rand, damit die Spuren mehr Platz haben.
 
 <img class="shot landscape" src="{{ '/images/project-landscape.png' | relative_url }}" alt="Projekt im Querformat mit mittig angeordnetem Aufnahmeknopf">
 
@@ -83,8 +81,8 @@ Jede Karte zeigt eine Aufnahme auf der gemeinsamen Zeitachse:
 - **S – Solo:** Sobald eine Spur auf Solo steht, klingen nur noch die Solo-Spuren. Mehrere Solos sind möglich.
 - **Lautsprecher – Stumm:** schaltet die Spur stumm; Solo hat Vorrang.
 - **Papierkorb:** öffnet eine Bestätigung zum Löschen.
-- **Effektzeile:** die eingeschalteten Effekte in Reihenfolge, gekürzt mit „…“, wenn sie nicht in eine Zeile passen.
-- **Wellenform:** auf einer dB-Skala, damit auch leise Aufnahmen gut sichtbar sind. Ein gesetzter Lautstärkeverlauf liegt als helle Linie darüber (oben 100 %, unten 0 %), die Übungsschleife als hellerer Bereich.
+- **Effektzeile:** die eingeschalteten Effekte in Reihenfolge.
+- **Wellenform:** auf einer dB-Skala, damit auch leise Aufnahmen gut sichtbar sind.
 - **Ohne Einmessung aufgenommen:** Diese Spur entstand ohne Latenzausgleich und kann leicht hinter den anderen liegen.
 
 Ein **langer Druck** auf die Karte öffnet die [Spur-Einstellungen](#spur-einstellungen). Während der Wiedergabe springst du durch **Tippen auf eine Wellenform** an diese Stelle.
@@ -94,20 +92,20 @@ Ein **langer Druck** auf die Karte öffnet die [Spur-Einstellungen](#spur-einste
 Mit **+ Neue Spur** unter den Spuren bereitest du eine leere Aufnahmespur für den nächsten Take vor, auch in einem Projekt ohne Aufnahmen. Sie zeigt **Leer**, und du kannst das Instrument schon vor der Aufnahme einstellen. Der nächste Take landet in dieser Spur.
 
 - **Effekte** (Wellensymbol) oder langer Druck öffnet ihre Einstellungen: Name, Effekte, Lautstärke und Panorama.
-- **Stumm** bedeutet bei der leeren Aufnahmespur: Das Mikrofon wird beim Aufnehmen **nicht mitgehört**. Hebst du die Stummschaltung auf, steht **Mithören** auf der Karte, und du hörst dich beim Aufnehmen durch ihre Effekte (siehe [Live mithören](#live-mithören)). Neue Spuren starten immer stumm; nach einer Aufnahme ist die Spur nicht mehr stumm, damit du den Take hörst.
+- **Stumm** bedeutet bei der leeren Aufnahmespur: Das Mikrofon wird beim Aufnehmen **nicht mitgehört**. Hebst du die Stummschaltung auf, steht **Mithören** auf der Karte, und du hörst dich beim Aufnehmen durch ihre Effekte (siehe [Live mithören](#live-mithören)).
 
 Du kannst auch ohne vorbereitete Spur direkt auf *Aufnehmen* tippen. Dann übernimmt die neue Spur Effekte und Eingangseinstellungen der letzten Aufnahme.
 
 ## Aufnehmen und Abspielen
 
 - **Abspielen** startet am Anfang oder am Beginn der aktiven Schleife; nochmal tippen stoppt.
-- **Aufnehmen** startet einen Take. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein *Vorlauf* eingestellt, zählt erst ein stiller Countdown herunter; ist das Metronom an, zählt es einen Takt vor. Während der Aufnahme siehst du die Wellenform live und einen Pegelmesser (grün bis −12 dB, gelb bis −3 dB, darüber rot). Erneut tippen stoppt und **speichert den Take sofort**; sehr kurze Versuche unter einer halben Sekunde werden verworfen.
+- **Aufnehmen** startet einen Take. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein *Vorlauf* eingestellt, zählt erst ein stiller Countdown herunter; ist das Metronom an, zählt es einen Takt vor. Während der Aufnahme siehst du die Wellenform live und einen Pegelmesser (grün bis −12 dB, gelb bis −3 dB, darüber rot).
 - **Metronom** öffnet die [Metronom-Einstellungen](#metronom).
 - Mit einem **USB-Interface mit zwei Eingängen** erscheint unter der Zeit die Wahl *Eingang 1*, *Eingang 2* oder *Eingang 1 und 2 gemischt*. Aufnahmen sind immer mono.
 
 Aufnahmen werden **immer ohne Effekte** gespeichert. Effekte, Lautstärke und Verlauf wirken nur beim Abspielen und Teilen – du kannst sie jederzeit ändern.
 
-Auf Android laufen Wiedergabe und Aufnahme mit Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiter. Ein Anruf oder eine andere Unterbrechung stoppt und speichert den Take.
+Auf Android laufen Wiedergabe und Aufnahme mit Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiter.
 
 ## Spur-Einstellungen
 
@@ -118,7 +116,7 @@ Ein langer Druck auf eine Spur öffnet ihre Einstellungen in Signalreihenfolge. 
 **Eingang**
 - **Metronom entfernen** – nur bei Takes, die mit hörbarem Klick aufgenommen wurden: rechnet den mitaufgenommenen Klick heraus.
 - **Übersprechen entfernen** – nur bei Takes, die über Lautsprecher-Wiedergabe aufgenommen wurden: entfernt die anderen Spuren, die der Lautsprecher in die Aufnahme gespielt hat.
-- **Normalisieren** – bringt die Spitze der Aufnahme auf einen Zielpegel (−24 bis 0 dBFS, Standard −6 dBFS).
+- **Normalisieren** – bringt die Spitze der Aufnahme auf einen Zielpegel.
 
 **Effekte** – bis zu sechs, von oben nach unten durchlaufen:
 - **Effekt hinzufügen** bietet die in der [Bibliothek](#effekt-bibliothek) ausgewählten Effekte an.
@@ -151,7 +149,7 @@ Der Hall arbeitet in Stereo; eine Mono-Spur wird dadurch räumlich. Seine Auskli
 
 <img class="shot wide" src="{{ '/images/effect-preview.png' | relative_url }}" alt="Probehören mit Mit/Ohne-Schalter">
 
-- **Probehören** spielt einen etwa sechs Sekunden langen Ausschnitt in Schleife: die Übungsschleife, sonst die aktuelle Position, sonst den Spuranfang. Hat die Spur keinen Ton, erklingt ein mitgelieferter Beispielklang. Änderungen an Reglern hörst du nach einem kurzen Moment im laufenden Loop.
+- **Probehören** spielt einen etwa sechs Sekunden langen Ausschnitt in Schleife.
 - **Mit / Ohne** vergleicht die Kette mit und ohne diesen Effekt.
 - **Live** schickt stattdessen dein Mikrofon durch die Effekte, siehe [Live mithören](#live-mithören).
 
@@ -168,7 +166,7 @@ Probehören ändert nichts am Projekt, bis du *Fertig* tippst.
 
 **Airwindows** sind 478 Effekte von Chris Johnson – von Bandmaschine über Verzerrer bis Hall. Jeder hat eigene Regler mit eigenen Einheiten, eine kurze Beschreibung und:
 - **Standardwerte** setzt alle Regler zurück.
-- **Pegel ausgleichen** (Standard: an) hält die Lautheit gleich, wenn der Effekt eingeschaltet wird – du hörst dann den Klang, nicht nur „lauter“. Schalte es aus, wenn der Effekt bewusst lauter oder leiser machen soll.
+- **Pegel ausgleichen** hält die Lautheit gleich, wenn der Effekt eingeschaltet wird.
 
 Effekte, die erst eine neuere Version von My Audio kennt, bleiben in Projekten erhalten, klingen aber nicht und zeigen *Benötigt eine neuere Version*.
 
@@ -177,14 +175,13 @@ Effekte, die erst eine neuere Version von My Audio kennt, bleiben in Projekten e
 My Audio kann dein Mikrofon in Echtzeit durch Effekte schicken, während du spielst oder singst:
 
 1. **Beim Aufnehmen:** Hebe die Stummschaltung der leeren Aufnahmespur auf. Während der Aufnahme hörst du dich durch ihre Effekte, zusammen mit den anderen Spuren.
-2. **Beim Ausprobieren:** In der Bibliothek und in den Spur-Einstellungen startet **Live** das Mikrofon direkt durch den Effekt zum Ausgang – ohne Wiedergabe und ohne Aufnahme. *Mit / Ohne* vergleicht auch hier.
+2. **Beim Ausprobieren:** In der Bibliothek und in den Spur-Einstellungen startet **Live** das Mikrofon direkt durch den Effekt zum Ausgang – ohne Wiedergabe und ohne Aufnahme.
 
 <img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Rückfrage vor dem Mithören über Bluetooth">
 
-- **Kopfhörer verwenden.** Am eingebauten Lautsprecher droht Rückkopplung (Pfeifen), über Bluetooth kommt der Klang deutlich verzögert an. My Audio fragt deshalb nach, bevor es dort mithört.
+- **Kopfhörer verwenden.** Am eingebauten Lautsprecher droht Rückkopplung (Pfeifen), über Bluetooth kommt der Klang deutlich verzögert an.
 - **Die Aufnahme bleibt trocken.** Gespeichert wird immer das unbearbeitete Mikrofon; die Effekte wirken danach genau so wie beim Mithören.
 - Die Verzögerung beim Mithören entspricht der eingemessenen Latenz. Mit dem [Audiopuffer](#einstellungen) lässt sie sich verkürzen.
-- Unterschiede zum fertigen Mix: *Normalisieren* wirkt live nicht, und *Pegel ausgleichen* nutzt live eine Schätzung.
 
 ## Master
 

@@ -8,7 +8,7 @@ permalink: /en/guide/
 
 # Guide
 
-My Audio is a studio on your phone: capture an idea, record track by track, add effects and share the result. This guide explains every screen. The screenshots show the German interface; on Windows everything looks the same and is operated with the mouse.
+My Audio is a studio on your phone. Capture an idea, record track by track, add effects and share the result. This guide explains every screen. The screenshots show the German interface. On Windows everything looks the same and is operated with the mouse.
 
 Guide version: My Audio {{ site.release }}. Available installers are listed on the [download page]({{ '/en/#download' | relative_url }}).
 
@@ -62,13 +62,11 @@ The first time you record, Android asks for microphone access. Headphones are al
 
 At the top are **Back**, the project name, **Notes**, **Share** and **Project settings**. Below that:
 
-- **Calibration notice**, if the selected devices have not been calibrated yet, with *Calibrate now*.
+- **Calibration notice**, if the selected devices have not been calibrated yet.
 - **Practice loop:** drag a region of at least half a second on the bar; a short tap removes it. The button on the left enables or disables the loop; the text shows its range. When active, *Play* starts at the loop start and repeats the region seamlessly. Recording never uses the loop.
-- **Master:** the effects on the whole mix; tap to open it (see [Master](#master)).
+- **Master:** the effects on the whole mix. Tap to open it (see [Master](#master)).
 - **Tracks** and at the bottom the **record track**.
 - **Transport bar:** time, play, record and metronome.
-
-In landscape orientation the time and buttons move into a column on the right, giving the tracks more room.
 
 <img class="shot landscape" src="{{ '/images/project-landscape.png' | relative_url }}" alt="Landscape project with the record button centred vertically">
 
@@ -83,8 +81,8 @@ Each card shows a recording on the shared timeline:
 - **S – Solo:** when any track is soloed, only the soloed tracks are heard. Multiple solos are possible.
 - **Speaker – Mute:** mutes the track; solo takes priority.
 - **Trash:** opens a delete confirmation.
-- **Effect row:** the enabled effects in order, abbreviated with "…" when they don't fit on one line.
-- **Waveform:** on a dB scale, so even quiet recordings are clearly visible. A set volume envelope appears as a light line over it (top = 100 %, bottom = 0 %); the practice loop shows as a lighter region.
+- **Effect row:** the enabled effects in order.
+- **Waveform:** on a dB scale, so even quiet recordings are clearly visible.
 - **Recorded without calibration:** this track was recorded without latency compensation and may sit slightly behind the others.
 
 A **long press** on the card opens the [track settings](#track-settings). During playback, **tapping a waveform** jumps to that position.
@@ -94,20 +92,20 @@ A **long press** on the card opens the [track settings](#track-settings). During
 **+ New track** below the tracks prepares an empty record track for the next take, also in a project without recordings. It shows **Empty** and lets you set up the instrument before recording. The next take goes into this track.
 
 - **Effects** (wave icon) or long press opens its settings: name, effects, volume and panning.
-- **Mute** on the empty record track means the microphone will **not be monitored** while recording. Unmuting it shows **Monitoring** on the card, and you hear yourself through its effects while recording (see [Live monitoring](#live-monitoring)). New tracks always start muted; after a recording the track is automatically unmuted so you hear the take.
+- **Mute** on the empty record track means the microphone will **not be monitored** while recording. Unmuting it shows **Monitoring** on the card, and you hear yourself through its effects while recording (see [Live monitoring](#live-monitoring)).
 
 You can also press *Record* without preparing a track. The new track then takes over the effects and input settings of the last recording.
 
 ## Recording and playback
 
 - **Play** starts at the beginning or at the start of the active loop; tap again to stop.
-- **Record** starts a take. All audible tracks play along while the new track is recorded. If a *pre-roll* is set, a silent countdown runs first; if the metronome is on, it counts one bar in. During recording you see the waveform live and a level meter (green up to −12 dB, yellow up to −3 dB, red above). Tapping again stops and **saves the take immediately**; very short attempts under half a second are discarded.
+- **Record** starts a take. All audible tracks play along while the new track is recorded. If a *pre-roll* is set, a silent countdown runs first; if the metronome is on, it counts one bar in. During recording you see the waveform live and a level meter (green up to −12 dB, yellow up to −3 dB, red above).
 - **Metronome** opens the [metronome settings](#metronome).
 - With a **USB interface with two inputs**, the choice *Input 1*, *Input 2* or *Input 1 and 2 mixed* appears below the time. Recordings are always mono.
 
 Recordings are **always saved without effects**. Effects, volume and envelope only apply during playback and sharing – you can change them any time.
 
-On Android, playback and recording continue in the background with a notification, even with the screen off. A call or other interruption stops and saves the take.
+On Android, playback and recording continue in the background with a notification, even with the screen off.
 
 ## Track settings
 
@@ -118,7 +116,7 @@ A long press on a track opens its settings in signal order. The **pencil** renam
 **Input**
 - **Remove metronome** – only for takes recorded with an audible click: removes the recorded click.
 - **Remove bleed** – only for takes recorded over loudspeaker playback: removes the other tracks that the speaker bled into the recording.
-- **Normalize** – brings the peak to a target level (−24 to 0 dBFS, default −6 dBFS).
+- **Normalize** – brings the peak to a target level.
 
 **Effects** – up to six, processed top to bottom:
 - **Add effect** offers the effects selected in the [library](#effect-library).
@@ -151,7 +149,7 @@ The reverb works in stereo; a mono track becomes spatial. Its tail extends the t
 
 <img class="shot wide" src="{{ '/images/effect-preview.png' | relative_url }}" alt="Auditioning with with/without switch">
 
-- **Listen** plays a roughly six-second excerpt in a loop: the practice loop, then the current position, then the track start. If the track has no audio, a bundled sample plays. Changes to controls are heard after a short moment in the running loop.
+- **Listen** plays a roughly six-second excerpt in a loop.
 - **With / Without** compares the chain with and without this effect.
 - **Live** sends your microphone through the effects instead, see [Live monitoring](#live-monitoring).
 
@@ -168,7 +166,7 @@ Auditioning does not change the project until you tap *Done*.
 
 **Airwindows** are 478 effects by Chris Johnson – from tape machine to distortion to reverb. Each has its own controls with its own units, a short description and:
 - **Defaults** resets all controls.
-- **Level matching** (default: on) keeps the loudness the same when the effect is enabled – so you hear the character, not just "louder". Turn it off if the effect is meant to change the level.
+- **Level matching** keeps the loudness the same when the effect is enabled.
 
 Effects that only a newer version of My Audio knows are preserved in projects but produce no sound and show *Requires a newer version*.
 
@@ -177,14 +175,13 @@ Effects that only a newer version of My Audio knows are preserved in projects bu
 My Audio can send your microphone through effects in real time while you play or sing:
 
 1. **While recording:** unmute the empty record track. During recording you hear yourself through its effects, together with the other tracks.
-2. **While experimenting:** in the library and in the track settings, **Live** sends the microphone directly through the effect to the output – without playback and without recording. *With / Without* compares here as well.
+2. **While experimenting:** in the library and in the track settings, **Live** sends the microphone directly through the effect to the output – without playback and without recording.
 
 <img class="shot dialog" src="{{ '/images/live-warning.png' | relative_url }}" alt="Confirmation before monitoring over Bluetooth">
 
-- **Use headphones.** The built-in speaker can cause feedback (squealing); Bluetooth adds a noticeable delay. My Audio asks before monitoring through either.
+- **Use headphones.** The built-in speaker can cause feedback (squealing); Bluetooth adds a noticeable delay.
 - **The recording stays dry.** The raw microphone signal is always saved; the effects are applied afterwards exactly as heard while monitoring.
 - The monitoring delay equals the calibrated latency. The [audio buffer](#settings) can shorten it.
-- Differences from the final mix: *Normalize* is not applied live, and *Level matching* uses an estimate during live monitoring.
 
 ## Master
 
