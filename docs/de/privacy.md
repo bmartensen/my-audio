@@ -44,9 +44,9 @@ Beim Aufruf der Seiten und beim Herunterladen verarbeitet GitHub technische Zugr
 
 Diese Website setzt keine Cookies, verwendet keine Analyse- oder Trackingdienste und lädt keine Schriften oder Skripte von Drittanbietern.
 
-## 4. Downloads auf martensening.com
+## 4. Produktseite auf martensening.com
 
-Die Installationsdateien stehen zusätzlich auf [martensening.com/myaudio](https://www.martensening.com/myaudio/) bereit. Für diese Website gilt die [Datenschutzerklärung von martensening.com](https://www.martensening.com/privacy.php).
+*Über My Audio* verlinkt außerdem die Produktseite auf [martensening.com/myaudio](https://www.martensening.com/myaudio/); ihre Download-Buttons führen zum GitHub-Release (Abschnitt 3). Für diese Website gilt die [Datenschutzerklärung von martensening.com](https://www.martensening.com/privacy.php).
 
 ## 5. Kontakt per E-Mail
 

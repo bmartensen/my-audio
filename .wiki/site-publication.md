@@ -1,6 +1,6 @@
 # GitHub Pages and releases
 
-`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published as GitHub releases; martensening.com mirrors the same files.
+`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published only as GitHub releases, each with the source archive of the bundled Java runtime; no other site hosts them, because GPLv2 counts source access only from the same place as the binaries. The martensening.com product page links the release assets.
 
 ## Site structure
 
@@ -21,8 +21,8 @@ The guide describes current behavior and how to use it, never earlier behavior o
 
 `_config.yml` holds `release` (the documented version) and `release_downloads`:
 
-- `false`: the landing pages link `download_page` (the martensening.com mirror) without advertising a version.
-- `true`: the buttons link the assets of the GitHub release `v<release>` directly, with the mirror as a secondary link.
+- `false`: the landing pages link the repository's `releases/latest` without advertising a version.
+- `true`: the buttons link the assets of the GitHub release `v<release>` directly, with its release page as a secondary link.
 
 A tag alone is not a release, and a release without assets has no installer URLs. Before publishing any Pages change, run:
 
@@ -31,7 +31,7 @@ A tag alone is not a release, and a release without assets has no installer URLs
 .\tools\check_site_downloads.ps1   # online: the configured destination and both installer URLs
 ```
 
-With `release_downloads: true` (or `-RequireGitHubRelease`), the check requires a published release with both installers, both checksum files and the bundled Java runtime's source archive.
+With `release_downloads: true` (or `-RequireGitHubRelease`), the check requires a published release with both installers, both checksum files and the bundled Java runtime's source archive. With `false`, it requires the same of `releases/latest`, the fallback target.
 
 ## Publishing a version
 
@@ -42,7 +42,7 @@ Only when the contributor explicitly authorizes it; preparing, building or commi
 3. Complete the [publication audit](publication-checks.md), commit the release source, create the annotated tag `v<version>` and push both.
 4. `.\tools\publish_github_release.ps1 -DryRun`, then without `-DryRun`: verifies tag, checksums and runtime source, creates a **draft** release with notes from the changelog and uploads APK, MSI, `.sha256` files and the runtime source. Review the draft, then publish it (`-Publish` or `gh release edit v<version> --draft=false --latest`).
 5. `.\tools\check_site_downloads.ps1 -RequireGitHubRelease` must pass. Then set `release_downloads: true` and `release`/`released` in `docs/_config.yml`, run both checks again, and push the Pages update. Check both languages and both installer links on the live site.
-6. Mirror on martensening.com: copy the byte-identical files to its `html/myaudio/download/`, update the version there and let its operator deploy (that repository's `.wiki/server.md`).
+6. martensening.com: set the version and date in its `html/myaudio/index.php` (the buttons link this release's assets) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
 
 ## Guide screenshots
 

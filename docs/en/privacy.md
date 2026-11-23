@@ -44,9 +44,9 @@ When you visit these pages or download files, GitHub processes technical access 
 
 This website sets no cookies, uses no analytics or tracking services and loads no third-party fonts or scripts.
 
-## 4. Downloads on martensening.com
+## 4. Product page on martensening.com
 
-The installers are also available on [martensening.com/myaudio](https://www.martensening.com/myaudio/?lang=en). That website's own [privacy policy](https://www.martensening.com/privacy.php?lang=en) applies there.
+*About My Audio* also links the product page on [martensening.com/myaudio](https://www.martensening.com/myaudio/?lang=en); its download buttons lead to the GitHub release (section 3). That website's own [privacy policy](https://www.martensening.com/privacy.php?lang=en) applies there.
 
 ## 5. Contact by e-mail
 

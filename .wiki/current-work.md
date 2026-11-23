@@ -14,7 +14,10 @@ As of 2026-11-23: **My Audio 0.9.18 / versionCode 33, released** for Android and
 - Pages moved to symmetric `/de/…` and `/en/…` addresses with privacy policy and legal notice; `/` chooses the language and `/anleitung/` redirects. Guide text describes only current behavior.
 - Screenshots are from 0.9.18 on the Pixel 9 with the synthetic demo project and status bar demo mode (restored afterwards). The demo project's notes size on the phone is one step smaller. The calibration image is the earlier Pixel capture: the current route was uncalibrated and no calibration was run.
 - Local preview (Liquid/Markdown approximation, not a GitHub Jekyll build): all eight pages at 320, 390 and 1440 px without overflow, missing images or broken anchors; root and `/anleitung/` redirects verified in German and English browser locales. `test_site_downloads.ps1` passes seven rejection cases. `release_downloads` is `true`: the landing pages link the release assets directly.
-- martensening.com (separate repository, committed and pushed as `98831cc`) mirrors 0.9.18 and links the GitHub release and the new guide addresses; the operator deploys it now that the release and Pages are published.
+- Pages no longer links a mirror: with `release_downloads: false` the landing pages fall back to `releases/latest`, which `check_site_downloads.ps1` then requires to be a complete release. Both privacy policies describe martensening.com only as the product page linked from About. Checked with `test_site_downloads.ps1`, `check_site_downloads.ps1` and the `releases/latest` fallback assertion; Pages was not built locally with Jekyll.
+- martensening.com (separate private repository): the product page now links the GitHub release assets and the repository no longer contains installers; its shared privacy policy covers the website, My Audio and Zufalling. Until its operator deploys, the live site still serves the 0.9.18 APK and MSI (HTTP 200, checked 2026-11-23); the deploy deletes them.
+- The 0.9.18 installers stay unchanged: the notice addition about earlier installers (`licenses/THIRD_PARTY_NOTICES.md`) reaches About with the next regular build.
+- Legal check 2026-11-23: neither Pages nor martensening.com sets cookies or loads third-party fonts or scripts (live responses), and the merged release manifest requests no `INTERNET` permission.
 
 ## Implemented state
 

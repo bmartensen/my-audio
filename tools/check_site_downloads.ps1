@@ -57,21 +57,18 @@ function Test-SiteDownloads {
         }
         Write-Output "GitHub release v$($config.release): both installers and checksums are published and reachable."
     } else {
-        $uri = [uri]$config.download_page
-        if ($uri.Scheme -ne 'https') { throw 'download_page must use HTTPS.' }
-        $response = Invoke-WebRequest -UseBasicParsing -Uri $uri
-        if ($response.StatusCode -ne 200) { throw 'Fallback download page is unavailable.' }
-        foreach ($extension in @('apk', 'msi')) {
-            $pattern = 'href="([^"]+\.' + $extension + ')"'
-            $link = [regex]::Match($response.Content, $pattern)
-            if (-not $link.Success) { throw "Download page has no $extension link." }
-            $target = [uri]::new($uri, $link.Groups[1].Value)
-            $file = Invoke-WebRequest -UseBasicParsing -Method Head -Uri $target
-            if ($file.StatusCode -ne 200 -or [long](@($file.Headers['Content-Length'])[0]) -le 0) {
-                throw "Fallback installer unavailable: $target"
-            }
+        # Without direct links the pages point at releases/latest, which must offer a complete release.
+        if ($config.repository_url -notmatch '^https://github\.com/([^/]+/[^/]+)/?$') {
+            throw 'repository_url must identify a GitHub repository.'
         }
-        Write-Output "Download page and both installers are reachable. No GitHub release version is advertised."
+        $api = "https://api.github.com/repos/$($Matches[1])/releases/latest"
+        try {
+            $latest = Invoke-RestMethod -Uri $api -Headers @{ Accept = 'application/vnd.github+json' } -UserAgent 'MyAudio-Download-Check'
+        } catch {
+            throw "The fallback releases/latest has no published release. $($_.Exception.Message)"
+        }
+        Assert-SiteReleaseAssets $latest ($latest.tag_name -replace '^v', '')
+        Write-Output "Fallback: latest release $($latest.tag_name) offers both installers, checksums and the runtime source. No version is advertised."
     }
 }
 

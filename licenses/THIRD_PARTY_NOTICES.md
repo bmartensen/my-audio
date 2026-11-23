@@ -34,6 +34,8 @@ The Windows MSI includes a jlink runtime selected by the build environment. The 
 Runtime source revision: https://github.com/adoptium/jdk21u/tree/2ab10ca20c19
 Build source revision: https://github.com/adoptium/temurin-build/tree/1cf43d7a3e77886bfea7d550a902e151a87d724d
 
+Every published MSI from 0.8.4 to 0.9.18 bundles this same Temurin 21.0.13+9 runtime. Its complete source archive (OpenJDK21U-jdk-sources_21.0.13_9.tar.gz) is attached to the GitHub release v0.9.18 of My Audio, which also covers the installers distributed earlier: https://github.com/bmartensen/my-audio/releases/tag/v0.9.18
+
 Redistributors must provide a compliant corresponding-source route for their selected runtime. See .wiki/developer-builds.md; do not treat this upstream reference or the JDK src.zip as fulfillment by itself. Other JDK selections require checking their exact notices and distribution terms. Local build preparation does not publish installers.
 
 ## Preview music
