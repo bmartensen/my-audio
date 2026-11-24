@@ -120,11 +120,11 @@ void DesktopEngine::closeDevice() {
     mDevice = nullptr;
 }
 
-bool DesktopEngine::startPlayback(int /* outputDeviceId */, bool /* bluetooth */) {
+bool DesktopEngine::startPlayback(int64_t startFrame, int /* outputDeviceId */, bool /* bluetooth */) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mDevice != nullptr || mMixLeft.empty()) return false;
     const PlaybackLoop::Range loop = mLoop.range();
-    mPosition = loop.active() ? loop.start : 0;
+    mPosition = loop.active() ? loop.start : std::clamp<int64_t>(startFrame, 0, mixFrames());
     mSeekRequest = -1;
     mRecording = false;
     if (!openDevice(false)) return false;
@@ -137,12 +137,13 @@ bool DesktopEngine::startPlayback(int /* outputDeviceId */, bool /* bluetooth */
     return true;
 }
 
-bool DesktopEngine::startRecording(const std::string &path, const std::string &referencePath, int64_t countInFrames,
+bool DesktopEngine::startRecording(const std::string &path, const std::string &referencePath, int64_t startFrame,
+                                   int64_t countInFrames,
                                    int /* outputDeviceId */, int /* inputDeviceId */, bool /* handsFreeInput */,
                                    bool /* bluetooth */, InputChannel /* miniaudio mixes all channels */) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mDevice != nullptr) return false;
-    mPosition = -std::max<int64_t>(0, countInFrames);
+    mPosition = std::max<int64_t>(0, startFrame) - std::max<int64_t>(0, countInFrames);
     mSeekRequest = -1;
     mInputPeak = 0.0f;
     mDroppedFrames = 0;

@@ -10,12 +10,12 @@ Commit and push permission rules are in [AGENTS.md](../AGENTS.md). Update the wi
 
 - `main` is the default branch and the latest release; GitHub Pages builds from `main` → `/docs`, so the site always describes the released app. It is protected: changes only through a pull request (no required approval), no direct or force pushes, no deletion, also for admins. Only merge commits are allowed in the repository.
 - `develop` is the working branch. All commits, wiki updates and guide changes land there and are pushed there; no feature branches for now. Pull requests from contributors target `develop`.
-- **Release:** on `develop`, raise the version, update CHANGELOG and current work, build and accept the candidate (see [UI refinement and final acceptance](#ui-refinement-and-final-acceptance)). Then open a pull request `develop` → `main` titled `Release <version>` whose body is the changelog entry, merge it with a merge commit, and put the annotated tag `v<version>` on that merge commit (its tree equals the built `develop` commit). Publish the GitHub release from the tag and switch the download links with a second pull request ([publishing a version](site-publication.md#publishing-a-version)). Each step needs the user's explicit request.
+- **Release:** on `develop`, raise the version, update CHANGELOG and current work, build the candidate (see [UI refinement and release candidates](#ui-refinement-and-release-candidates)). Then open a pull request `develop` → `main` titled `Release <version>` whose body is the changelog entry, merge it with a merge commit, and put the annotated tag `v<version>` on that merge commit (its tree equals the built `develop` commit). Publish the GitHub release from the tag and switch the download links with a second pull request ([publishing a version](site-publication.md#publishing-a-version)). Each step needs the user's explicit request.
 - After a merge into `main`, bring the merge commit back into `develop` (`git merge --ff-only origin/main`, or a plain merge if `develop` moved on) and push `develop`. `main` then never holds anything `develop` lacks, so the next release pull request has no conflicts.
 
 ## Issues
 
-Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests, measurements or acceptance checks to perform; those belong to the work on an issue, and their results and open verification go to [current work](current-work.md). Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
+Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests or measurements to perform; tests belong to the work on an issue, and their results go to [current work](current-work.md). A deviation from agreed behavior noticed while using the app is a bug issue. Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
 
 ## Build and automated checks
 
@@ -47,14 +47,13 @@ tag; `tools/publish_github_release.ps1` creates the release only on explicit aut
 
 Only run installation/device commands when authorized for that device. Replacement installs preserve data only when signatures are compatible; never resolve a mismatch by automatic uninstall.
 
-### UI refinement and final acceptance
+### UI refinement and release candidates
 
-1. Iterate on layout and interaction with debug builds in the emulator. Rebuild and replace the debug app there without incrementing the release version for each visual adjustment. Check screenshots with representative multitrack projects, portrait/landscape, light/dark themes and relevant navigation modes. Keep destructive-action tests in disposable demo data or discard unsaved changes.
-2. Once the emulator checks pass, prepare the release candidate with the next shared versionName/versionCode and build the Android release APK and Windows installer. Preserve every previously distributed package; further changes after a candidate has been installed for acceptance require a new version.
-3. Perform final acceptance with the release build on the contributor's connected smartphone, using their existing, finished projects and realistic track counts. The current maintainer uses a Pixel, but any contributor's compatible phone can serve this role. Select the intended device explicitly; no model or serial is a prerequisite. Use the contributor's configured signing identity, verify update compatibility and preserve their projects. Never substitute a debug installation over their release app.
-4. Inspect the actual phone screenshots and let the contributor assess the result in their normal workflow. Emulator checks, successful packaging and signature verification do not constitute final human acceptance or hardware audio acceptance. Record their scope separately in current work. Windows review uses the matching installer when the shared UI is affected.
+1. Iterate on layout and interaction with debug builds in the emulator. Rebuild and replace the debug app there without incrementing the release version for each visual adjustment. Check screenshots with representative multitrack projects, portrait/landscape, light/dark themes and relevant navigation modes. Keep destructive actions to disposable demo data.
+2. Prepare a release candidate with the next shared versionName/versionCode and build the Android release APK and Windows installer. Preserve every previously distributed package; further changes after a candidate has been installed require a new version.
+3. Install the release build as an update on the contributor's connected smartphone when they ask for it. The current maintainer uses a Pixel, but any contributor's compatible phone can serve this role. Select the intended device explicitly; no model or serial is a prerequisite. Use the contributor's configured signing identity, verify update compatibility and preserve their projects. Never substitute a debug installation over their release app.
 
-Keep the final phone pass focused on acceptance; return to the emulator for further polish rather than repeatedly distributing intermediate builds. Package preparation and local acceptance do not authorize a commit, push or publication.
+Automated tests are the verification; the contributor uses the app regularly and reports deviations from agreed behavior as issues. Package preparation and installation do not authorize a commit, push or publication.
 
 ```powershell
 .\tools\debug_launch.ps1 -Target emulator
@@ -65,7 +64,7 @@ Keep the final phone pass focused on acceptance; return to the emulator for furt
 .\tools\native_tests.ps1 -Test stereo_mix -Device <serial>
 ```
 
-The launch helper waits for the token-specific `Ready` marker under `MyAudioDebug` and reports AndroidRuntime failures. Native tests compile through the pinned NDK and run in `/data/local/tmp`, without changing app projects. Effect tests compile the large Airwindows catalogue. Latency measurements need real hardware; emulator audio timing is not acceptance evidence.
+The launch helper waits for the token-specific `Ready` marker under `MyAudioDebug` and reports AndroidRuntime failures. Native tests compile through the pinned NDK and run in `/data/local/tmp`, without changing app projects. Effect tests compile the large Airwindows catalogue. Latency measurements need real hardware; emulator audio timing says nothing about real devices.
 
 Native tests cover envelopes, sample-accurate loops, EQ/compression/pan, BS.1770 loudness, limiting, warmup boundaries, bleed removal, stereo compatibility and effect catalogue defaults. Logcat tags include `MyAudioProject`, `MyAudioEngine`, `MyAudioService`, `MyAudioCalibration` and `MyAudioPreview`.
 

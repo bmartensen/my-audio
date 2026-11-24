@@ -46,7 +46,7 @@ object ProjectJson {
     private val TRACK_KEYS = setOf(
         "id", "name", "fileName", "channels", "offsetFrames", "lengthFrames", "volume", "muted", "solo", "pan",
         "createdAtMillis", "recordedMetronome", "countInFrames", "referenceFileName", "effects", "volumeEnvelope",
-        "latencyCalibrated"
+        "latencyCalibrated", "latencyFrames", "shiftFrames"
     )
     private val TRACK_NESTED = mapOf("recordedMetronome" to METRONOME_KEYS)
     private val RECORD_TRACK_KEYS = setOf("name", "volume", "muted", "solo", "pan", "effects", "volumeEnvelope")
@@ -144,6 +144,9 @@ object ProjectJson {
         track.referenceFileName?.let { put("referenceFileName", it) }
         // Missing means calibrated; only the exception is written.
         if (!track.latencyCalibrated) put("latencyCalibrated", false)
+        // Both optional (0.11): offsetFrames stays the effective position, so older versions play the track right.
+        track.latencyFrames?.let { put("latencyFrames", it) }
+        if (track.shiftFrames != 0L) put("shiftFrames", track.shiftFrames)
         put("effects", effectsJson(track.effects))
         put("volumeEnvelope", envelopeJson(track.volumeEnvelope))
     }.with(track.unknown)
@@ -391,6 +394,8 @@ object ProjectJson {
         effects = parseEffects(track.optObject("effects"), version),
         volumeEnvelope = parseEnvelope(track.optArray("volumeEnvelope")),
         latencyCalibrated = track.optBoolean("latencyCalibrated", true),
+        latencyFrames = if (track.has("latencyFrames")) track.optLong("latencyFrames", 0L).coerceAtLeast(0) else null,
+        shiftFrames = track.optLong("shiftFrames", 0L),
         unknown = track.unknown(TRACK_KEYS, TRACK_NESTED)
     )
 

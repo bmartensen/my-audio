@@ -18,5 +18,9 @@ expect fun PlatformBackHandler(enabled: Boolean = true, onBack: () -> Unit)
 @Composable
 expect fun NoSuggestionsKeyboard(content: @Composable () -> Unit)
 
+/** Runs [action] when the app goes to the background (Android: the activity stops); a no-op on the desktop. */
+@Composable
+expect fun OnAppBackground(action: () -> Unit)
+
 /** Full-width editor dialog that handles insets and the keyboard itself where the platform has them. */
 expect fun editorDialogProperties(): DialogProperties

@@ -123,8 +123,8 @@ float removeMetronome(std::vector<float> &samples, int64_t offsetFrames, float b
     return after > 0.0 ? static_cast<float>(10.0 * std::log10(before / after)) : 0.0f;
 }
 
-bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFrames, int64_t countInFrames,
-                                 float bpm, int sampleRate, float &removedDb) {
+bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFrames, int64_t startFrame,
+                                 int64_t countInFrames, float bpm, int sampleRate, float &removedDb) {
     if (samples.empty() || bpm <= 0.0f || countInFrames <= 0) return false;
     const ClickGrid grid(bpm, sampleRate);
     const auto length = static_cast<int64_t>(samples.size());
@@ -134,11 +134,15 @@ bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFram
     auto windowStart = [&](int64_t beat) { return grid.beatStart(beat) - offsetFrames - kPreTaps; };
     auto inside = [&](int64_t start) { return start >= 0 && start + span <= length; };
 
-    // Average the count-in clicks per type (beats before project frame 0).
+    // The first beat of the song: the beat at the take's start, or the next one if the start lies between beats.
+    int64_t firstSongBeat = grid.beatAt(startFrame);
+    if (grid.beatStart(firstSongBeat) < startFrame) ++firstSongBeat;
+
+    // Average the count-in clicks per type (beats before the take's start).
     std::vector<double> templates[2] = {std::vector<double>(span, 0.0), std::vector<double>(span, 0.0)};
     std::vector<int64_t> examples[2];
-    for (int64_t beat = grid.beatAt(-countInFrames); beat < 0; ++beat) {
-        if (grid.beatStart(beat) < -countInFrames) continue;
+    for (int64_t beat = grid.beatAt(startFrame - countInFrames); beat < firstSongBeat; ++beat) {
+        if (grid.beatStart(beat) < startFrame - countInFrames) continue;
         const int64_t start = windowStart(beat);
         if (!inside(start)) continue;
         const int type = ClickGrid::isAccent(beat) ? 1 : 0;
@@ -180,7 +184,7 @@ bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFram
         }
         double xt = 0.0, xs = 0.0;
         int beats = 0;
-        for (int64_t beat = 0;; ++beat) {
+        for (int64_t beat = firstSongBeat;; ++beat) {
             const int64_t start = windowStart(beat);
             if (start >= length) break;
             if (ClickGrid::isAccent(beat) != (type == 1) || !inside(start)) continue;
@@ -201,7 +205,7 @@ bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFram
             gain = 1.0;
             shift = 0.0;
         }
-        for (int64_t beat = 0;; ++beat) {
+        for (int64_t beat = firstSongBeat;; ++beat) {
             const int64_t start = windowStart(beat);
             if (start >= length) break;
             if (ClickGrid::isAccent(beat) != (type == 1)) continue;

@@ -82,14 +82,14 @@ class ProjectRepository(root: File) {
     }
 
     /**
-     * Deletes only the audio of the last track, which is the record track while no empty one follows it. Its
-     * settings stay as the empty record track, so the next take runs through the same effects.
+     * Removes only the audio of the last track, which is the record track while no empty one follows it. Its
+     * settings stay as the empty record track, so the next take runs through the same effects. The files stay
+     * until [deleteOrphanedFiles], so undo can bring the take back while the project is open.
      */
     @Synchronized
     fun deleteRecording(projectId: Long, trackId: Long): Project? {
         val project = load(projectId) ?: return null
         val track = project.tracks.lastOrNull()?.takeIf { it.id == trackId && project.recordTrack == null } ?: return project
-        deleteTrackFiles(projectId, track)
         return project.copy(tracks = project.tracks - track, recordTrack = RecordTrack.keepingSettingsOf(track)).also(::save)
     }
 
@@ -114,6 +114,17 @@ class ProjectRepository(root: File) {
         project.copy(tracks = project.tracks.map { if (it.id == track.id) track else it })
     }
 
+    /**
+     * Writes [project] as it is, e.g. a state from the undo history; its takes must still be on disk (deleted takes
+     * stay until the project is closed).
+     */
+    @Synchronized
+    fun restore(project: Project): Project? {
+        if (load(project.id) == null) return null
+        save(project)
+        return project
+    }
+
     @Synchronized
     fun setMasterChain(projectId: Long, chain: List<EffectSlot>): Project? =
         update(projectId) { it.copy(masterChain = chain.take(EffectSlot.MAX_PER_CHAIN)) }
@@ -133,18 +144,12 @@ class ProjectRepository(root: File) {
     @Synchronized
     fun setPreRoll(projectId: Long, preRoll: PreRoll): Project? = update(projectId) { it.copy(preRoll = preRoll) }
 
+    /** Removes a track from the project; its files stay until [deleteOrphanedFiles], like [deleteRecording]. */
     @Synchronized
     fun deleteTrack(projectId: Long, trackId: Long): Project? {
         val project = load(projectId) ?: return null
         val track = project.tracks.firstOrNull { it.id == trackId } ?: return project
-        deleteTrackFiles(projectId, track)
         return project.copy(tracks = project.tracks - track).also(::save)
-    }
-
-    /** Take, reference and derived caches all share the take's id as name prefix. */
-    private fun deleteTrackFiles(projectId: Long, track: Track) {
-        val prefix = File(track.fileName).nameWithoutExtension + "."
-        tracksDir(projectId).listFiles { file -> file.name.startsWith(prefix) }?.forEach { it.delete() }
     }
 
     /**
@@ -273,8 +278,9 @@ class ProjectRepository(root: File) {
     }
 
     /**
-     * Removes files of takes that are not part of the project, e.g. a take interrupted by process
-     * death. Only call while no take is being recorded.
+     * Removes files of takes that are not part of the project: deleted takes (kept for undo while the project was
+     * open) and takes interrupted by process death. Take, reference and caches share the take's id as name prefix.
+     * Only call while no take is being recorded.
      */
     @Synchronized
     fun deleteOrphanedFiles(projectId: Long) {
@@ -301,6 +307,11 @@ class ProjectRepository(root: File) {
 
     private fun save(project: Project) {
         val dir = projectDir(project.id).apply { mkdirs() }
+        // The cleaned take depends on the latency (bleed alignment), which can change for uncalibrated takes.
+        load(project.id)?.tracks?.forEach { old ->
+            val new = project.tracks.firstOrNull { it.id == old.id } ?: return@forEach
+            if (new.latency != old.latency) cleanCacheFile(project.id, new).delete()
+        }
         // Write-then-rename keeps the previous state if the app dies mid-write.
         val temp = File(dir, "$PROJECT_FILE.tmp")
         temp.writeText(ProjectJson.encode(project))

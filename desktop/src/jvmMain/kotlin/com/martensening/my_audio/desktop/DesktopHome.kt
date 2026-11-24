@@ -50,32 +50,72 @@ class DesktopHome(
      * Imports a ZIP as a new project, decided by its content like on Android: a backup when it
      * holds `project.json`, a SoundCraft session when it holds a `.scraft` file, otherwise one track per audio file. [onDone] receives null on failure.
      */
-    fun importZip(file: File, onDone: (Project?) -> Unit) {
-        if (importing) return
+    fun importZip(file: File, onDone: (Project?) -> Unit) = importFiles(listOf(file)) { created, failed ->
+        onDone(created.singleOrNull()?.takeIf { failed == 0 })
+    }
+
+    /**
+     * Imports files dropped onto the window: each ZIP becomes a project (see [importZip]), and loose audio files
+     * together become one project with a track each, like a ZIP of them. [onDone] receives the created projects
+     * and the number of files that could not be imported.
+     */
+    fun importFiles(files: List<File>, onDone: (created: List<Project>, failed: Int) -> Unit) {
+        if (importing || files.isEmpty()) return
         importing = true
         scope.launch {
             val work = File(cacheDir, "import").apply { deleteRecursively(); mkdirs() }
-            val project = withContext(Dispatchers.IO) {
-                runCatching {
-                    val names = ZipFile(file).use { zip -> zip.entries().toList().map { it.name } }
-                    if (ProjectRepository.PROJECT_FILE in names) {
-                        file.inputStream().use { repository.importBackup(it, System.currentTimeMillis()) }
-                    } else if (SoundCraftImport.isSession(names)) {
-                        ZipFile(file).use { zip ->
-                            SoundCraftImport.import(zip, work, repository, System.currentTimeMillis(), file.nameWithoutExtension) { source, target ->
-                                DesktopAudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE)
-                            }
-                        }
-                    } else {
-                        importAudio(file, work)
-                    }
-                }.onFailure { Log.e(TAG, "Project import failed", it) }.getOrNull()
+            val created = mutableListOf<Project>()
+            var failed = 0
+            withContext(Dispatchers.IO) {
+                val (audio, archives) = files.partition { it.extension.lowercase() in DesktopAudioImport.EXTENSIONS }
+                for (file in archives) {
+                    val project = runCatching { importArchive(file, work) }
+                        .onFailure { Log.e(TAG, "Project import failed", it) }.getOrNull()
+                    if (project != null) created += project else failed++
+                    work.listFiles()?.forEach { it.deleteRecursively() }
+                }
+                if (audio.isNotEmpty()) {
+                    val project = runCatching { importAudioFiles(audio, work) }
+                        .onFailure { Log.e(TAG, "Audio import failed", it) }.getOrNull()
+                    if (project != null) created += project else failed += audio.size
+                }
+                work.deleteRecursively()
             }
-            withContext(Dispatchers.IO) { work.deleteRecursively() }
             projects = withContext(Dispatchers.IO) { repository.list() }
             importing = false
-            onDone(project)
+            onDone(created, failed)
         }
+    }
+
+    private suspend fun importArchive(file: File, work: File): Project? {
+        val names = ZipFile(file).use { zip -> zip.entries().toList().map { it.name } }
+        return if (ProjectRepository.PROJECT_FILE in names) {
+            file.inputStream().use { repository.importBackup(it, System.currentTimeMillis()) }
+        } else if (SoundCraftImport.isSession(names)) {
+            ZipFile(file).use { zip ->
+                SoundCraftImport.import(zip, work, repository, System.currentTimeMillis(), file.nameWithoutExtension) { source, target ->
+                    DesktopAudioImport.decodeToWav(source, target, NativeAudio.SAMPLE_RATE)
+                }
+            }
+        } else {
+            importAudio(file, work)
+        }
+    }
+
+    /** Loose audio files as one project, in the order and with the names a ZIP of them would get; all or nothing. */
+    private suspend fun importAudioFiles(files: List<File>, work: File): Project? {
+        val byName = files.associateBy { it.name }
+        val ordered = ProjectArchive.audioEntries(byName.keys.toList()).mapNotNull(byName::get)
+        if (ordered.isEmpty()) return null
+        val takes = ordered.mapIndexed { index, file ->
+            val target = File(work, "$index.wav")
+            val frames = DesktopAudioImport.decodeToWav(file, target, NativeAudio.SAMPLE_RATE)
+            val trackName = ProjectArchive.trackName(file.name) ?: getString(Res.string.track_default_name, index + 1)
+            ProjectRepository.ImportedTake(trackName, target, frames, com.martensening.my_audio.audio.PcmWavInfo.read(target).channels)
+        }
+        // Named after the folder the files came from, like a ZIP after its file.
+        val name = ordered.first().absoluteFile.parentFile?.name?.takeIf { it.isNotBlank() } ?: ordered.first().nameWithoutExtension
+        return repository.createFromTakes(name, NativeAudio.SAMPLE_RATE, takes, System.currentTimeMillis())
     }
 
     /** One track per audio file, all or nothing; see ProjectArchive.audioEntries. */

@@ -13,6 +13,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.content.edit
 import androidx.compose.runtime.mutableStateOf
+import com.martensening.my_audio.audio.AudioDevices
+import com.martensening.my_audio.platform.PreviewOutput
 import com.martensening.my_audio.ui.AndroidProjectPlatform
 import com.martensening.my_audio.ui.LiveInputs
 import com.martensening.my_audio.ui.MyAudioApp
@@ -32,6 +34,13 @@ class MainActivity : ComponentActivity() {
         volumeControlStream = AudioManager.STREAM_MUSIC
         // Buffer choice to the engine and live audition for library and effect dialogs, before any screen opens.
         LiveInputs.current = AndroidProjectPlatform(application).liveInput()
+        // Effect previews play on the selected output like the transport does.
+        val audioDevices = AudioDevices(application)
+        val audioManager = application.getSystemService(AudioManager::class.java)
+        PreviewOutput.device = {
+            val id = audioDevices.route().outputId
+            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull { it.id == id }
+        }
         handleDebugLaunch(intent)
         handleProjectIntent(intent)
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {

@@ -11,6 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import com.martensening.my_audio.ui.ProjectSessions
@@ -35,7 +37,17 @@ fun main() = application {
         icon = painterResource("icon.png"),
         state = windowState,
         onKeyEvent = { event ->
-            (event.key == Key.F1 && event.type == KeyEventType.KeyDown).also { if (it) aboutOpen.value = true }
+            val down = event.type == KeyEventType.KeyDown
+            // Text fields handle their own Ctrl+Z first; these keys reach the window only from the project itself.
+            // The history is empty outside an open project, so the keys do nothing there.
+            when {
+                down && event.key == Key.F1 -> true.also { aboutOpen.value = true }
+                down && event.isCtrlPressed && event.key == Key.Z && !event.isShiftPressed ->
+                    true.also { ProjectSessions.active?.undo() }
+                down && event.isCtrlPressed && (event.key == Key.Y || (event.key == Key.Z && event.isShiftPressed)) ->
+                    true.also { ProjectSessions.active?.redo() }
+                else -> false
+            }
         }
     ) {
         window.minimumSize = Dimension(480, 640)

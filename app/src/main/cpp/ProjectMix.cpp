@@ -33,10 +33,10 @@ void cleanTake(const TrackSource &source, std::vector<float> &samples) {
     if (source.metronomeBpm > 0.0f) {
         float removedDb = 0.0f;
         const char *method = "count-in template";
-        if (!removeMetronomeWithTemplate(samples, source.offsetFrames, source.countInFrames, source.metronomeBpm,
-                                         kSampleRate, removedDb)) {
+        if (!removeMetronomeWithTemplate(samples, source.recordedOffsetFrames(), source.startFrame(),
+                                         source.countInFrames, source.metronomeBpm, kSampleRate, removedDb)) {
             method = "linear model";
-            removedDb = removeMetronome(samples, source.offsetFrames, source.metronomeBpm, source.metronomeVolume,
+            removedDb = removeMetronome(samples, source.recordedOffsetFrames(), source.metronomeBpm, source.metronomeVolume,
                                         kSampleRate);
         }
         MYAUDIO_LOGI(kTag, "Metronome removal (%s) %s: %.1f dB around the beats", method, source.path.c_str(),
@@ -54,7 +54,7 @@ void cleanTake(const TrackSource &source, std::vector<float> &samples) {
     std::vector<float> reference(pcm.size());
     for (size_t i = 0; i < pcm.size(); ++i) reference[i] = pcm[i] / 32768.0f;
     // Take index j holds what the speaker played at reference index j - latency.
-    const int64_t latency = -source.offsetFrames - source.countInFrames;
+    const int64_t latency = source.latencyFrames;
     float removedDb = 0.0f;
     if (!removeBleed(samples, reference, latency, removedDb, needsRaw ? &raw : nullptr)) return;
     const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
@@ -92,7 +92,7 @@ bool loadCleanTake(const TrackSource &source, std::vector<int16_t> &pcm, std::ve
 
     // Stereo files are imports, never microphone takes: no click/bleed model or mono cache applies.
     if (channels == 2) {
-        const auto start = static_cast<size_t>(std::clamp<int64_t>(-source.offsetFrames, 0, samples.size()));
+        const auto start = static_cast<size_t>(std::clamp<int64_t>(source.leadFrames(), 0, samples.size()));
         std::fill(samples.begin(), samples.begin() + start, 0.0f);
         std::fill(right.begin(), right.begin() + start, 0.0f);
         return true;
@@ -111,9 +111,10 @@ bool loadCleanTake(const TrackSource &source, std::vector<int16_t> &pcm, std::ve
     }
     if (!cleaned) cleanTake(source, samples);
 
-    // Latency and count-in lie before project frame 0. Silence them before the effects, so the
-    // count-in neither sets the normalisation peak nor rings into the song through the reverb.
-    const auto projectStart = static_cast<size_t>(std::clamp<int64_t>(-source.offsetFrames, 0, samples.size()));
+    // Count-in and latency lie before the take's start (and a shift may move audio before project frame 0).
+    // Silence them before the effects, so the count-in neither sets the normalisation peak nor rings into the
+    // song through the reverb.
+    const auto projectStart = static_cast<size_t>(std::clamp<int64_t>(source.leadFrames(), 0, samples.size()));
     std::fill(samples.begin(), samples.begin() + static_cast<std::ptrdiff_t>(projectStart), 0.0f);
     return true;
 }

@@ -36,14 +36,15 @@ std::vector<myaudio::EffectSlot> readChain(JNIEnv *env, jfloatArray encoded) {
 /** Track sources from the arrays of AudioEngine.TrackArguments; see there for the layout. */
 std::vector<myaudio::TrackSource> readSources(JNIEnv *env, jobjectArray paths, jlongArray frames, jfloatArray parameters,
                                               jobjectArray chains, jobjectArray envelopes, jobjectArray envelopeGains) {
-    // Per track: three paths (take, reference, cache), two longs (offset, count-in), five floats
-    // and an encoded effect chain; layout must match AudioEngine.TrackArguments.
+    // Per track: three paths (take, reference, cache), four longs (offset, count-in, shift, latency), five
+    // floats and an encoded effect chain; layout must match AudioEngine.TrackArguments.
     constexpr jsize kPaths = 3;
+    constexpr jsize kFrames = 4;
     constexpr jsize kStride = 5;
     const jsize count = env->GetArrayLength(paths) / kPaths;
-    std::vector<jlong> frameValues(count * 2);
+    std::vector<jlong> frameValues(count * kFrames);
     std::vector<jfloat> values(count * kStride);
-    env->GetLongArrayRegion(frames, 0, count * 2, frameValues.data());
+    env->GetLongArrayRegion(frames, 0, count * kFrames, frameValues.data());
     env->GetFloatArrayRegion(parameters, 0, count * kStride, values.data());
     auto pathAt = [&](jsize index) {
         auto value = static_cast<jstring>(env->GetObjectArrayElement(paths, index));
@@ -54,8 +55,11 @@ std::vector<myaudio::TrackSource> readSources(JNIEnv *env, jobjectArray paths, j
     std::vector<myaudio::TrackSource> sources;
     for (jsize i = 0; i < count; ++i) {
         const jfloat *v = values.data() + i * kStride;
-        sources.push_back({pathAt(i * kPaths), pathAt(i * kPaths + 1), pathAt(i * kPaths + 2), frameValues[i * 2],
-                           frameValues[i * 2 + 1], v[0], v[1], v[2], v[3], v[4], {}, {}});
+        const jlong *f = frameValues.data() + i * kFrames;
+        sources.push_back({pathAt(i * kPaths), pathAt(i * kPaths + 1), pathAt(i * kPaths + 2), f[0], f[1],
+                           v[0], v[1], v[2], v[3], v[4], {}, {}});
+        sources.back().shiftFrames = f[2];
+        sources.back().latencyFrames = f[3];
         auto chain = static_cast<jfloatArray>(env->GetObjectArrayElement(chains, i));
         sources.back().effects = readChain(env, chain);
         env->DeleteLocalRef(chain);
@@ -126,16 +130,17 @@ Java_com_martensening_my_1audio_audio_NativeAudio_exportStems(JNIEnv *env, jobje
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_martensening_my_1audio_audio_NativeAudio_startPlayback(JNIEnv * /* env */, jobject /* this */, jint outputDeviceId, jboolean bluetooth) {
-    return engine().startPlayback(outputDeviceId, bluetooth);
+Java_com_martensening_my_1audio_audio_NativeAudio_startPlayback(JNIEnv * /* env */, jobject /* this */, jlong startFrame,
+                                                              jint outputDeviceId, jboolean bluetooth) {
+    return engine().startPlayback(startFrame, outputDeviceId, bluetooth);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_martensening_my_1audio_audio_NativeAudio_startRecording(JNIEnv *env, jobject /* this */, jstring path,
-                                                               jstring referencePath, jlong countInFrames,
+                                                               jstring referencePath, jlong startFrame, jlong countInFrames,
                                                                jint outputDeviceId, jint inputDeviceId, jboolean handsFreeInput, jboolean bluetooth,
                                                                jint inputChannel) {
-    return engine().startRecording(toString(env, path), toString(env, referencePath), countInFrames,
+    return engine().startRecording(toString(env, path), toString(env, referencePath), startFrame, countInFrames,
                                    outputDeviceId, inputDeviceId, handsFreeInput, bluetooth,
                                    myaudio::toInputChannel(inputChannel));
 }

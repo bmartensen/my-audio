@@ -6,6 +6,11 @@ import android.view.inputmethod.InputConnection
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalView
@@ -24,6 +29,17 @@ actual fun KeepScreenOn(enabled: Boolean) {
 
 @Composable
 actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) = BackHandler(enabled, onBack)
+
+@Composable
+actual fun OnAppBackground(action: () -> Unit) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val current by rememberUpdatedState(action)
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) current() }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+}
 
 /**
  * "Autocorrect off" alone is only a hint to the keyboard; these platform flags make Gboard stop

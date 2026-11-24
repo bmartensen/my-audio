@@ -164,7 +164,6 @@ fun VolumeEnvelopeScreen(
     var windowStart by rememberSaveable(track.id) { mutableLongStateOf(0L) }
     var previewFrame by rememberSaveable(track.id) { mutableLongStateOf(0L) }
     var confirmingLeave by rememberSaveable(track.id) { mutableStateOf(false) }
-    var confirmingReset by rememberSaveable(track.id) { mutableStateOf(false) }
 
     val hasChanges = draft.points() != savedEnvelope
     val requestBack: () -> Unit = {
@@ -194,15 +193,6 @@ fun VolumeEnvelopeScreen(
     }
 
     PlatformBackHandler(onBack = requestBack)
-    if (confirmingReset) {
-        ConfirmDeleteDialog(
-            title = stringResource(Res.string.envelope_reset_question),
-            message = stringResource(Res.string.envelope_reset_info),
-            confirmLabel = Res.string.action_reset,
-            onConfirm = { if (!playing && !busy) draft.clear() },
-            onDismiss = { confirmingReset = false }
-        )
-    }
     if (confirmingLeave) {
         UnsavedChangesDialog(
             busy = busy,
@@ -309,7 +299,8 @@ fun VolumeEnvelopeScreen(
                     selected = draft.selected,
                     onPlay = { if (playing) stopPreview() else onPreview(draft.points(), previewFrame) },
                     onRemove = draft::removeSelected,
-                    onReset = { confirmingReset = true },
+                    // Resets the draft at once: Discard keeps the saved curve, and a saved reset can be undone.
+                    onReset = { if (!playing && !busy) draft.clear() },
                     modifier = if (width != null) Modifier.width(width) else Modifier.fillMaxWidth().widthIn(max = PanelMaxWidth)
                 )
             }
@@ -575,9 +566,11 @@ private fun DrawScope.drawPeaks(
     if (peaks == null || peaks.isEmpty()) return
     fun frameOf(index: Int) = track.offsetFrames + (index + 0.5) * track.lengthFrames / peaks.size
     fun xOf(index: Int) = ((frameOf(index) - start) / visible * size.width).toFloat()
+    // Count-in and latency before the take's start are silent in the mix and not drawn.
+    val audible = track.audibleStartFrames
     // One peak beyond each edge, so the contour runs on to the border instead of ending short of it.
     var first = 0
-    while (first + 1 < peaks.size && frameOf(first + 1) < start) first++
+    while (first + 1 < peaks.size && (frameOf(first + 1) < start || frameOf(first) < audible)) first++
     var last = peaks.size - 1
     while (last - 1 >= 0 && frameOf(last - 1) > start + visible) last--
     if (first > last) return

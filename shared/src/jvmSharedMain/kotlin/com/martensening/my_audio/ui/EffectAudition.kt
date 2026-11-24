@@ -312,6 +312,8 @@ fun rememberEffectAudition(source: AuditionSource): EffectAudition {
     val scope = rememberCoroutineScope()
     val audition = remember(source) { EffectAudition(scope, source) }
     DisposableEffect(audition) { onDispose { audition.stop() } }
+    // Leaving the app ends the clip and Live: nobody should keep hearing the microphone unnoticed.
+    OnAppBackground { audition.stop() }
     return audition
 }
 

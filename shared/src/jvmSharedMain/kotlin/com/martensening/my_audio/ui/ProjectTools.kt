@@ -111,15 +111,23 @@ fun ProjectNotes(
     // Notes opened during a run jump to where the run has got to by now. Stop keeps the position.
     fun leadInMillis(secondsPerLine: Float) = (NotesScroll.LEAD_IN_LINES * secondsPerLine * 1000).toLong()
     var syncedRun by rememberSaveable { mutableIntStateOf(0) }
-    LaunchedEffect(runId, runActive) {
+    var syncedMotion by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(runId, runActive, motionStartMillis, scrolling) {
         val secondsPerLine = scrollSecondsPerLine
         // A finished run never moves the text, e.g. when the notes are opened after Stop.
-        if (!runActive || runId == syncedRun || secondsPerLine == null) return@LaunchedEffect
-        syncedRun = runId
+        if (!runActive || secondsPerLine == null) return@LaunchedEffect
         val movingMillis = motionStartMillis?.let {
             (uptimeMillis() - it - leadInMillis(secondsPerLine)).coerceAtLeast(0)
         } ?: 0L
-        verticalScroll.scrollTo((movingMillis / 1000f / secondsPerLine * lineHeightPx).roundToInt())
+        fun scrollToRun() = (movingMillis / 1000f / secondsPerLine * lineHeightPx).roundToInt()
+        if (runId != syncedRun) {
+            syncedRun = runId
+            verticalScroll.scrollTo(scrollToRun())
+        } else if (scrolling && motionStartMillis != null && syncedMotion != runId && movingMillis > 0) {
+            // A take from the start marker moves once its count-in is over: jump to the marker's line then.
+            syncedMotion = runId
+            verticalScroll.scrollTo(scrollToRun())
+        }
     }
     // Teleprompter: glides on every frame while the transport runs; a finger can still adjust
     // the position meanwhile.

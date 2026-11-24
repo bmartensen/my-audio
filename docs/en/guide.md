@@ -62,10 +62,10 @@ Headphones are always the best choice when overdubbing or monitoring.
 
 <img class="shot" src="{{ '/images/project.png' | relative_url }}" alt="Project view">
 
-At the top are **Back**, the project name, **Notes**, **Share** and **Project settings**. Below that:
+At the top are **Back**, the project name, **Undo**, **Notes**, **Share** and **Project settings**. **Undo** reverts any change to the project, including a take or a deleted track, as long as the project is open. **Redo** then appears next to it. Below that:
 
 - **Calibration notice**, if the selected devices have not been calibrated yet.
-- **Practice loop:** drag a region on the bar. A short tap removes the loop. The button on the left enables or disables the loop. The text shows its range. When active, **Play** starts at the loop start and repeats the region seamlessly.
+- **Practice loop:** drag a region on the bar. A short tap sets the [start marker](#recording-and-playback). The button on the left enables or disables the loop. The text shows its range. When active, **Play** starts at the loop start and repeats the region seamlessly.
 - **Master:** the effects on the whole mix. Tap to open it (see [Master](#master)).
 - **Tracks** and at the bottom the **record track**.
 - **Transport bar:** time, play, record and metronome.
@@ -84,9 +84,9 @@ Each card shows a recording on the shared timeline:
 - **Speaker – Mute:** mutes the track. Solo takes priority.
 - **Trash:** deletes the track.
 - **Effect row:** the enabled effects in order.
-- **Recorded without calibration:** this track was recorded without latency compensation and may sit slightly behind the others.
+- **Recorded without calibration:** this track was recorded without latency compensation and may sit slightly behind the others. Enter its latency under **Timing** in the [track settings](#track-settings).
 
-A long press on the card opens the [track settings](#track-settings). During playback, tapping a waveform jumps to that position.
+A long press on the card opens the [track settings](#track-settings). During playback, tapping a waveform jumps to that position. While stopped, a tap sets the start marker.
 
 ## The record track
 
@@ -99,8 +99,9 @@ You can also press **Record** without preparing a track. The new track then take
 
 ## Recording and playback
 
-- **Play** starts at the beginning or at the start of the active loop. Tap again to stop.
-- **Record** starts a take. All audible tracks play along while the new track is recorded. If a **pre-roll** is set, a silent countdown runs first. If the metronome is on, it counts one bar in.
+- **Start marker:** while stopped, tap the loop bar or a waveform. Play and Record begin there, and Stop returns to it. The time shows the marker.
+- **Play** starts at the start marker or at the start of the active loop. Tap again to stop.
+- **Record** starts a take at the start marker. All audible tracks play along while the new track is recorded. If a **pre-roll** is set, a silent countdown runs first. If the metronome is on, it counts one bar in.
 - **Metronome** opens the [metronome settings](#metronome).
 - With a USB interface with two inputs, the choice **Input 1**, **Input 2** or **Input 1 and 2 mixed** appears below the time. Recordings are always mono.
 
@@ -116,6 +117,7 @@ A long press on a track opens its settings in signal order. The **pencil** renam
 - **Remove metronome** – only for takes recorded with an audible click: removes the recorded click.
 - **Remove bleed** – only for takes recorded over loudspeaker playback: removes the other tracks that the speaker bled into the recording.
 - **Normalize** – brings the peak to a target level.
+- **Timing** – **Offset** moves the track in milliseconds, with **−** and **+** or by typing. **Latency** shows the calibrated compensation. For a track recorded without calibration you enter it yourself or take the current measurement with **Use calibration**.
 
 **Effects** – up to six, processed top to bottom:
 - **Add effect** offers the effects selected in the [library](#effect-library).
@@ -304,7 +306,8 @@ Every device needs some time for a sound to leave the speaker and arrive back at
 The Windows version has the same functions and layout, operated with mouse and keyboard:
 - A right-click on a track or the **Master** opens its settings, like a long press.
 - Devices, audio buffer and calibration are in the settings dialog (gear).
-- Projects live in *Documents/My Audio*. ZIP files can also be imported by drag and drop. Save and share open a save dialog.
+- Projects live in *Documents/My Audio*. ZIP and audio files can also be imported by drag and drop, several at once. Each ZIP becomes a project, and audio files dropped together become one project with a track per file. Save and share open a save dialog.
+- **Ctrl+Z** undoes a change, **Ctrl+Y** redoes it.
 - **F1** opens **About My Audio**.
 - Windows cannot distinguish speakers from headphones. Pay attention to headphones yourself when monitoring live, to avoid feedback.
 

@@ -62,10 +62,10 @@ Kopfhörer sind beim Überspielen und Mithören immer die beste Wahl.
 
 <img class="shot" src="{{ '/images/project.png' | relative_url }}" alt="Projektansicht">
 
-Oben stehen **Zurück**, der Projektname, **Notizen**, **Teilen** und **Projekteinstellungen**. Darunter folgen:
+Oben stehen **Zurück**, der Projektname, **Rückgängig**, **Notizen**, **Teilen** und **Projekteinstellungen**. **Rückgängig** nimmt jede Änderung im Projekt zurück, auch eine Aufnahme oder eine gelöschte Spur, solange das Projekt offen ist. Danach erscheint **Wiederholen**. Darunter folgen:
 
 - **Hinweis zur Einmessung**, falls die gewählten Geräte noch nicht eingemessen sind.
-- **Übungsschleife:** Ziehe auf der Leiste einen Bereich auf. Ein kurzes Tippen entfernt die Schleife. Der Knopf links schaltet die Schleife ein und aus, der Text zeigt ihren Bereich. Ist sie aktiv, beginnt **Abspielen** am Schleifenanfang und wiederholt den Bereich nahtlos.
+- **Übungsschleife:** Ziehe auf der Leiste einen Bereich auf. Ein kurzes Tippen setzt die [Startmarke](#aufnehmen-und-abspielen). Der Knopf links schaltet die Schleife ein und aus, der Text zeigt ihren Bereich. Ist sie aktiv, beginnt **Abspielen** am Schleifenanfang und wiederholt den Bereich nahtlos.
 - **Master:** die Effekte auf dem ganzen Mix. Tippen öffnet sie (siehe [Master](#master)).
 - **Spuren** und ganz unten die **Aufnahmespur**.
 - **Transportleiste:** Zeit, Abspielen, Aufnehmen und Metronom.
@@ -84,9 +84,9 @@ Jede Karte zeigt eine Aufnahme auf der gemeinsamen Zeitachse:
 - **Lautsprecher – Stumm:** schaltet die Spur stumm. Solo hat Vorrang.
 - **Papierkorb:** löscht die Spur.
 - **Effektzeile:** die eingeschalteten Effekte in Reihenfolge.
-- **Ohne Einmessung aufgenommen:** Diese Spur entstand ohne Latenzausgleich und kann leicht hinter den anderen liegen.
+- **Ohne Einmessung aufgenommen:** Diese Spur entstand ohne Latenzausgleich und kann leicht hinter den anderen liegen. Unter **Timing** in den [Spur-Einstellungen](#spur-einstellungen) trägst du ihre Latenz nach.
 
-Ein langer Druck auf die Karte öffnet die [Spur-Einstellungen](#spur-einstellungen). Während der Wiedergabe springst du durch Tippen auf eine Wellenform an diese Stelle.
+Ein langer Druck auf die Karte öffnet die [Spur-Einstellungen](#spur-einstellungen). Während der Wiedergabe springst du durch Tippen auf eine Wellenform an diese Stelle. Im Stillstand setzt Tippen die Startmarke.
 
 ## Die Aufnahmespur
 
@@ -99,8 +99,9 @@ Du kannst auch ohne vorbereitete Spur direkt auf **Aufnehmen** tippen. Dann übe
 
 ## Aufnehmen und Abspielen
 
-- **Abspielen** startet am Anfang oder am Beginn der aktiven Schleife. Nochmal tippen stoppt.
-- **Aufnehmen** startet einen Take. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein **Vorlauf** eingestellt, zählt erst ein stiller Countdown herunter. Ist das Metronom an, zählt es einen Takt vor.
+- **Startmarke:** Tippe im Stillstand auf die Schleifenleiste oder eine Wellenform. Abspielen und Aufnehmen beginnen dort, Stopp springt wieder zurück. Die Zeit zeigt die Marke an.
+- **Abspielen** startet an der Startmarke oder am Beginn der aktiven Schleife. Nochmal tippen stoppt.
+- **Aufnehmen** startet einen Take an der Startmarke. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein **Vorlauf** eingestellt, zählt erst ein stiller Countdown herunter. Ist das Metronom an, zählt es einen Takt vor.
 - **Metronom** öffnet die [Metronom-Einstellungen](#metronom).
 - Mit einem USB-Interface mit zwei Eingängen erscheint unter der Zeit die Wahl **Eingang 1**, **Eingang 2** oder **Eingang 1 und 2 gemischt**. Aufnahmen sind immer mono.
 
@@ -116,6 +117,7 @@ Ein langer Druck auf eine Spur öffnet ihre Einstellungen in Signalreihenfolge. 
 - **Metronom entfernen** – nur bei Takes, die mit hörbarem Klick aufgenommen wurden: rechnet den mitaufgenommenen Klick heraus.
 - **Übersprechen entfernen** – nur bei Takes, die über Lautsprecher-Wiedergabe aufgenommen wurden: entfernt die anderen Spuren, die der Lautsprecher in die Aufnahme gespielt hat.
 - **Normalisieren** – bringt die Spitze der Aufnahme auf einen Zielpegel.
+- **Timing** – **Versatz** verschiebt die Spur in Millisekunden, mit **−** und **+** oder per Eingabe. **Latenz** zeigt den eingemessenen Ausgleich. Bei einer Spur ohne Einmessung trägst du ihn selbst ein oder übernimmst mit **Einmessung übernehmen** die aktuelle Messung.
 
 **Effekte** – bis zu sechs, von oben nach unten durchlaufen:
 - **Effekt hinzufügen** bietet die in der [Bibliothek](#effekt-bibliothek) ausgewählten Effekte an.
@@ -304,7 +306,8 @@ Jedes Gerät braucht etwas Zeit, bis ein Ton aus dem Lautsprecher kommt und wied
 Die Windows-Version hat dieselben Funktionen und denselben Aufbau, bedient mit Maus und Tastatur:
 - Ein Rechtsklick auf eine Spur oder den **Master** öffnet ihre Einstellungen, wie langes Drücken.
 - Geräte, Audiopuffer und Einmessung liegen im Einstellungsdialog (Zahnrad).
-- Projekte liegen unter *Dokumente/My Audio*. ZIP-Dateien lassen sich auch per Drag-and-drop importieren. Speichern und Teilen öffnen einen Speichern-Dialog.
+- Projekte liegen unter *Dokumente/My Audio*. ZIP- und Audiodateien lassen sich auch per Drag-and-drop importieren, mehrere auf einmal. Jedes ZIP wird ein Projekt, zusammen abgelegte Audiodateien werden ein Projekt mit einer Spur je Datei. Speichern und Teilen öffnen einen Speichern-Dialog.
+- **Strg+Z** nimmt eine Änderung zurück, **Strg+Y** stellt sie wieder her.
 - **F1** öffnet **Über My Audio**.
 - Windows unterscheidet Lautsprecher und Kopfhörer nicht. Achte beim Live-Mithören selbst auf Kopfhörer, damit keine Rückkopplung entsteht.
 

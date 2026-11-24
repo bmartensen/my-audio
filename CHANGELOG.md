@@ -2,6 +2,14 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.11.0
+
+- **Undo** and **Redo** in a project: every change can be reverted while the project is open, including a take, an import and a deleted track. Deleting a track or a recording, removing an effect and resetting a volume envelope therefore no longer ask for confirmation. On Windows also with **Ctrl+Z** and **Ctrl+Y**.
+- **Start marker:** a tap on the stopped timeline sets where **Play** and **Record** begin, and Stop returns there. Takes can start later in the song.
+- **Timing** in the track settings: move a track by an **Offset** in milliseconds, and enter the **Latency** of a take recorded without calibration or take the current measurement.
+- Effect previews play on the output selected in the settings, and stop when the app goes to the background.
+- Windows: dropping several ZIP or audio files imports all of them.
+
 ## 0.10.4
 
 - Importing audio files and stems on Android is several times faster.

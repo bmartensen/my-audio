@@ -64,6 +64,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -122,9 +123,6 @@ fun ProjectContent(
 ) {
     val viewModel = session
     val state by viewModel.state.collectAsState()
-    var deletingTrack by rememberSaveable { mutableStateOf<Long?>(null) }
-    var deletingRecording by rememberSaveable { mutableStateOf<Long?>(null) }
-    var deletingRecordTrack by rememberSaveable { mutableStateOf(false) }
     var editingRecordTrack by rememberSaveable { mutableStateOf(false) }
     var monitorWarning by remember { mutableStateOf<LiveWarning?>(null) }
     var editingMetronome by rememberSaveable { mutableStateOf(false) }
@@ -190,6 +188,7 @@ fun ProjectContent(
     Scaffold(
         topBar = {
             BackTopAppBar(title = project?.name.orEmpty(), onBack = leaveProject) {
+                UndoButtons(state, onUndo = viewModel::undo, onRedo = viewModel::redo)
                 NotesButton(enabled = project != null, notesVisible = notesVisible, onNotes = { notesVisible = !notesVisible })
                 ShareMenu(
                     enabled = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting && !state.importing && project != null,
@@ -216,9 +215,9 @@ fun ProjectContent(
                         ProjectNotes(project.notes, project.notesTextSize, onTextSize = viewModel::setNotesTextSize,
                             onEdit = { editingNotes = true }, onClose = { notesVisible = false }, modifier = Modifier.weight(1f),
                             scrollSecondsPerLine = project.notesScroll.secondsPerLine.takeIf { project.notesScroll.enabled },
-                            // Moves with the music: during playback, and during a take from project frame 0 on.
+                            // Moves with the music: during playback, and during a take from its start on.
                             scrolling = state.mode == TransportMode.Playing ||
-                                (state.mode == TransportMode.Recording && state.positionFrames >= 0),
+                                (state.mode == TransportMode.Recording && state.positionFrames >= state.takeStartFrames),
                             runId = state.runId,
                             runActive = countingDown || state.mode == TransportMode.Playing || state.mode == TransportMode.Recording,
                             motionStartMillis = state.motionStartMillis)
@@ -227,12 +226,14 @@ fun ProjectContent(
                     TrackList(
                         project = project,
                         state = state,
-                        onOpenCalibration = { viewModel.leave(onOpenCalibration) },
+                        // Calibrating keeps the project open: its undo history stays.
+                        onOpenCalibration = { viewModel.leave(onOpenCalibration, closing = false) },
                         onToggleMute = { viewModel.setMuted(it, !it.muted) },
                         onToggleSolo = { viewModel.setSolo(it, !it.solo) },
                         onLoopChange = viewModel::setLoop,
-                        onDelete = { deletingTrack = it.id },
-                        onDeleteRecording = { deletingRecording = it.id },
+                        // No confirmations inside a project: every deletion can be undone.
+                        onDelete = viewModel::deleteTrack,
+                        onDeleteRecording = viewModel::deleteRecording,
                         onEdit = { editingTrack = it.id },
                         onRecordTrackMute = {
                             // Unmuting the empty record track monitors the microphone: warn where that feeds back or lags.
@@ -241,7 +242,7 @@ fun ProjectContent(
                             else viewModel.setRecordTrackMuted(!project.nextTake.muted)
                         },
                         onRecordTrackSolo = { viewModel.setRecordTrackSolo(!project.nextTake.solo) },
-                        onRecordTrackDelete = { deletingRecordTrack = true },
+                        onRecordTrackDelete = viewModel::deleteRecordTrack,
                         onRecordTrackEdit = { editingRecordTrack = true },
                         onAddEmptyTrack = viewModel::addEmptyTrack,
                         onEditMaster = { editingMaster = true },
@@ -281,22 +282,6 @@ fun ProjectContent(
     if (state.tunerOpen) {
         TunerDialog(state, onRetry = viewModel::openTuner, onClose = viewModel::closeTuner)
     }
-    project?.tracks?.firstOrNull { it.id == deletingTrack }?.let { track ->
-        ConfirmDeleteDialog(
-            title = stringResource(Res.string.track_delete_question),
-            message = formatResource(Res.string.track_delete_info, track.name),
-            onConfirm = { viewModel.deleteTrack(track) },
-            onDismiss = { deletingTrack = null }
-        )
-    }
-    project?.tracks?.firstOrNull { it.id == deletingRecording }?.let { track ->
-        ConfirmDeleteDialog(
-            title = stringResource(Res.string.track_recording_delete_question),
-            message = formatResource(Res.string.track_recording_delete_info, track.name),
-            onConfirm = { viewModel.deleteRecording(track) },
-            onDismiss = { deletingRecording = null }
-        )
-    }
     monitorWarning?.let { warning ->
         LiveWarningDialog(
             warning,
@@ -307,14 +292,6 @@ fun ProjectContent(
             onCancel = { monitorWarning = null }
         )
     }
-    if (deletingRecordTrack && project != null) {
-        ConfirmDeleteDialog(
-            title = stringResource(Res.string.track_delete_question),
-            message = formatResource(Res.string.record_track_delete_info, recordTrackName(project)),
-            onConfirm = viewModel::deleteRecordTrack,
-            onDismiss = { deletingRecordTrack = false }
-        )
-    }
     val librarySelection by viewModel.effectLibrary.selection.collectAsState()
     val tones by remember { ToneLibrary.current?.tones ?: MutableStateFlow(emptyList()) }.collectAsState()
     val effectChoices = remember(librarySelection, tones) { EffectChoice.of(librarySelection, tones) }
@@ -323,6 +300,7 @@ fun ProjectContent(
             track = track,
             choices = effectChoices,
             onSave = viewModel::setTrackSettings,
+            calibratedLatencyFrames = state.latencyFrames,
             onDismiss = { editingTrack = null },
             auditionSource = remember(track.id) { viewModel.trackAuditionSource(track.id) }
         )
@@ -384,7 +362,12 @@ private fun TrackList(
     val emptyRecordTrack = project.recordTrack != null
     val lastTake = project.tracks.lastOrNull()?.takeUnless { emptyRecordTrack }
     val editable = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting
-    val seek = onSeek.takeIf { state.mode == TransportMode.Playing }
+    // A tap on the timeline seeks while playing and sets the start marker while stopped.
+    val seek = onSeek.takeIf { state.mode == TransportMode.Playing || editable }
+    // Shown whenever nothing plays or records, also while the mix is rendered after a change.
+    val marker = state.startMarkerFrames.takeIf {
+        it > 0 && state.mode != TransportMode.Playing && state.mode != TransportMode.Recording
+    }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp),
@@ -396,7 +379,7 @@ private fun TrackList(
         }
         val playhead = state.positionFrames.takeIf { state.mode == TransportMode.Playing }
         if (project.tracks.isNotEmpty() && state.mode != TransportMode.Recording) {
-            item(key = "loop") { LoopBar(project, playhead, onLoopChange) }
+            item(key = "loop") { LoopBar(project, playhead, marker, onLoopChange, seek) }
         }
         // Warning, loop, master, tracks: the master stays in view however many tracks follow.
         if (project.tracks.isNotEmpty() && state.mode != TransportMode.Recording && state.preRollMillis == null) {
@@ -408,6 +391,7 @@ private fun TrackList(
                 project = project,
                 peaks = state.waveforms[track.id],
                 playheadFrames = playhead,
+                markerFrames = marker,
                 editable = editable,
                 onToggleMute = { onToggleMute(track) },
                 onToggleSolo = { onToggleSolo(track) },
@@ -464,7 +448,7 @@ private const val RECORD_TRACK_ID = -1L
 
 /**
  * The empty record track at the end: the next take goes here with its settings. A long press opens them; the
- * trash removes the empty track and its settings after confirmation, including at defaults.
+ * trash removes the empty track and its settings (undoable), including at defaults.
  */
 @Composable
 private fun RecordTrackCard(
@@ -537,11 +521,12 @@ private fun RecordTrackCard(
 private fun RecordingCard(project: Project, state: ProjectUiState) {
     PanelCard(border = BorderStroke(1.dp, RecordRed)) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp)) {
-            val countingIn = state.positionFrames < 0 && state.countInFrames > 0
+            val start = state.takeStartFrames
+            val countingIn = state.positionFrames < start && state.countInFrames > 0
             Text(
                 text = if (countingIn) {
                     val framesPerBeat = state.countInFrames / Metronome.COUNT_IN_BEATS
-                    val beat = ((state.countInFrames + state.positionFrames) / framesPerBeat + 1)
+                    val beat = ((state.countInFrames + state.positionFrames - start) / framesPerBeat + 1)
                         .coerceIn(1, Metronome.COUNT_IN_BEATS.toLong())
                     formatResource(Res.string.project_count_in, beat, Metronome.COUNT_IN_BEATS)
                 } else {
@@ -559,11 +544,13 @@ private fun RecordingCard(project: Project, state: ProjectUiState) {
                     .height(48.dp)
             ) {
                 val middle = size.height / 2
-                if (peaks.isEmpty() || state.positionFrames <= 0) return@Canvas
-                // Each peak covers one monitor interval; spread them over the frames recorded so far.
-                val step = size.width * state.positionFrames / timeline / peaks.size
+                val recorded = state.positionFrames - start
+                if (peaks.isEmpty() || recorded <= 0) return@Canvas
+                // Each peak covers one monitor interval; spread them over the frames recorded so far, from the start.
+                val left = size.width * start / timeline
+                val step = size.width * recorded / timeline / peaks.size
                 peaks.forEachIndexed { index, peak ->
-                    val x = (index + 0.5f) * step
+                    val x = left + (index + 0.5f) * step
                     val half = (displayLevel(peak) * middle).coerceAtLeast(0.5f)
                     drawLine(RecordRed, Offset(x, middle - half), Offset(x, middle + half), strokeWidth = (step * 0.7f).coerceAtLeast(1f))
                 }
@@ -618,13 +605,14 @@ private fun TrackCard(
     project: Project,
     peaks: FloatArray?,
     playheadFrames: Long?,
+    markerFrames: Long?,
     editable: Boolean,
     onToggleMute: () -> Unit,
     onToggleSolo: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onEnvelope: () -> Unit,
-    /** Non-null while playing: jump playback to a project frame. */
+    /** Non-null while playing or stopped: jump playback to a project frame, or set the start marker there. */
     onSeek: ((Long) -> Unit)?
 ) {
     PanelCard(
@@ -683,7 +671,7 @@ private fun TrackCard(
                 }
             }
             ActiveEffectsLine(track.effects.chain)
-            if (!track.latencyCalibrated) {
+            if (track.needsLatency) {
                 Text(
                     text = stringResource(Res.string.track_uncalibrated),
                     style = MaterialTheme.typography.bodySmall,
@@ -696,9 +684,12 @@ private fun TrackCard(
                 projectFrames = project.lengthFrames,
                 peaks = peaks,
                 playheadFrames = playheadFrames,
+                markerFrames = markerFrames,
                 loop = project.activeLoop,
                 color = if (project.isAudible(track)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 onSeek = onSeek,
+                // A long press on the waveform opens the options like on the rest of the card, without moving the marker.
+                onLongPress = onEdit.takeIf { editable },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(end = 8.dp)
@@ -760,18 +751,21 @@ private fun MasterCard(chain: List<EffectSlot>, editable: Boolean, onEdit: () ->
 }
 
 /**
- * The whole project as a strip: dragging marks the practice loop and switches it on, a tap
- * removes it, the button switches it on and off. The text always says whether playback loops.
- * Only playback loops; Record always starts at the project start.
+ * The whole project as a strip: dragging marks the practice loop and switches it on, the button switches it on
+ * and off, and a tap sets the start marker (or seeks while playing). The text always says whether playback
+ * loops. Only playback loops; Record starts at the marker.
  */
 @Composable
-private fun LoopBar(project: Project, playheadFrames: Long?, onLoopChange: (PlaybackLoop?) -> Unit) {
+private fun LoopBar(project: Project, playheadFrames: Long?, markerFrames: Long?, onLoopChange: (PlaybackLoop?) -> Unit,
+                    onTap: ((Long) -> Unit)?) {
     val length = project.lengthFrames.coerceAtLeast(1)
     val loop = project.loop
     var draft by remember { mutableStateOf<PlaybackLoop?>(null) }
     val shown = draft ?: loop
     val primary = MaterialTheme.colorScheme.primary
     val inactive = MaterialTheme.colorScheme.outline
+    val markerColor = MaterialTheme.colorScheme.tertiary
+    val currentTap by rememberUpdatedState(onTap)
     PanelCard {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -813,7 +807,11 @@ private fun LoopBar(project: Project, playheadFrames: Long?, onLoopChange: (Play
                                 onDragCancel = { draft = null }
                             )
                         }
-                        .pointerInput(Unit) { detectTapGestures { onLoopChange(null) } }
+                        .pointerInput(length) {
+                            detectTapGestures { offset ->
+                                currentTap?.invoke((offset.x.coerceIn(0f, size.width.toFloat()) / size.width * length).roundToLong())
+                            }
+                        }
                 ) {
                     shown?.takeIf { it.lengthFrames > 0 }?.let {
                         val color = if (it.enabled) primary else inactive
@@ -823,6 +821,7 @@ private fun LoopBar(project: Project, playheadFrames: Long?, onLoopChange: (Play
                         drawRoundRect(color.copy(alpha = 0.2f), topLeft, area, corner)
                         drawRoundRect(color, topLeft, area, corner, style = Stroke(2.dp.toPx()))
                     }
+                    markerFrames?.let { drawStartMarker(it.coerceIn(0, length), 0, length, markerColor) }
                     playheadFrames?.let { drawPlaybackCursor(it.coerceIn(0, length), 0, length) }
                 }
                 val looping = shown?.takeIf { it.enabled && it.lengthFrames > 0 }
@@ -839,6 +838,23 @@ private fun LoopBar(project: Project, playheadFrames: Long?, onLoopChange: (Play
                     color = if (looping != null) primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    }
+}
+
+/**
+ * Undo, and Redo once something was undone: every change to the project while it is open. Disabled while the
+ * transport runs or an export or import is busy.
+ */
+@Composable
+private fun UndoButtons(state: ProjectUiState, onUndo: () -> Unit, onRedo: () -> Unit) {
+    val idle = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting && !state.importing
+    IconButton(onClick = onUndo, enabled = idle && state.canUndo) {
+        Icon(painterResource(Res.drawable.ic_undo), contentDescription = stringResource(Res.string.action_undo))
+    }
+    if (state.canRedo) {
+        IconButton(onClick = onRedo, enabled = idle) {
+            Icon(painterResource(Res.drawable.ic_redo), contentDescription = stringResource(Res.string.action_redo))
         }
     }
 }
@@ -929,20 +945,26 @@ private fun TrackWaveform(
     projectFrames: Long,
     peaks: FloatArray?,
     playheadFrames: Long?,
+    markerFrames: Long?,
     loop: PlaybackLoop?,
     color: Color,
     onSeek: ((Long) -> Unit)?,
+    onLongPress: (() -> Unit)?,
     modifier: Modifier
 ) {
+    val markerColor = MaterialTheme.colorScheme.tertiary
     val baseline = MaterialTheme.colorScheme.outlineVariant
     val loopShade = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
     // A contrasting colour, so the curve stands out from the waveform without covering it.
     val envelopeColor = MaterialTheme.colorScheme.tertiary
-    // While playing, a tap continues playback at that point of the shared timeline.
+    // While playing, a tap continues playback at that point of the shared timeline; while stopped, it sets the marker.
+    // The gesture keeps running across recompositions; it always calls the latest actions.
+    val currentSeek by rememberUpdatedState(onSeek)
+    val currentLongPress by rememberUpdatedState(onLongPress)
     val seekModifier = if (onSeek != null && projectFrames > 0) {
         Modifier.pointerInput(projectFrames) {
-            detectTapGestures { offset ->
-                onSeek((offset.x / size.width * projectFrames).toLong().coerceIn(0L, projectFrames))
+            detectTapGestures(onLongPress = { currentLongPress?.invoke() }) { offset ->
+                currentSeek?.invoke((offset.x / size.width * projectFrames).toLong().coerceIn(0L, projectFrames))
             }
         }
     } else Modifier
@@ -955,9 +977,10 @@ private fun TrackWaveform(
         drawLine(baseline, Offset(0f, middle), Offset(size.width, middle), strokeWidth = 1f)
         if (peaks == null || peaks.isEmpty() || projectFrames <= 0) return@Canvas
         // A filled, mirrored contour on a dB scale: separate thin bars of the raw level left quiet
-        // takes almost invisible. Bins of the count-in (before frame 0) are not drawn.
+        // takes almost invisible. Bins of the count-in and latency (before the take's start) are not drawn.
         val framesPerBin = track.lengthFrames.toFloat() / peaks.size
-        val first = peaks.indices.firstOrNull { track.offsetFrames + (it + 0.5f) * framesPerBin >= 0 } ?: return@Canvas
+        val audible = maxOf(track.audibleStartFrames, 0L)
+        val first = peaks.indices.firstOrNull { track.offsetFrames + (it + 0.5f) * framesPerBin >= audible } ?: return@Canvas
         fun xOf(index: Int) = size.width * (track.offsetFrames + (index + 0.5f) * framesPerBin) / projectFrames
         val area = Path().apply {
             moveTo(xOf(first), middle)
@@ -984,6 +1007,7 @@ private fun TrackWaveform(
                 drawPath(curve, envelopeColor, style = Stroke(width = 1.5.dp.toPx(), join = StrokeJoin.Round))
             }
         }
+        markerFrames?.let { drawStartMarker(it.coerceIn(0, projectFrames), 0, projectFrames, markerColor) }
         playheadFrames?.let {
             drawPlaybackCursor(it.coerceIn(0, projectFrames), 0, projectFrames)
         }
@@ -1018,7 +1042,10 @@ private fun TransportBar(
     val sampleRate = project?.sampleRate ?: 48_000
     val preRoll = state.preRollMillis
     val status = @Composable {
-        val position = if (state.mode == TransportMode.Idle) project?.lengthFrames ?: 0 else state.positionFrames
+        // Stopped, the clock shows the start marker once one is set, otherwise the project length.
+        val position = if (state.mode == TransportMode.Idle) {
+            state.startMarkerFrames.takeIf { it > 0 } ?: project?.lengthFrames ?: 0
+        } else state.positionFrames
         Text(
             // The pre-roll counts whole seconds down in the place of the clock, also with the notes open.
             text = if (preRoll != null) formatResource(Res.string.pre_roll_countdown, preRollSeconds(preRoll)) else formatTime(position, sampleRate),

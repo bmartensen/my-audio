@@ -47,7 +47,7 @@ Manual fallback: install [Temurin 21](https://adoptium.net/temurin/releases/?ver
 
 ## Android development
 
-Use the [UI refinement and final acceptance workflow](repository-rules.md#ui-refinement-and-final-acceptance): iterate with debug builds in the emulator, then verify the final release build against existing, finished projects on the contributor's connected smartphone. A Pixel is not required.
+Use the [UI refinement and release candidate workflow](repository-rules.md#ui-refinement-and-release-candidates): iterate with debug builds in the emulator, then install the release build as an update on the contributor's connected smartphone. A Pixel is not required.
 
 ```powershell
 .\build.ps1 -Target Android

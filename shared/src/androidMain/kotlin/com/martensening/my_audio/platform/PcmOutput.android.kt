@@ -1,8 +1,15 @@
 package com.martensening.my_audio.platform
 
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioTrack
+
+/** The output previews play on: the app's selected output device, set by the app at start-up. */
+object PreviewOutput {
+    @Volatile
+    var device: () -> AudioDeviceInfo? = { null }
+}
 
 actual fun openPcmOutput(sampleRate: Int, channels: Int): PcmOutput? = runCatching {
     val mask = if (channels == 2) AudioFormat.CHANNEL_OUT_STEREO else AudioFormat.CHANNEL_OUT_MONO
@@ -21,6 +28,8 @@ actual fun openPcmOutput(sampleRate: Int, channels: Int): PcmOutput? = runCatchi
         .setBufferSizeInBytes(maxOf(minimum, sampleRate / 12 * channels * Float.SIZE_BYTES))
         .setTransferMode(AudioTrack.MODE_STREAM)
         .build()
+    // Like Play and Record: the device chosen in the settings, not just the system's default output.
+    runCatching { PreviewOutput.device() }.getOrNull()?.let { track.setPreferredDevice(it) }
     track.play()
     object : PcmOutput {
         override fun write(samples: FloatArray, count: Int) {
