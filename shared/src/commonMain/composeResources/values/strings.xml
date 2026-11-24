@@ -331,6 +331,7 @@
     <string name="share_soundcraft_summary">Tracks, positions and effects for SoundCraft (ZIP)</string>
     <string name="action_undo">Undo</string>
     <string name="action_redo">Redo</string>
+    <string name="project_close_question">Close project?</string>
     <string name="track_timing">Timing</string>
     <string name="track_timing_summary">Offset %1$s · latency %2$s</string>
     <string name="track_timing_summary_missing">Offset %1$s · latency missing</string>

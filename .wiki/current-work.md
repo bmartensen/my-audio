@@ -2,6 +2,12 @@
 
 As of 2026-11-24: **My Audio 0.11.0 / versionCode 39** for Android and Windows, released from `main` with tag `v0.11.0` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.11.0) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
 
+## 0.11.1 on develop
+
+- Version 0.11.1 / versionCode 40, not yet released to `main`.
+- Close confirmation ([#38](https://github.com/bmartensen/my-audio/issues/38)): Back in the top bar and the system back button ask „Projekt wirklich schließen?“ while the project has undo or redo steps; opening calibration keeps the project open and asks nothing.
+- Built from `develop` with `build.ps1 -Target All -AndroidConfiguration Release`: `MyAudio-0.11.1.apk` (release key) and `MyAudio-0.11.1.msi` (SHA-256 `a05567cb…6d597d8a`). The APK is installed on the Pixel 9 as an update over 0.11.0, the MSI on the contributor's Windows computer. 119 shared desktop tests (2 gated skipped) and 13 Android JVM tests pass.
+
 ## Release 0.11.0
 
 Milestone [0.11.x](https://github.com/bmartensen/my-audio/milestone/2) sharpens the recording workflow. Microsoft Store listing, images and screenshots: [Microsoft Store](microsoft-store.md), packaging in [#18](https://github.com/bmartensen/my-audio/issues/18).

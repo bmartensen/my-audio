@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -143,7 +144,11 @@ fun ProjectContent(
         }
     }
     // Backgrounding and Activity destruction keep the service-owned session alive.
-    val leaveProject = { viewModel.leave(onBack) }
+    // Closing clears the undo history, so a project with history asks first.
+    var confirmingClose by rememberSaveable { mutableStateOf(false) }
+    val leaveProject: () -> Unit = {
+        if (state.canUndo || state.canRedo) confirmingClose = true else viewModel.leave(onBack)
+    }
     PlatformBackHandler(onBack = leaveProject)
     PlatformBackHandler(enabled = notesVisible && !editingNotes && !state.tunerOpen) { notesVisible = false }
 
@@ -256,6 +261,21 @@ fun ProjectContent(
         }
     }
 
+    if (confirmingClose) {
+        AlertDialog(
+            onDismissRequest = { confirmingClose = false },
+            title = { Text(stringResource(Res.string.project_close_question)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmingClose = false
+                    viewModel.leave(onBack)
+                }) { Text(stringResource(Res.string.action_close)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingClose = false }) { Text(stringResource(Res.string.action_cancel)) }
+            }
+        )
+    }
     if (editingNotes && project != null) {
         NotesEditor(project.notes, project.notesTextSize, onSave = viewModel::saveNotes, onDismiss = { editingNotes = false })
     }

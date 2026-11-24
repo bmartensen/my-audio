@@ -326,6 +326,7 @@
     <string name="share_soundcraft_summary">Spuren, Positionen und Effekte für SoundCraft (ZIP)</string>
     <string name="action_undo">Rückgängig</string>
     <string name="action_redo">Wiederholen</string>
+    <string name="project_close_question">Projekt wirklich schließen?</string>
     <string name="track_timing">Timing</string>
     <string name="track_timing_summary">Versatz %1$s · Latenz %2$s</string>
     <string name="track_timing_summary_missing">Versatz %1$s · Latenz fehlt</string>

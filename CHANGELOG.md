@@ -2,6 +2,10 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.11.1
+
+- **Back** in a project asks for confirmation once something can be undone, so a stray tap no longer discards the undo history.
+
 ## 0.11.0
 
 - **Undo** and **Redo** in a project: every change can be reverted while the project is open, including a take, an import and a deleted track. Deleting a track or a recording, removing an effect and resetting a volume envelope therefore no longer ask for confirmation. On Windows also with **Ctrl+Z** and **Ctrl+Y**.
