@@ -140,13 +140,20 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    fun deletingTrackRemovesItsFile() {
+    fun deletedTrackKeepsItsFileForUndoUntilTheProjectIsClosed() {
         val project = repository.create("Demo", 48_000, nowMillis = 1_000)
         val file = repository.newTrackFile(project.id, nowMillis = 42).apply { writeText("pcm") }
-        repository.addTrack(project.id, track(42, file.name))
+        val before = repository.addTrack(project.id, track(42, file.name))!!
 
         val updated = repository.deleteTrack(project.id, 42)!!
         assertTrue(updated.tracks.isEmpty())
+        assertTrue(file.exists())
+        // Undo writes the earlier state back; the take is still there.
+        assertEquals(before, repository.restore(before))
+        assertEquals(before, repository.load(project.id))
+
+        repository.deleteTrack(project.id, 42)
+        repository.deleteOrphanedFiles(project.id)
         assertFalse(file.exists())
     }
 

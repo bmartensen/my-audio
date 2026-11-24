@@ -43,13 +43,15 @@ public:
      */
     bool exportStems(const std::vector<TrackSource> &sources, int64_t projectFrames,
                      const std::vector<std::string> &targets);
-    bool startPlayback(int outputDeviceId, bool bluetooth);
+    /** Plays from [startFrame], or from the practice loop's start while it is active. */
+    bool startPlayback(int64_t startFrame, int outputDeviceId, bool bluetooth);
     /**
-     * Records from project frame -countInFrames, so the count-in clicks precede frame 0. If the
-     * mix is not empty, the played mix (without the click) is written to [referencePath] in step
+     * Records from project frame startFrame - countInFrames, so the count-in clicks precede the start. If
+     * the mix is not empty, the played mix (without the click) is written to [referencePath] in step
      * with the take, for the later bleed removal.
      */
-    bool startRecording(const std::string &path, const std::string &referencePath, int64_t countInFrames,
+    bool startRecording(const std::string &path, const std::string &referencePath, int64_t startFrame,
+                        int64_t countInFrames,
                         int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
                         InputChannel inputChannel);
     /**
@@ -72,7 +74,7 @@ public:
     void setMetronome(bool enabled, float bpm, float volume);
     /** Exactly what playback outputs (mix plus audible click), for export; empty while a stream runs. */
     std::vector<float> renderPlayback();
-    /** Jumps playback to a project frame; ignored while recording (takes always start at 0). */
+    /** Jumps playback to a project frame; ignored while recording (a take runs on from its start). */
     void seekPlayback(int64_t frame);
     /** Practice loop of the playback, [start, end) in project frames; end <= start switches it off. */
     void setLoop(int64_t start, int64_t end) { mLoop.set(start, end); }

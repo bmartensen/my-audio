@@ -33,14 +33,15 @@ object NativeAudio {
                              envelopes: Array<LongArray>, envelopeGains: Array<FloatArray>,
                              projectFrames: Long, targets: Array<String>): Boolean
 
-    external fun startPlayback(outputDeviceId: Int, bluetooth: Boolean): Boolean
+    /** Plays from [startFrame], or from the practice loop while it is active. */
+    external fun startPlayback(startFrame: Long, outputDeviceId: Int, bluetooth: Boolean): Boolean
 
     /**
      * Plays all tracks and records the microphone into a new WAV file at [path]. The take starts
-     * [countInFrames] before project frame 0 so the metronome can count in. [inputChannel] as for
+     * [countInFrames] before project frame [startFrame] so the metronome can count in. [inputChannel] as for
      * [runCalibrationSession]; the take is always mono.
      */
-    external fun startRecording(path: String, referencePath: String, countInFrames: Long,
+    external fun startRecording(path: String, referencePath: String, startFrame: Long, countInFrames: Long,
                                 outputDeviceId: Int, inputDeviceId: Int, handsFreeInput: Boolean, bluetooth: Boolean,
                                 inputChannel: Int): Boolean
 

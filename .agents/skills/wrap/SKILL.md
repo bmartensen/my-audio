@@ -15,7 +15,7 @@ Save the session's work on `develop`: reconcile the wiki, verify, commit and pus
    - agreed behavior in `app-requirements.md`, durable choices in the newest dated group of `decisions.md`, implemented state and evidence in `current-work.md`;
    - add user-visible changes to `CHANGELOG.md`;
    - fix contradictions, such as a page calling an implemented feature pending;
-   - name the issues this work completes, so the commit message can close them (`Closes #<n>`); new open work found during the session becomes an issue only when the user agrees, and only as a change to the codebase; test and acceptance results go to `current-work.md` instead.
+   - name the issues this work completes, so the commit message can close them (`Closes #<n>`); new open work found during the session becomes an issue only when the user agrees, and only as a change to the codebase; test results go to `current-work.md` instead.
 4. **Verify.** Run the documented checks that cover the changes (`.wiki/repository-rules.md`). If a check cannot run, say exactly why.
 5. **Review.** Inspect `git status --short` and the full diff. Mention unrelated pre-existing changes; do not revert them. Stage only intended files and check the staged list for credentials, personal data and build artifacts.
 6. **Commit.** Write a concise English message describing the change, with `Closes #<n>` lines for completed issues. Include wiki updates in the same commit as the implementation they describe. Add no agent/model authorship credits or trailers. Version tags are not created here; they belong on the release merge commit in `main`.

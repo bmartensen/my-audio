@@ -12,7 +12,7 @@ projects/<project-id>/
   tracks/<track-id>.clean-v<N>.wav  # disposable versioned cleanup cache
 ```
 
-Android stores this under private filesDir; Windows under Documents/My Audio. Each take/reference is immutable after stop. Caches can be regenerated and are excluded from backups. Track deletion removes files with its ID prefix; project deletion removes its directory. Opening a project removes track files not referenced by project.json, including abandoned interrupted takes. Cleanup caches of earlier versions (`*.clean-v<n>.wav`) are kept, because older app versions still use their own.
+Android stores this under private filesDir; Windows under Documents/My Audio. Each take/reference is immutable after stop. Caches can be regenerated and are excluded from backups. Deleting a track or a recording only removes it from project.json: its files stay while the project is open, so undo can restore it. Closing the project (back to the home screen) and opening it remove track files not referenced by project.json, including deleted and abandoned interrupted takes. Project deletion removes its directory. The undo history itself is never stored. Cleanup caches of earlier versions (`*.clean-v<n>.wav`) are kept, because older app versions still use their own.
 
 Device preferences/calibration are not project data. Android `audio_devices` stores type/address/name, not persistent port IDs; `calibration` keys include the measurement method and device pair. Bluetooth keys include connection identity (boot/port ID). Unsupported hands-free output preferences fall back to system output. The compatibility key `latest` applies only to phone speaker/internal microphone. Windows uses `devices.json`, `calibration.json` and `window.json` alongside projects. `library.json` stores local selection, for example `{ "selected": ["airwindows.ToTape9", "myaudio.eq", "myaudio.reverb"] }`; absent means My Audio EQ and reverb selected. `audio.json` (Android filesDir, Windows next to the projects) stores the global buffer, e.g. `{ "buffer": 4 }` (0 = Automatic, 1 = Short, 4 = Long; other values read as Automatic); calibration keys of a non-automatic buffer end in `|buffer=<n>`. None of these device files travels in a project backup.
 
@@ -47,11 +47,13 @@ Device preferences/calibration are not project data. Android `audio_devices` sto
 
 | Field | Contract |
 |---|---|
-| `offsetFrames` | Project frame corresponding to the first file frame: negative latency plus recorded count-in correction. Recalibration does not change it. |
+| `offsetFrames` | Project frame corresponding to the first file frame: the take's start (start marker) minus count-in and latency, plus `shiftFrames`. It is the effective position every version reads. Recalibration does not change it. |
+| `latencyFrames` | Optional (0.11): round trip compensated in `offsetFrames`; written for takes from 0.11 on and when edited. Absent means a take before 0.11, which always started at frame 0: latency = −offset − countIn, at least 0 (imports: 0). |
+| `shiftFrames` | Optional (0.11), default 0: the user's offset contained in `offsetFrames`; positive is later. The take's start is `offsetFrames − shiftFrames + countInFrames + latency`. Moving a track also moves its `volumeEnvelope` points. |
 | `lengthFrames` | File duration including count-in, in time frames; stereo does not double it. |
 | `channels` | Optional, default 1; value 2 requires format 2. WAV contains interleaved stereo PCM16. More than two channels are rejected. |
 | `recordedMetronome` | Click settings used during this take; absent means no recorded click. |
-| `countInFrames` | Recorded one-bar count-in at file start, or 0. Silent pre-roll is not recorded. |
+| `countInFrames` | Recorded one-bar count-in at file start, before the take's start, or 0. Silent pre-roll is not recorded. |
 | `referenceFileName` | Optional immutable playback reference for bleed removal. |
 | `effects` | Input cleanup, normalization and effect chain; formats 1/2 also support fixed EQ/compressor/reverb fields. |
 | `pan` | Default 0, range −1 to 1. Mono pan; stereo balance attenuates the opposite channel without mixing channels. |
@@ -104,7 +106,8 @@ Format 1/2 enabled EQ/compressor becomes `myaudio.eq`, preserving a disabled sub
 - Imported tones (0.10): `{"type": "myaudio.nam", "tone": "<sha256>", "name": "…", "inputDb": 0, "outputDb": 0}` (gains ±24 dB, clamped) and `{"type": "myaudio.ir", "tone": "<sha256>", "name": "…"}`; both write `"levelMatch": false` only when switched off. `tone` is the SHA-256 of the file in the tone library (`<root>/tones/<sha256>.nam|wav` with `tones.json` for names and details); `name` is shown when the tone is missing. These are optional slot types within format 3, so 0.9.x opens them as preserved unknown slots. Project backups add the used tone files as `tones/<sha256>.nam|wav`; importing a backup adds them to the tone library under the slot's name. Mix and track exports contain no tones.
 - An unknown effect type opens as a `ChainEffect.Unknown` slot: its JSON is kept verbatim, only `enabled` belongs to this version. It is never rendered and shows “Requires a newer version”; it can be bypassed, moved or removed.
 - `recordTrack` (project, optional): the empty record track after `tracks`, with `name` (absent = default name for `nextTrackNumber`), `volume`, `muted` (default true), `solo`, `pan`, `effects` and `volumeEnvelope`. Absent means no prepared empty track; the UI shows “+ New track”, while direct recording uses the default or inherited next-take settings. It is not part of `tracks`, because readers up to 0.8.6 require `fileName` there. A chain on it raises the written version to 3 like any other chain. A solo on it counts like any track solo.
-- `latencyCalibrated` (track, optional, default true; only `false` is written): marks a take recorded without calibration, whose offset holds only the count-in.
+- `latencyCalibrated` (track, optional, default true; only `false` is written): marks a take recorded without calibration. Its latency is 0 until the user enters one (`latencyFrames`); the hint shows while it is 0.
+- `latencyFrames` and `shiftFrames` (track, 0.11): describe how `offsetFrames` is made up, which stays the effective position, so 0.9/0.10 play a moved track where it belongs. Their click and bleed removal assumes a start at frame 0 and may sound slightly different for takes recorded from a later start marker. The cleanup cache is deleted when a take's latency changes, because bleed removal aligns with it.
 - None of these raises the version. `ReleasedReader086` in the desktop tests is the verbatim 0.8.5/0.8.6 reader; `VersionExchangeTest` proves that projects written now open there, and that fields from a newer version survive reading, editing and saving. 0.8.x drops the new fields when it saves.
 
 ## Extension rules

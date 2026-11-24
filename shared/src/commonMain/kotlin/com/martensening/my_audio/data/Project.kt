@@ -188,9 +188,9 @@ data class TrackEffects(
 }
 
 /**
- * One recorded take. [offsetFrames] is the project frame of the file's first sample; overdubs
- * start negative by the calibrated latency so the take lines up with the existing tracks.
- * Volume, mute and effects are applied when the mix is rendered, never to the file.
+ * One recorded take. [offsetFrames] is the project frame of the file's first sample, the only position older
+ * versions read: the take's start marker, minus count-in and latency, plus the user's [shiftFrames]. Volume, mute
+ * and effects are applied when the mix is rendered, never to the file.
  */
 data class Track(
     val id: Long,
@@ -222,13 +222,50 @@ data class Track(
     /** PCM channel count; microphone takes and old projects are mono. */
     val channels: Int = 1,
     /**
-     * False for a take recorded on a device pair that was not calibrated: [offsetFrames] then holds only the
-     * count-in, without latency compensation. Later calibrations never move it.
+     * False for a take recorded on a device pair that was not calibrated: it was stored without latency
+     * compensation, and its [latency] can be entered later. Calibrations never move it on their own.
      */
     val latencyCalibrated: Boolean = true,
+    /** Round trip compensated in [offsetFrames]; null for projects before 0.11, see [latency]. */
+    val latencyFrames: Long? = null,
+    /** The user's offset contained in [offsetFrames]; positive moves the track later. */
+    val shiftFrames: Long = 0,
     val unknown: UnknownFields = UnknownFields.NONE
 ) {
     val endFrames get() = offsetFrames + lengthFrames
+
+    /** Position of the file's first sample as recorded, without the user's offset. */
+    val recordedOffsetFrames get() = offsetFrames - shiftFrames
+
+    /**
+     * The compensated round trip. Takes before 0.11 always started at frame 0, so it is what lies before frame 0
+     * besides the count-in; imports (offset 0 or later) have none.
+     */
+    val latency: Long get() = latencyFrames ?: (-recordedOffsetFrames - countInFrames).coerceAtLeast(0)
+
+    /** Project frame where the take started (the start marker), after count-in and latency. */
+    val startFrames get() = recordedOffsetFrames + countInFrames + latency
+
+    /** Project frame where the take's audio begins (its start plus the user's offset); before it lie count-in and latency. */
+    val audibleStartFrames get() = offsetFrames + countInFrames + latency
+
+    /** True for a take without calibration whose latency has not been entered yet; its card shows a hint. */
+    val needsLatency get() = !latencyCalibrated && latency == 0L
+
+    /**
+     * The same take with [latency] and [shift] (frames): the audio moves accordingly, the volume envelope with it,
+     * and the start marker stays.
+     */
+    fun withTiming(latency: Long = this.latency, shift: Long = shiftFrames): Track {
+        val offset = startFrames - countInFrames - latency + shift
+        val delta = offset - offsetFrames
+        return copy(
+            offsetFrames = offset,
+            latencyFrames = latency,
+            shiftFrames = shift,
+            volumeEnvelope = if (delta == 0L) volumeEnvelope else volumeEnvelope.map { it.copy(frame = it.frame + delta) }
+        )
+    }
 }
 
 /**

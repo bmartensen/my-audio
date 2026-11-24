@@ -155,12 +155,12 @@ bool MultitrackEngine::startMonitoring(int outputDeviceId, int inputDeviceId, bo
     return true;
 }
 
-bool MultitrackEngine::startPlayback(int outputDeviceId, bool bluetooth) {
+bool MultitrackEngine::startPlayback(int64_t startFrame, int outputDeviceId, bool bluetooth) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mOutput || mMixLeft.empty()) return false;
     // With a practice loop, the very first block already starts there.
     const PlaybackLoop::Range loop = mLoop.range();
-    mPosition = loop.active() ? loop.start : 0;
+    mPosition = loop.active() ? loop.start : std::clamp<int64_t>(startFrame, 0, mixFrames());
     mSeekRequest = -1;
     mRecording = false;
     mWarmup.reset(bluetooth ? kSampleRate * StreamWarmup::kBluetoothSeconds : 0);
@@ -177,13 +177,13 @@ bool MultitrackEngine::startPlayback(int outputDeviceId, bool bluetooth) {
     return true;
 }
 
-bool MultitrackEngine::startRecording(const std::string &path, const std::string &referencePath,
+bool MultitrackEngine::startRecording(const std::string &path, const std::string &referencePath, int64_t startFrame,
                                       int64_t countInFrames, int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
                                       InputChannel inputChannel) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mOutput) return false;
-    mPosition = -std::max<int64_t>(0, countInFrames);
-    mSeekRequest = -1;  // takes always start at the beginning, never at a stale jump target
+    mPosition = std::max<int64_t>(0, startFrame) - std::max<int64_t>(0, countInFrames);
+    mSeekRequest = -1;  // takes start at their start frame, never at a stale jump target
     mInputPeak = 0.0f;
     mDroppedFrames = 0;
     mInputChannel = inputChannel;

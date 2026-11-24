@@ -30,6 +30,7 @@ kotlin {
         named("desktopMain") { dependsOn(jvmSharedMain) }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.lifecycle.runtime.compose)
         }
         named("desktopTest").dependencies {
             implementation(libs.junit)

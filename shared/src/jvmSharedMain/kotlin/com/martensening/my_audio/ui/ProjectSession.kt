@@ -24,6 +24,7 @@ import com.martensening.my_audio.data.PlaybackLoop
 import com.martensening.my_audio.data.ProjectArchive
 import com.martensening.my_audio.data.EffectSlot
 import com.martensening.my_audio.data.Project
+import com.martensening.my_audio.data.ProjectHistory
 import com.martensening.my_audio.data.ProjectRepository
 import com.martensening.my_audio.data.RecordTrack
 import com.martensening.my_audio.data.Track
@@ -80,7 +81,13 @@ data class ProjectUiState(
     val tunerListening: Boolean = false,
     val tunerDeviceName: String = "",
     val tunerTracking: Boolean = false,
-    val tunerError: Boolean = false
+    val tunerError: Boolean = false,
+    /** Where Play and Record start and Stop returns to; set by a tap on the stopped timeline, not saved. */
+    val startMarkerFrames: Long = 0,
+    /** Project frame where the running take started (its count-in lies before it). */
+    val takeStartFrames: Long = 0,
+    val canUndo: Boolean = false,
+    val canRedo: Boolean = false
 )
 
 /** Transport state survives Activity recreation; the foreground service retains a running session. */
@@ -112,11 +119,14 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     private var recordingFile: File? = null
     private var recordingMetronome: Metronome? = null
     private var recordingCountIn = 0L
+    private var recordingStart = 0L
     private var autoRecordHandled = false
     // Transport changes suspend; these main-thread flags ignore taps while one is in progress.
     private var starting = false
     private var stopping = false
     private var finishingPreview = false
+    /** Undo and redo while the project is open; cleared when it is closed. */
+    private val history = ProjectHistory()
 
     init {
         viewModelScope.launch {
@@ -194,6 +204,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     fun setNotesScroll(scroll: NotesScroll) {
         val value = scroll.copy(secondsPerLine = scroll.secondsPerLine
             .coerceIn(NotesScroll.MIN_SECONDS_PER_LINE, NotesScroll.MAX_SECONDS_PER_LINE))
+        recordUndo(_state.value.project, key = "notesScroll")
         _state.update { state -> state.copy(project = state.project?.copy(notesScroll = value)) }
         viewModelScope.launch(saveDispatcher) { repository.setNotesScroll(projectId, value) }
     }
@@ -201,6 +212,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     /** Silent countdown before each take; used from the next Record on. */
     fun setPreRoll(preRoll: PreRoll) {
         val value = preRoll.copy(seconds = preRoll.seconds.coerceIn(PreRoll.MIN_SECONDS, PreRoll.MAX_SECONDS))
+        recordUndo(_state.value.project, key = "preRoll")
         _state.update { state -> state.copy(project = state.project?.copy(preRoll = value)) }
         viewModelScope.launch(saveDispatcher) { repository.setPreRoll(projectId, value) }
     }
@@ -240,6 +252,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                         throw error
                     }
                 }
+                recordUndo(_state.value.project)
                 _state.update { it.copy(project = withLocalSettings(project)) }
                 loadWaveforms(project)
                 AudioEngine.prepare(project, repository)
@@ -263,7 +276,9 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
 
     /** Save only the shared text; never replace tracks or rebuild/stop a running mix. */
     suspend fun saveNotes(notes: String): Boolean = try {
+        val before = _state.value.project
         checkNotNull(withContext(saveDispatcher) { repository.setNotes(projectId, notes) })
+        if (before?.notes != notes) recordUndo(before)
         _state.update { state -> state.copy(project = state.project?.copy(notes = notes)) }
         true
     } catch (cancelled: CancellationException) {
@@ -288,14 +303,15 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                 if (project.audibleTracks.isEmpty()) return@startTransport
                 AudioEngine.prepare(project, repository)
                 AudioEngine.applyMetronome(project.metronome, recording = false)
-                // With an active loop, playback starts at the loop instead of the project start.
+                // With an active loop, playback starts at the loop, otherwise at the start marker.
                 val loop = project.activeLoop
                 AudioEngine.applyLoop(loop)
+                val start = loop?.startFrames ?: playbackStart(project)
                 transportRoute = platform.route()
-                if (AudioEngine.startPlayback(transportRoute!!)) {
-                    val start = loop?.startFrames ?: 0
+                if (AudioEngine.startPlayback(transportRoute!!, start)) {
+                    // The notes follow project time: they start at the line belonging to the start.
                     _state.update { it.copy(mode = TransportMode.Playing, positionFrames = start, errorMessage = null,
-                        runId = it.runId + 1, motionStartMillis = uptimeMillis()) }
+                        runId = it.runId + 1, motionStartMillis = uptimeMillis() - framesToMillis(start)) }
                     startMonitor()
                 } else {
                     _state.update { it.copy(errorMessage = Res.string.project_error_audio) }
@@ -330,6 +346,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             AudioEngine.applyMetronome(project.metronome, recording = true)
             // With the metronome, one bar is counted in; its clicks double as removal templates.
             val countIn = if (project.metronome.enabled) project.metronome.countInFrames(NativeAudio.SAMPLE_RATE) else 0L
+            // A take starts at the start marker; the existing tracks play from there.
+            val takeStart = _state.value.startMarkerFrames.coerceAtLeast(0)
             // The silent pre-roll runs once everything is prepared, so the take starts right at zero.
             // A new run: the notes go to the top already for the pre-roll, to read the first line.
             _state.update { it.copy(runId = it.runId + 1, motionStartMillis = null) }
@@ -357,17 +375,19 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             // An unmuted record track monitors the microphone through its chain; the take itself stays dry.
             val take = project.nextTake
             AudioEngine.setMonitor(take.effects.chain.takeUnless { take.muted }, take.volume, take.pan)
-            if (AudioEngine.startRecording(file, ProjectRepository.referenceFileFor(file), countIn, route)) {
+            if (AudioEngine.startRecording(file, ProjectRepository.referenceFileFor(file), takeStart, countIn, route)) {
                 recordingFile = file
                 recordingMetronome = project.metronome.takeIf { it.enabled }
                 recordingCountIn = countIn
+                recordingStart = takeStart
                 _state.update {
                     it.copy(
                         mode = TransportMode.Recording,
                         preRollMillis = null,
-                        // The notes move from project frame 0 on, after the count-in.
-                        motionStartMillis = uptimeMillis() + countIn * 1000 / NativeAudio.SAMPLE_RATE,
-                        positionFrames = -countIn,
+                        // The notes follow project time from the take's start on, after the count-in.
+                        motionStartMillis = uptimeMillis() + framesToMillis(countIn) - framesToMillis(takeStart),
+                        positionFrames = takeStart - countIn,
+                        takeStartFrames = takeStart,
                         countInFrames = countIn,
                         recordingPeaks = emptyList(),
                         latencyFrames = latency,
@@ -398,6 +418,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         val project = _state.value.project ?: return
         val changed = project.tracks.firstOrNull { it.id == track.id }?.let(change) ?: return
         val updated = project.copy(tracks = project.tracks.map { if (it.id == changed.id) changed else it })
+        recordUndo(project)
         _state.update { it.copy(project = updated) }
         viewModelScope.launch {
             try {
@@ -413,6 +434,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     /** Applies immediately, also while playing, and is stored with the project. */
     fun setLoop(loop: PlaybackLoop?) {
         val project = _state.value.project ?: return
+        if (project.loop == loop) return
+        recordUndo(project)
         val updated = project.copy(loop = loop)
         _state.update { it.copy(project = updated) }
         if (_state.value.mode == TransportMode.Playing) AudioEngine.applyLoop(updated.activeLoop)
@@ -450,6 +473,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         if (project.recordTrack == null && project.tracks.isNotEmpty()) return
         val changed = change(project.nextTake)
         val updated = project.copy(recordTrack = changed)
+        recordUndo(project)
         _state.update { it.copy(project = updated) }
         viewModelScope.launch {
             try {
@@ -462,11 +486,48 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         }
     }
 
-    /** Tapping a waveform while playing continues playback there; takes are never moved. */
+    /**
+     * A tap on the timeline: while playing, playback continues there; while stopped, it sets the start marker
+     * where Play and Record begin. Takes are never moved by tapping.
+     */
     fun seekTo(frame: Long) {
-        if (_state.value.mode != TransportMode.Playing) return
-        AudioEngine.seekPlayback(frame)
+        when (_state.value.mode) {
+            TransportMode.Playing -> AudioEngine.seekPlayback(frame)
+            TransportMode.Idle -> {
+                if (starting || stopping) return
+                val marker = frame.coerceAtLeast(0)
+                _state.update { it.copy(startMarkerFrames = marker, positionFrames = marker) }
+            }
+            else -> Unit
+        }
     }
+
+    /** Where Play starts without a loop: the marker, or the beginning once the marker lies after the end. */
+    private fun playbackStart(project: Project): Long =
+        _state.value.startMarkerFrames.takeIf { it < project.lengthFrames }?.coerceAtLeast(0) ?: 0
+
+    fun undo() = travel(history::undo)
+
+    fun redo() = travel(history::redo)
+
+    /** Writes the state [step] returns; the notes' text size is a view setting and stays as it is. */
+    private fun travel(step: (Project) -> Project?) {
+        val state = _state.value
+        if (state.mode != TransportMode.Idle || starting || stopping || state.exporting || state.importing) return
+        val current = state.project ?: return
+        val target = step(current)?.copy(notesTextSize = current.notesTextSize) ?: return
+        publishHistory()
+        changeProject(undoable = false) { repository.restore(target) }
+    }
+
+    /** Remembers [before], the state a change leaves; see [ProjectHistory.record]. */
+    private fun recordUndo(before: Project?, key: String? = null) {
+        before ?: return
+        history.record(before, key)
+        publishHistory()
+    }
+
+    private fun publishHistory() = _state.update { it.copy(canUndo = history.canUndo, canRedo = history.canRedo) }
 
     /**
      * Exports and requests the share sheet: the mix exactly as Play outputs it (Ogg/Opus), the
@@ -517,6 +578,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     /** Applies immediately, also while playing or recording; [saveMetronome] stores it with the project. */
     fun setMetronome(metronome: Metronome) {
         val project = _state.value.project ?: return
+        if (project.metronome == metronome) return
+        recordUndo(project, key = "metronome")
         _state.update { it.copy(project = project.copy(metronome = metronome)) }
         AudioEngine.applyMetronome(metronome, recording = _state.value.mode == TransportMode.Recording)
     }
@@ -541,22 +604,49 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         val frames = AudioEngine.stopNow()
         NativeAudio.setMonitorChain(FloatArray(0), 1f, 0f, false)
         platform.stopRouting()
+        val before = _state.value.project
         val project = recordingFile?.let { finishTake(it, frames) }
         recordingFile = null
-        _state.update { it.copy(project = project ?: it.project, mode = TransportMode.Idle, positionFrames = 0) }
+        if (project != null) recordUndo(before)
+        _state.update { it.copy(project = project ?: it.project, mode = TransportMode.Idle,
+            positionFrames = it.startMarkerFrames) }
     }
 
-    fun close() { closeTuner(); viewModelScope.cancel() }
+    fun close() {
+        closeTuner()
+        viewModelScope.cancel()
+        clearHistory()
+        deleteUnusedFiles()
+    }
 
-    fun leave(onLeft: () -> Unit) {
+    /**
+     * Stops the transport and runs [onLeft]. With [closing] (back to the projects) the project is closed: its undo
+     * history ends, and the audio of deleted takes, kept for undo until now, is removed.
+     */
+    fun leave(onLeft: () -> Unit, closing: Boolean = true) {
         closeTuner()
         stopRequested = true
         viewModelScope.launch {
             tunerJob?.join()
             while (starting || stopping) delay(20)
             stopTransport()
+            if (closing) {
+                clearHistory()
+                withContext(saveDispatcher) { deleteUnusedFiles() }
+                _state.update { it.copy(startMarkerFrames = 0, positionFrames = 0) }
+            }
             onLeft()
         }
+    }
+
+    private fun clearHistory() {
+        history.clear()
+        publishHistory()
+    }
+
+    /** Takes deleted while the project was open were kept for undo; once it is closed they go. */
+    private fun deleteUnusedFiles() {
+        runCatching { repository.deleteOrphanedFiles(projectId) }.onFailure { Log.e(TAG, "Cleanup failed", it) }
     }
 
     /** Auditions only this track with the unsaved curve; project settings and files stay intact. */
@@ -588,9 +678,11 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             _state.update { it.copy(mode = TransportMode.Loading) }
             try {
                 if (points != null) {
-                    val project = withContext(Dispatchers.IO) {
+                    val before = _state.value.project
+                    val project = withContext(saveDispatcher) {
                         repository.updateTrack(projectId, track.copy(volumeEnvelope = VolumeEnvelope.sanitize(points, track.endFrames)))
                     }
+                    if (project != null && project != before) recordUndo(before)
                     if (project != null) _state.update { it.copy(project = project) }
                 }
                 _state.value.project?.let { AudioEngine.prepare(it, repository) }
@@ -699,8 +791,9 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
                     it.copy(
                         positionFrames = position,
                         inputLevel = level,
-                        // The live waveform starts at project frame 0, after the count-in.
-                        recordingPeaks = if (recording && position >= 0) it.recordingPeaks + level else it.recordingPeaks
+                        // The live waveform starts at the take's start, after the count-in.
+                        recordingPeaks = if (recording && position >= it.takeStartFrames) it.recordingPeaks + level
+                            else it.recordingPeaks
                     )
                 }
             }
@@ -768,14 +861,17 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             if (mode == TransportMode.Recording) AudioEngine.setMonitor(null)
             val file = recordingFile
             recordingFile = null
+            val before = _state.value.project
             val project = if (mode == TransportMode.Recording && file != null) {
-                withContext(Dispatchers.IO) { finishTake(file, frames) }
+                withContext(saveDispatcher) { finishTake(file, frames) }
             } else null
+            if (project != null) recordUndo(before)
             _state.update { state ->
                 state.copy(
                     project = project?.let(::withLocalSettings) ?: state.project,
                     mode = TransportMode.Idle,
-                    positionFrames = 0,
+                    // Stop returns to the start marker, so the same part can be played or recorded again.
+                    positionFrames = state.startMarkerFrames,
                     inputLevel = 0f,
                     latencyFrames = loadLatencyFrames(),
                     recordingPeaks = emptyList()
@@ -810,8 +906,9 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             id = file.nameWithoutExtension.toLong(),
             name = recordingTrackName ?: "Track " + project.nextTrackNumber,
             fileName = file.name,
-            // The file starts with the count-in, then the round-trip latency, then project frame 0.
-            offsetFrames = -latency - countIn,
+            // The file starts with the count-in, then the round-trip latency, then the start marker.
+            offsetFrames = recordingStart - latency - countIn,
+            latencyFrames = latency,
             lengthFrames = frames,
             createdAtMillis = System.currentTimeMillis(),
             recordedMetronome = metronome,
@@ -825,13 +922,18 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
         return repository.addTake(projectId, track)
     }
 
-    /** Runs [change] while idle and re-renders the mix. False if refused. */
-    private fun changeProject(change: () -> Project?): Boolean {
+    /**
+     * Runs [change] while idle and re-renders the mix; an [undoable] change can be undone. Writes go through the
+     * same queue as the background saves, so they land in tap order. False if refused.
+     */
+    private fun changeProject(undoable: Boolean = true, change: () -> Project?): Boolean {
         if (_state.value.mode != TransportMode.Idle || starting || stopping || _state.value.exporting) return false
+        val before = _state.value.project
         _state.update { it.copy(mode = TransportMode.Loading) }
         viewModelScope.launch {
             try {
-                val project = withContext(Dispatchers.IO) { change() } ?: return@launch
+                val project = withContext(saveDispatcher) { change() } ?: return@launch
+                if (undoable && project != before) recordUndo(before)
                 _state.update { it.copy(project = project) }
                 loadWaveforms(project)
                 AudioEngine.prepare(project, repository)
@@ -856,6 +958,8 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     }
 
     private fun loadLatencyFrames(): Long? = platform.latencyFrames(platform.route())
+
+    private fun framesToMillis(frames: Long) = frames * 1000 / NativeAudio.SAMPLE_RATE
 
     companion object {
         private const val TAG = "MyAudioProject"

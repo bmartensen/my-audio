@@ -15,5 +15,3 @@ The real Windows JNI decoder, shared WAV writer and solo render produced the exp
 Synthetic MP3/Vorbis/Opus/24-bit WAV tests imported exactly 144,000 frames (3 s at 48 kHz), with 440 Hz left and 660 Hz right; resampling from 44.1 kHz and Opus pre-skip/end trim were covered. Automated tests cover phase opposition, separation, resampling block boundaries, waveform peaks, format versions, backup round trips and cleanup defaults. Native stereo tests cover balance, envelopes, linked effects, reverb and stem export.
 
 The offline Windows callback path plays prepared stereo audio and passes finite-value/peak tests. That does not exclude output underruns or hardware/Bluetooth distortion. Desktop `transportXruns()` counts dropped capture frames, not separate playback underruns. Master normalization can make low-level source artifacts more audible by raising quiet solo tracks toward −14 LUFS, limited to +24 dB.
-
-Listening acceptance with a fresh import of the original material on Windows and Android remains open. Offline measurements alone do not establish that the reported crackle is resolved.

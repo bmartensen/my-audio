@@ -37,12 +37,13 @@ With `release_downloads: true` (or `-RequireGitHubRelease`), the check requires 
 
 Only when the contributor explicitly authorizes it; preparing, building or committing is not permission to publish.
 
-1. Raise the version, build the release candidate (`build.ps1 -Target All -AndroidConfiguration Release`) and let the contributor accept it on their phone (see [repository commands](repository-rules.md#ui-refinement-and-final-acceptance)).
+1. Raise the version, build the release candidate (`build.ps1 -Target All -AndroidConfiguration Release`) and install it on the contributor's phone when they ask for it (see [repository commands](repository-rules.md#ui-refinement-and-release-candidates)).
 2. Download the source archive of the exact Java runtime bundled in the MSI (`desktop/build/compose/tmp/main/runtime/release` names the version; the JDK path is printed by `build.ps1`) with its `.sha256.txt` into `.work/runtime-source/`, e.g. for Temurin `gh release download jdk-<version> -R adoptium/temurin21-binaries -p '*-jdk-sources_*.tar.gz*'`.
 3. Complete the [publication audit](publication-checks.md) on `develop` and push it. Open the release pull request `develop` → `main` (`gh pr create --base main --head develop --title "Release <version>"`, changelog entry as body), merge it with a merge commit, then create the annotated tag `v<version>` on the merge commit in `main` and push the tag (see [branches and releases](repository-rules.md#branches-and-releases)).
 4. `.\tools\publish_github_release.ps1 -DryRun`, then without `-DryRun`: verifies tag, checksums and runtime source, creates a **draft** release with notes from the changelog and uploads APK, MSI, `.sha256` files and the runtime source. Review the draft, then publish it (`-Publish` or `gh release edit v<version> --draft=false --latest`).
 5. `.\tools\check_site_downloads.ps1 -RequireGitHubRelease` must pass. Then set `release_downloads: true` and `release`/`released` in `docs/_config.yml` on `develop`, run both checks again and bring the change to `main` with a second pull request (`Link <version> downloads`). Check both languages and both installer links on the live site.
 6. martensening.com: set the version and date in its `html/myaudio/index.php` (the buttons link this release's assets) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
+7. Microsoft Store: `build.ps1 -Target WindowsStore` from the tagged merge commit, then in Partner Center start a new submission, upload `.work/MyAudio-<version>.msix` under Packages and put the changelog entry into *What's new in this version* of both listings ([Microsoft Store](microsoft-store.md)). The GitHub release carries the runtime source the package bundles.
 
 ## Guide screenshots
 

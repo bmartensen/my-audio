@@ -2,11 +2,36 @@ package com.martensening.my_audio.platform
 
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.DataLine
+import javax.sound.sampled.Mixer
+import javax.sound.sampled.SourceDataLine
 import kotlin.math.roundToInt
+
+/** The output previews play on: the name of the app's selected playback device ("" = default), set by the app. */
+object PreviewOutput {
+    @Volatile
+    var deviceName: () -> String = { "" }
+}
+
+/**
+ * The Java Sound mixer of the playback device named [name] (as the native engine lists it). Java Sound may cut
+ * long names, so a mixer whose name starts the device name also matches; null keeps the default output.
+ */
+private fun mixerFor(name: String, info: DataLine.Info): Mixer.Info? {
+    if (name.isEmpty()) return null
+    val candidates = AudioSystem.getMixerInfo().filter { AudioSystem.getMixer(it).isLineSupported(info) }
+    return candidates.firstOrNull { it.name == name }
+        ?: candidates.filter { it.name.length >= MIN_PREFIX && name.startsWith(it.name) }.maxByOrNull { it.name.length }
+}
+
+private const val MIN_PREFIX = 8
 
 actual fun openPcmOutput(sampleRate: Int, channels: Int): PcmOutput? = runCatching {
     val format = AudioFormat(sampleRate.toFloat(), 16, channels, true, false)
-    val line = AudioSystem.getSourceDataLine(format)
+    val info = DataLine.Info(SourceDataLine::class.java, format)
+    // Like Play and Record: the device chosen in the settings, not just the system's default output.
+    val mixer = runCatching { mixerFor(PreviewOutput.deviceName(), info) }.getOrNull()
+    val line = mixer?.let { AudioSystem.getSourceDataLine(format, it) } ?: AudioSystem.getSourceDataLine(format)
     // About 80 ms of buffer: short enough that a changed setting is heard at once.
     line.open(format, sampleRate / 12 * channels * 2)
     line.start()

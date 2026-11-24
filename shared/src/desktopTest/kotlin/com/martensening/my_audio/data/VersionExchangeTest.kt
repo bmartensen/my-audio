@@ -188,6 +188,21 @@ class VersionExchangeTest {
     }
 
     @Test
+    fun latencyAndOffsetKeepTheVersionAndOlderReadersPlayTheShiftedPosition() {
+        // A take from the start marker 96 000, moved 4 800 frames later by the user.
+        val take = Track(2, "A", "2.wav", 96_000 - 1_020, 48000, createdAtMillis = 2, latencyFrames = 1_020)
+            .withTiming(shift = 4_800)
+        val simple = Project(1, "Demo", 1, 48000, tracks = listOf(take))
+        val text = ProjectJson.encode(simple)
+        assertEquals(1, ProjectJson.formatVersion(text))
+        assertEquals(simple, ProjectJson.decode(text))
+        // offsetFrames stays the effective position, so an older reader places the track exactly there.
+        val old = ReleasedReader086.decode(text).tracks.single()
+        assertEquals(96_000L - 1_020L + 4_800L, old.offsetFrames)
+        assertEquals(take.offsetFrames, old.offsetFrames)
+    }
+
+    @Test
     fun aRecordTrackWithoutFieldsIsAFreshOne() {
         val text = """
             {"version": 1, "id": 1, "name": "Neu", "createdAtMillis": 1, "sampleRate": 48000, "tracks": [],

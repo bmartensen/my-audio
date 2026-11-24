@@ -65,8 +65,8 @@ public:
     bool setTracks(const std::vector<TrackSource> &sources, const std::vector<EffectSlot> &master);
     bool exportStems(const std::vector<TrackSource> &sources, int64_t projectFrames,
                      const std::vector<std::string> &targets);
-    bool startPlayback(int outputDeviceId, bool bluetooth);
-    bool startRecording(const std::string &path, const std::string &referencePath, int64_t countInFrames,
+    bool startPlayback(int64_t startFrame, int outputDeviceId, bool bluetooth);
+    bool startRecording(const std::string &path, const std::string &referencePath, int64_t startFrame, int64_t countInFrames,
                         int outputDeviceId, int inputDeviceId, bool handsFreeInput, bool bluetooth,
                         InputChannel inputChannel);
     /** Live audition: microphone through the monitor chain to the output, nothing played or recorded. */

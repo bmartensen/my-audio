@@ -75,6 +75,8 @@ class RecordTrackTest {
 
         project = repository.deleteRecording(project.id, track.id)!!
         assertTrue(project.tracks.isEmpty())
+        // The audio stays for undo until the project is closed.
+        repository.deleteOrphanedFiles(project.id)
         assertTrue(tracksDir.listFiles().orEmpty().isEmpty())
         val kept = project.recordTrack!!
         assertEquals(RecordTrack.keepingSettingsOf(track), kept)

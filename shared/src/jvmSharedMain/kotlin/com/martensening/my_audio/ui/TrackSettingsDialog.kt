@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import com.martensening.my_audio.audio.NativeAudio
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +32,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -84,8 +89,9 @@ private fun panText(pan: Float): String {
 
 /**
  * Per-track settings opened by a long press, top to bottom in signal order: the input stage
- * (clean-up and normalisation), the effect chain and the channel (volume, panorama). Every effect
+ * (clean-up, normalisation and timing), the effect chain and the channel (volume, panorama). Every effect
  * can be switched off while keeping its values. Applied when the mix is rendered.
+ * [calibratedLatencyFrames] is the current route's calibration, which an uncalibrated take can adopt.
  */
 @Composable
 fun TrackSettingsDialog(
@@ -93,7 +99,8 @@ fun TrackSettingsDialog(
     choices: List<EffectChoice>,
     onSave: (Track) -> Unit,
     onDismiss: () -> Unit,
-    auditionSource: AuditionSource = SampleAuditionSource
+    auditionSource: AuditionSource = SampleAuditionSource,
+    calibratedLatencyFrames: Long? = null
 ) {
     val audition = rememberEffectAudition(auditionSource)
     var name by rememberSaveable { mutableStateOf(track.name) }
@@ -106,6 +113,18 @@ fun TrackSettingsDialog(
     var normalizeDb by rememberSaveable { mutableFloatStateOf(track.effects.normalize.targetDb) }
     var normalizeExpanded by rememberSaveable { mutableStateOf(false) }
     var chain by remember { mutableStateOf(track.effects.chain) }
+    var latencyMs by rememberSaveable { mutableStateOf(framesToMs(track.latency)) }
+    var offsetMs by rememberSaveable { mutableStateOf(framesToMs(track.shiftFrames)) }
+    var timingExpanded by rememberSaveable { mutableStateOf(false) }
+    // The empty record track (no audio yet) has no position to adjust.
+    val hasAudio = track.fileName.isNotEmpty()
+
+    // Unchanged values keep the exact frames; edited ones are whole milliseconds.
+    fun timed(base: Track): Track {
+        val latency = if (latencyMs == framesToMs(track.latency)) track.latency else msToFrames(latencyMs)
+        val shift = if (offsetMs == framesToMs(track.shiftFrames)) track.shiftFrames else msToFrames(offsetMs)
+        return if (latency == track.latency && shift == track.shiftFrames) base else base.withTiming(latency, shift)
+    }
 
     // A copy, so fields of a newer app version stored with the effects stay.
     fun currentEffects() = track.effects.copy(
@@ -176,6 +195,41 @@ fun TrackSettingsDialog(
                         onChange = { normalizeDb = it.roundTo(0.5f) }
                     )
                 }
+                if (hasAudio) {
+                    // Folded by default: one line says where the track sits; tracks are never moved by dragging.
+                    TimingRow(
+                        summary = if (!track.latencyCalibrated && latencyMs == 0) {
+                            formatResource(Res.string.track_timing_summary_missing, formatMs(offsetMs))
+                        } else {
+                            formatResource(Res.string.track_timing_summary, formatMs(offsetMs), "$latencyMs ms")
+                        },
+                        expanded = timingExpanded,
+                        onToggle = { timingExpanded = !timingExpanded }
+                    )
+                    if (timingExpanded) {
+                        if (track.latencyCalibrated) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
+                                Text(stringResource(Res.string.track_latency), style = MaterialTheme.typography.labelLarge,
+                                    modifier = Modifier.weight(1f))
+                                Text("$latencyMs ms", style = MaterialTheme.typography.labelLarge)
+                            }
+                        } else {
+                            MsField(stringResource(Res.string.track_latency), latencyMs, 0..MAX_LATENCY_MS) { latencyMs = it }
+                            calibratedLatencyFrames?.let { frames ->
+                                TextButton(
+                                    onClick = { latencyMs = framesToMs(frames) },
+                                    enabled = latencyMs != framesToMs(frames),
+                                    modifier = Modifier.align(Alignment.End)
+                                ) {
+                                    Text(formatResource(Res.string.track_latency_adopt, "${framesToMs(frames)} ms"))
+                                }
+                            }
+                        }
+                        MsField(stringResource(Res.string.track_offset), offsetMs, -MAX_OFFSET_MS..MAX_OFFSET_MS, signed = true) {
+                            offsetMs = it
+                        }
+                    }
+                }
 
                 SectionTitle(Res.string.track_effects)
                 EffectChainEditor(chain, onChange = { chain = it }, choices = choices, audition = audition, live = true)
@@ -201,7 +255,8 @@ fun TrackSettingsDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                onSave(track.copy(name = name.trim().ifEmpty { track.name }, volume = volume, pan = pan, effects = currentEffects()))
+                onSave(timed(track).copy(name = name.trim().ifEmpty { track.name }, volume = volume, pan = pan,
+                    effects = currentEffects()))
                 onDismiss()
             }) {
                 Text(stringResource(Res.string.action_done))
@@ -380,5 +435,70 @@ internal fun ValueSlider(
             enabled = enabled,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+private const val MAX_LATENCY_MS = 1_000
+private const val MAX_OFFSET_MS = 10_000
+
+private fun framesToMs(frames: Long) = Math.round(frames * 1000.0 / NativeAudio.SAMPLE_RATE).toInt()
+
+private fun msToFrames(ms: Int) = ms.toLong() * NativeAudio.SAMPLE_RATE / 1000
+
+/** "+12 ms", "−8 ms", "0 ms". */
+private fun formatMs(ms: Int) = when {
+    ms > 0 -> "+$ms ms"
+    ms < 0 -> "−${-ms} ms"
+    else -> "0 ms"
+}
+
+/** The folded timing line of the input section: a tap shows latency and offset. */
+@Composable
+private fun TimingRow(summary: String, expanded: Boolean, onToggle: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 8.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(Res.string.track_timing), style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface)
+            Text(summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Icon(
+            painterResource(Res.drawable.ic_arrow_drop_down),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 12.dp).rotate(if (expanded) 180f else 0f)
+        )
+    }
+}
+
+/**
+ * Milliseconds as − / field / +: the buttons nudge by 1 ms, the field takes a typed value. Values outside [range]
+ * are clamped; an unfinished entry such as "-" keeps the last valid value.
+ */
+@Composable
+private fun MsField(label: String, value: Int, range: IntRange, signed: Boolean = false, onChange: (Int) -> Unit) {
+    var text by remember { mutableStateOf(value.toString()) }
+    // Follows changes from the buttons or "adopt" (and clamping), without disturbing what is being typed.
+    LaunchedEffect(value) { if (text.toIntOrNull() != value) text = value.toString() }
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+        TextButton(onClick = { onChange((value - 1).coerceIn(range)) }, enabled = value > range.first) { Text("−") }
+        OutlinedTextField(
+            value = text,
+            onValueChange = { typed ->
+                val clean = typed.filterIndexed { index, c -> c.isDigit() || (signed && c == '-' && index == 0) }.take(6)
+                text = clean
+                clean.toIntOrNull()?.let { onChange(it.coerceIn(range)) }
+            },
+            singleLine = true,
+            suffix = { Text("ms") },
+            textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.End),
+            keyboardOptions = KeyboardOptions(keyboardType = if (signed) KeyboardType.Text else KeyboardType.Number,
+                imeAction = ImeAction.Done),
+            modifier = Modifier.width(120.dp)
+        )
+        TextButton(onClick = { onChange((value + 1).coerceIn(range)) }, enabled = value < range.last) { Text("+") }
     }
 }

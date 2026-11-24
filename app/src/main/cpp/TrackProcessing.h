@@ -19,14 +19,14 @@ float removeMetronome(std::vector<float> &samples, int64_t offsetFrames, float b
 
 /**
  * Template subtraction for takes with a count-in: the clicks recorded during the count-in
- * (before project frame 0, nothing else playing) are averaged per click type and subtracted at
- * every beat of the song, after one global gain/shift fit per type. Captures room tail and
+ * (before [startFrame], where the take started, nothing else playing) are averaged per click type and
+ * subtracted at every beat of the song from [startFrame] on, after one global gain/shift fit per type. Captures room tail and
  * repeatable speaker non-linearity that the linear model misses. Returns false without touching
  * the samples if the count-in is unusable (then use removeMetronome()); otherwise [removedDb]
  * receives the removed energy around the beats.
  */
-bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFrames, int64_t countInFrames,
-                                 float bpm, int sampleRate, float &removedDb);
+bool removeMetronomeWithTemplate(std::vector<float> &samples, int64_t offsetFrames, int64_t startFrame,
+                                 int64_t countInFrames, float bpm, int sampleRate, float &removedDb);
 
 /** Scales the track so its peak reaches [targetDb] dBFS. */
 void normalizePeak(std::vector<float> &samples, float targetDb);

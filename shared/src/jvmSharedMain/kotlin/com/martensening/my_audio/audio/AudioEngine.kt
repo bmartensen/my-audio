@@ -111,7 +111,7 @@ object AudioEngine {
     /** Native arguments for [tracks]; layout must match `readSources` in `JniBridge.cpp`. */
     private class TrackArguments(project: Project, tracks: List<Track>, repository: ProjectRepository) {
         val paths = tracks.flatMap { trackPaths(project, it, repository) }.toTypedArray()
-        val frames = tracks.flatMap { listOf(it.offsetFrames, it.countInFrames) }.toLongArray()
+        val frames = tracks.flatMap { listOf(it.offsetFrames, it.countInFrames, it.shiftFrames, it.latency) }.toLongArray()
         val parameters = tracks.flatMap(::processingParameters).toFloatArray()
         val chains = tracks.map { encodeChain(it.effects.chain) }.toTypedArray()
         val envelopes = tracks.map { track -> track.volumeEnvelope.map { it.frame }.toLongArray() }.toTypedArray()
@@ -198,9 +198,10 @@ object AudioEngine {
         NativeAudio.setMetronome(audible, metronome.bpm.toFloat(), metronome.volume)
     }
 
-    suspend fun startPlayback(route: TransportRoute): Boolean = lock.withLock {
+    /** Plays from [startFrame], or from the practice loop while one is applied. */
+    suspend fun startPlayback(route: TransportRoute, startFrame: Long = 0): Boolean = lock.withLock {
         withContext(Dispatchers.Default) {
-            NativeAudio.startPlayback(route.outputId, route.outputBluetooth)
+            NativeAudio.startPlayback(startFrame, route.outputId, route.outputBluetooth)
         }
     }
 
@@ -231,12 +232,16 @@ object AudioEngine {
         return true
     }
 
-    /** Records [file]; if something is played, it is captured to [referenceFile] for the bleed removal. */
-    suspend fun startRecording(file: File, referenceFile: File, countInFrames: Long, route: TransportRoute): Boolean =
+    /**
+     * Records [file] from project frame [startFrame] after [countInFrames]; if something is played, it is captured to
+     * [referenceFile] for the bleed removal.
+     */
+    suspend fun startRecording(file: File, referenceFile: File, startFrame: Long, countInFrames: Long,
+                               route: TransportRoute): Boolean =
         lock.withLock {
             if (!route.ready) return@withLock false
             withContext(Dispatchers.Default) {
-                NativeAudio.startRecording(file.absolutePath, referenceFile.absolutePath, countInFrames,
+                NativeAudio.startRecording(file.absolutePath, referenceFile.absolutePath, startFrame, countInFrames,
                     route.outputId, route.inputId, route.communication, route.bluetooth,
                     route.inputChannel?.code ?: InputChannel.DEVICE_CODE)
             }

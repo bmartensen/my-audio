@@ -78,8 +78,8 @@ bool exportDawTracks(const std::vector<TrackSource> &sources, const std::vector<
     for (size_t t = 0; t < sources.size(); ++t) {
         const TrackSource &source = sources[t];
         if (!loadProcessedTake(source, left, right)) continue;
-        // Latency and count-in lie before project frame 0; the clip starts with the song.
-        const auto first = static_cast<size_t>(std::clamp<int64_t>(-source.offsetFrames, 0, static_cast<int64_t>(left.size())));
+        // Count-in and latency lie before the take's start; the clip starts there.
+        const auto first = static_cast<size_t>(std::clamp<int64_t>(source.leadFrames(), 0, static_cast<int64_t>(left.size())));
         DawTrack &track = tracks[t];
         track.start = source.offsetFrames + static_cast<int64_t>(first);
         track.dryFrames = static_cast<int64_t>(left.size() - first);

@@ -2,6 +2,7 @@ package com.martensening.my_audio.desktop
 
 import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.audio.AudioSettings
+import com.martensening.my_audio.platform.PreviewOutput
 import com.martensening.my_audio.ui.LiveInputs
 import com.martensening.my_audio.ui.PlatformLiveInput
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
@@ -68,6 +69,8 @@ fun DesktopApp(window: Frame, version: String, aboutOpen: MutableState<Boolean>)
         DesktopProjectPlatform(repository, devices, calibrationStore, DesktopStorage.root).also { platform ->
             // Desktop outputs do not tell loudspeaker from headphones; the Live hint asks for headphones.
             LiveInputs.current = PlatformLiveInput(platform, hasPermission = { true }, warningOf = { null })
+            // Effect previews play on the selected output like the transport does.
+            PreviewOutput.deviceName = { devices.route().output }
         }
     }
     val calibration = remember { DesktopCalibration(calibrationStore, devices, scope) }
@@ -160,15 +163,20 @@ private fun DesktopHomeScreen(
         else scope.launch { snackbarHostState.showSnackbar(getString(Res.string.import_failed)) }
     }
 
-    // Files dragged from Explorer onto the window are imported like with the import button. The
-    // content decides, not the name: shared backups sometimes lose their ".zip" on the way.
+    // Files dragged from Explorer onto the window are imported like with the import button, all of them: each ZIP
+    // as a project, loose audio files together as one. The content decides for ZIPs, not the name: shared backups
+    // sometimes lose their ".zip" on the way. A single new project opens; several stay listed on the home page.
     val dropTarget = remember {
         object : DragAndDropTarget {
             override fun onDrop(event: DragAndDropEvent): Boolean {
-                val file = (event.dragData() as? DragData.FilesList)?.readFiles().orEmpty()
+                val files = (event.dragData() as? DragData.FilesList)?.readFiles().orEmpty()
                     .map { File(URI(it)) }
-                    .firstOrNull { it.isFile } ?: return false
-                import(file)
+                    .filter { it.isFile }
+                if (files.isEmpty()) return false
+                home.importFiles(files) { created, failed ->
+                    if (failed > 0) scope.launch { snackbarHostState.showSnackbar(getString(Res.string.import_failed)) }
+                    else created.singleOrNull()?.let { onOpenProject(it.id, false) }
+                }
                 return true
             }
         }

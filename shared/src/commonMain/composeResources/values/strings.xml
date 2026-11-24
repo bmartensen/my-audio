@@ -7,7 +7,6 @@
     <string name="action_play">Play</string>
     <string name="action_stop">Stop</string>
     <string name="action_delete">Delete</string>
-    <string name="action_reset">Reset</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="action_discard">Discard</string>
@@ -90,10 +89,6 @@
 
     <string name="track_default_name">Track %1$d</string>
     <string name="track_delete_question">Delete track?</string>
-    <string name="track_delete_info">“%1$s” and its recording will be deleted.</string>
-    <string name="track_recording_delete_question">Delete recording?</string>
-    <string name="track_recording_delete_info">The recording of “%1$s” will be deleted.</string>
-    <string name="record_track_delete_info">“%1$s” and its settings will be deleted.</string>
     <string name="track_uncalibrated">Recorded without calibration</string>
     <string name="track_solo">Solo</string>
     <string name="track_unsolo">Solo off</string>
@@ -161,8 +156,6 @@
     <string name="effect_reverb_name">Reverb (My Audio)</string>
     <string name="effect_add">Add effect</string>
     <string name="effect_remove">Remove</string>
-    <string name="effect_remove_question">Remove effect?</string>
-    <string name="effect_remove_info">“%1$s” will be removed.</string>
     <string name="effect_move">Move</string>
     <plurals name="effect_chain_full">
         <item quantity="one">At most %1$d effect</item>
@@ -234,8 +227,6 @@
     <string name="envelope_point">Point: %1$.2f s · %2$d %%</string>
     <string name="envelope_remove_point">Remove selected point</string>
     <string name="envelope_reset">Reset to full volume</string>
-    <string name="envelope_reset_question">Reset volume curve?</string>
-    <string name="envelope_reset_info">All volume points will be removed.</string>
     <string name="audio_channel">Playback and recording</string>
     <string name="audio_recording">Recording continues in the background</string>
     <string name="audio_playing">Playback continues in the background</string>
@@ -338,4 +329,12 @@
     <string name="effect_output_gain">Output</string>
     <string name="share_soundcraft">SoundCraft session</string>
     <string name="share_soundcraft_summary">Tracks, positions and effects for SoundCraft (ZIP)</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_redo">Redo</string>
+    <string name="track_timing">Timing</string>
+    <string name="track_timing_summary">Offset %1$s · latency %2$s</string>
+    <string name="track_timing_summary_missing">Offset %1$s · latency missing</string>
+    <string name="track_latency">Latency</string>
+    <string name="track_offset">Offset</string>
+    <string name="track_latency_adopt">Use calibration (%1$s)</string>
 </resources>

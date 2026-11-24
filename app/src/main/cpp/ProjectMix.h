@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -41,8 +42,8 @@ struct TrackSource {
     std::string path;
     std::string referencePath;  // what was played while recording; empty = no bleed removal
     std::string cachePath;      // cleaned take (click + bleed removed) to reuse; empty = no cache
-    int64_t offsetFrames;  // project frame of the file's first sample
-    int64_t countInFrames; // metronome count-in recorded before project frame 0, 0 = none
+    int64_t offsetFrames;  // project frame of the file's first sample, including the user's shift
+    int64_t countInFrames; // metronome count-in recorded before the take's start, 0 = none
     float gain;
     float metronomeBpm;    // > 0: remove the click recorded at this tempo ...
     float metronomeVolume; // ... and volume
@@ -50,6 +51,15 @@ struct TrackSource {
     float pan;             // -1 left .. 1 right
     std::vector<VolumePoint> volumeEnvelope;
     std::vector<EffectSlot> effects;  // in signal order
+    int64_t shiftFrames = 0;    // user offset contained in offsetFrames; the recording itself sat at offset - shift
+    int64_t latencyFrames = 0;  // round trip between count-in and recorded audio; 0 for imports
+
+    /** Project frame of the file's first sample as it was recorded; the click grid refers to it. */
+    int64_t recordedOffsetFrames() const { return offsetFrames - shiftFrames; }
+    /** Project frame (as recorded) where the take started: the start marker after count-in and latency. */
+    int64_t startFrame() const { return recordedOffsetFrames() + countInFrames + latencyFrames; }
+    /** File samples before the take's start (count-in and latency), and anything before project frame 0. */
+    int64_t leadFrames() const { return std::max<int64_t>(countInFrames + latencyFrames, -offsetFrames); }
 };
 
 /**

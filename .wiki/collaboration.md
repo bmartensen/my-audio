@@ -23,4 +23,4 @@ These rules apply to everyone working on My Audio, with or without an assistant.
 ## Privacy and honesty
 
 - Personal recordings, private paths, credentials and other people's contact details stay out of the repository. Public author and product contact details are intentional.
-- Report what was verified and how. A build is not a listening test; an emulator is not hardware acceptance.
+- Report what was verified and how. A build is not a listening test; an emulator is not a real device.
