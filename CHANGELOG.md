@@ -9,6 +9,7 @@ User-visible changes by released version, newest first. Intermediate test builds
 - **Timing** in the track settings: move a track by an **Offset** in milliseconds, and enter the **Latency** of a take recorded without calibration or take the current measurement.
 - Effect previews play on the output selected in the settings, and stop when the app goes to the background.
 - Windows: dropping several ZIP or audio files imports all of them.
+- Windows: a package for the Microsoft Store, with the same app and the same projects as the installer.
 
 ## 0.10.4
 

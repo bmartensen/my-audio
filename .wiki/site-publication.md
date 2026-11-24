@@ -43,6 +43,7 @@ Only when the contributor explicitly authorizes it; preparing, building or commi
 4. `.\tools\publish_github_release.ps1 -DryRun`, then without `-DryRun`: verifies tag, checksums and runtime source, creates a **draft** release with notes from the changelog and uploads APK, MSI, `.sha256` files and the runtime source. Review the draft, then publish it (`-Publish` or `gh release edit v<version> --draft=false --latest`).
 5. `.\tools\check_site_downloads.ps1 -RequireGitHubRelease` must pass. Then set `release_downloads: true` and `release`/`released` in `docs/_config.yml` on `develop`, run both checks again and bring the change to `main` with a second pull request (`Link <version> downloads`). Check both languages and both installer links on the live site.
 6. martensening.com: set the version and date in its `html/myaudio/index.php` (the buttons link this release's assets) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
+7. Microsoft Store: `build.ps1 -Target WindowsStore` from the tagged merge commit, then in Partner Center start a new submission, upload `.work/MyAudio-<version>.msix` under Packages and put the changelog entry into *What's new in this version* of both listings ([Microsoft Store](microsoft-store.md)). The GitHub release carries the runtime source the package bundles.
 
 ## Guide screenshots
 

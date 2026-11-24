@@ -1,6 +1,6 @@
 # Microsoft Store
 
-Everything Partner Center asks for when submitting the Windows app, in the order of its pages. The listing texts follow the guide style: what the app does, no filler, no semicolons. German and English listings are deliberate localizations. Package and signing: [issue #18](https://github.com/bmartensen/my-audio/issues/18) and [decisions](decisions.md).
+Everything Partner Center asks for when submitting the Windows app, in the order of its pages. The listing texts follow the guide style: what the app does, no filler, no semicolons. Description and features name the core of the app, not the refinements of the latest version. Those belong in *What's new in this version*. German and English listings are deliberate localizations. Package and signing: [issue #18](https://github.com/bmartensen/my-audio/issues/18) and [decisions](decisions.md).
 
 ## Product identity
 
@@ -26,21 +26,22 @@ Reserved name **My Audio**. The package identity lives in `gradle.properties` an
 
 | Field | Value |
 |---|---|
-| Category | Music |
-| Privacy policy URL | `https://bmartensen.github.io/my-audio/en/privacy/` |
-| Website | `https://bmartensen.github.io/my-audio/` |
+| Category | Music, no subcategory. Secondary category Multimedia design |
+| Personal information | Yes. The app records audio through the microphone, which Microsoft's policy counts as personal information, even though it stays on the device |
+| Privacy policy URL | `https://martensening.com/privacy.php`, the publisher's shared policy that covers My Audio |
+| Website | `https://martensening.com/myaudio/`, the publisher's product page with guide, source and downloads |
 | Support contact info | `info@martensening.com` |
-| Product declarations | Install to alternate drives allowed. Everything else not ticked. |
+| Product declarations | Ticked: install on other drives or removable storage, include in automatic OneDrive backups. Not ticked: purchases outside the Store, accessibility review, recording and broadcasting clips (games only), pen and ink, generative AI. |
 | Minimum hardware | Microphone |
 | Recommended hardware | Nothing ticked |
 
 ## Age ratings
 
-IARC questionnaire, app category *All other app types*. Every question about violence, sexuality, language, controlled substances and gambling is answered **No**, as are the questions about user interaction, sharing location, digital purchases and unrestricted web access. Expected result: suitable for all ages.
+IARC questionnaire, app category *All other app types*. Every question about violence, sexuality, language, controlled substances and gambling is answered **No**, as are the questions about user interaction, sharing location, digital purchases and unrestricted web access. Sharing user content is **No** as well: the app only exports files (mix, stems, backup) that the user passes on with other apps, and it has no chat, feed or server of its own. Result: all ages everywhere, for example IARC 3+ and ESRB Everyone.
 
 ## Packages
 
-The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), architecture x64. Device family Windows 10/11 Desktop.
+`.work/MyAudio-<version>.msix` from `build.ps1 -Target WindowsStore` ([developer builds](developer-builds.md#microsoft-store-package)), unsigned, architecture x64, Windows 10 version 1809 or newer. Device family availability: only Windows 10/11 Desktop ticked, and Microsoft does not decide about future device families, because the app is an x64 desktop app with its own Java runtime.
 
 ## Store listing de-DE
 
@@ -50,7 +51,7 @@ The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), arch
 
 > My Audio ist ein Studio für spontane Musikideen. Nimm Spur für Spur auf, während du die bisherigen Spuren hörst. Forme den Klang mit Effekten und teile dein Demo.
 >
-> Aufnehmen. Ein Klick startet ein neues Projekt mit der ersten Spur. Die Einmessung gleicht die Verzögerung deiner Audiogeräte aus, damit neue Takes im Takt liegen. Metronom mit Einzähler und stiller Vorlauf helfen beim Einstieg. Mit der Startmarke nimmst du an jeder Stelle im Song auf. Jede Änderung lässt sich rückgängig machen.
+> Aufnehmen. Ein Klick startet ein neues Projekt mit der ersten Spur. Die Einmessung gleicht die Verzögerung deiner Audiogeräte aus, damit neue Takes im Takt liegen. Metronom mit Einzähler und stiller Vorlauf helfen beim Einstieg.
 >
 > Klang. Lautstärke, Panorama, Solo und Stumm für jede Spur. Bis zu sechs Effekte pro Spur und auf dem Master, darunter EQ, Kompressor, Hall und 478 Airwindows-Effekte. Eigene Amp-Modelle und Boxen lassen sich importieren. Jeder Effekt lässt sich vor dem Einsetzen probehören, auch live über das Mikrofon. Ein Lautstärkeverlauf hebt Passagen an oder blendet sie aus.
 >
@@ -65,13 +66,10 @@ The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), arch
 **Product features:**
 
 - Mehrspuraufnahme mit eingemessener Latenz
-- Aufnehmen ab jeder Stelle im Song
-- Rückgängig und Wiederholen für jede Änderung
 - Bis zu sechs Effekte pro Spur und auf dem Master
 - EQ, Kompressor, Hall und 478 Airwindows-Effekte
 - Import eigener Amp-Modelle und Boxen
 - Live mithören durch die Effekte
-- Lautstärkeverlauf und Zeitversatz pro Spur
 - Notizen mit Akkorden und Teleprompter
 - Metronom mit Einzähler und Stimmgerät
 - Export als Ogg/Opus, WAV-Einzelspuren, Projektsicherung und SoundCraft-Sitzung
@@ -109,7 +107,7 @@ The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), arch
 
 > My Audio is a studio for spontaneous musical ideas. Record track by track while you hear the tracks you already have. Shape the sound with effects and share your demo.
 >
-> Record. One click starts a new project with its first track. Calibration compensates the delay of your audio devices, so new takes land in time. A metronome with count-in and a silent pre-roll help you come in. The start marker lets you record from any point in the song. Every change can be undone.
+> Record. One click starts a new project with its first track. Calibration compensates the delay of your audio devices, so new takes land in time. A metronome with count-in and a silent pre-roll help you come in.
 >
 > Sound. Volume, pan, solo and mute for every track. Up to six effects per track and on the master, including EQ, compressor, reverb and 478 Airwindows effects. Import your own amp models and cabinets. Audition every effect before you add it, also live through the microphone. A volume envelope brings passages forward or fades them out.
 >
@@ -124,13 +122,10 @@ The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), arch
 **Product features:**
 
 - Multitrack recording with calibrated latency
-- Record from any point in the song
-- Undo and redo for every change
 - Up to six effects per track and on the master
 - EQ, compressor, reverb and 478 Airwindows effects
 - Import your own amp models and cabinets
 - Live monitoring through the effects
-- Volume envelope and time offset per track
 - Notes with chords and a teleprompter
 - Metronome with count-in and a tuner
 - Export as Ogg/Opus, WAV stems, project backup and SoundCraft session
@@ -159,6 +154,8 @@ The MSIX built for [#18](https://github.com/bmartensen/my-audio/issues/18), arch
 **Developed by:** Björn Martensen
 
 ## Submission options
+
+**Publishing hold options:** publish manually after certification, once the same version is released on GitHub. Then the Store, the GitHub release with the runtime source and the product page show one version.
 
 **Notes for certification:**
 

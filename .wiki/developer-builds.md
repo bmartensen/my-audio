@@ -15,7 +15,7 @@ Install Git to obtain the checkout. For automatic prerequisite installation, Win
 
 Use `-Target Android` or `-Target Windows` for one platform. The first native build compiles the large effect library and can take several minutes. Gradle, Maven and CMake download dependencies. Subsequent builds reuse caches. An interrupted setup can be rerun; a requested reboot must be completed first.
 
-The helper produces `.work/MyAudio-<version>-debug.apk` and `.work/MyAudio-<version>.msi`, with SHA-256 files. Android supports arm64-v8a and x86_64; Windows is x64.
+The helper produces `.work/MyAudio-<version>-debug.apk` and `.work/MyAudio-<version>.msi`, with SHA-256 files. `-Target WindowsStore` produces `.work/MyAudio-<version>.msix` for the Microsoft Store instead of the MSI. Android supports arm64-v8a and x86_64; Windows is x64.
 
 If script execution is blocked, inspect the script and use a process-local override rather than changing machine policy:
 
@@ -31,6 +31,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Target All -Ins
 | Android SDK | Command-line tools and platform-tools; platform 37.0, build-tools 37.0.0, NDK 30.0.16248370 and CMake 4.1.2 are pinned by `app/build.gradle.kts`. NDK is only needed for Android. |
 | Windows C++ | Visual Studio Build Tools with “Desktop development with C++”, including the Windows SDK. Setup discovers installations with vswhere and adds the workload if needed. |
 | MSI tooling | The Compose Gradle plugin downloads WiX and uses the selected JDK's `jpackage`. |
+| MSIX tooling | `makeappx`, `makepri` and `signtool` from the Windows SDK of the C++ workload. The App Certification Kit comes with the Windows SDK. |
 | Optional tools | Android Studio for IDE/emulator workflows; Python for artwork, analysis and export checks. Neither is required to compile the applications. |
 
 SDK command-line tools use a pinned official download with a checked SHA-256. Package versions come from the build file. Setup does not change system-wide JAVA_HOME/PATH. It creates ignored `local.properties` only when absent, and does not overwrite an existing SDK choice. Java is selected from explicit arguments, process settings and installed JDKs; Java on PATH is not assumed.
@@ -94,6 +95,50 @@ For an update, the signing identity must match the installed app. Keep your key 
 ```
 
 The native build discovers Visual Studio and the pinned CMake/Ninja installation; JNI comes from the selected JDK. `:desktop:packageMsi` creates a per-user installer under `desktop/build/compose/binaries/main/msi`. `tools/release_desktop.ps1` copies it and its hash into `.work`. No code-signing certificate is required; the MSI is unsigned and may trigger Windows reputation prompts. Projects live in Documents/My Audio and are retained on uninstall. Windows installs a new MSI over an older version but not over the identical version, so every distributed build needs a new version. To test a rebuilt MSI locally under the same version, uninstall the installed build first, then install; a repair install (`REINSTALL=ALL`) does not reliably replace the application files. Projects in Documents/My Audio are kept.
+
+## Microsoft Store package
+
+```powershell
+.\build.ps1 -Target WindowsStore
+```
+
+`tools/package_msix.ps1` packs the app image of `:desktop:createDistributable` (the same app and Java runtime as the MSI) into `.work/MyAudio-<version>.msix` with a SHA-256 file. The manifest template is `desktop/msix/AppxManifest.xml`; the script fills the identity from `myAudio.store.*` in `gradle.properties` and the version as `<versionName>.0`, copies the logos from `branding/microsoft-store/package` (made by `tools/prepare_store_assets.py`) and indexes their scale variants into `resources.pri`. The package declares `runFullTrust` and `microphone`. It stays unsigned: Partner Center accepts it and Microsoft signs it. A fork submits under its own identity by overriding the three `myAudio.store.*` values.
+
+Projects stay in Documents/My Audio, which MSIX does not redirect, so the Store app and the MSI share them. The Store requires a higher version for every submission.
+
+**Local test.** Windows installs only signed packages. Either switch on developer mode and register the unpacked layout, or sign a copy with a self-made certificate whose subject equals the publisher:
+
+```powershell
+# Developer mode (Settings > System > For developers), no certificate:
+Add-AppxPackage -Register desktop\build\msix\layout\AppxManifest.xml
+
+# Or a test certificate in the user's certificate store, without a PFX or password:
+$cert = New-SelfSignedCertificate -Type Custom -Subject '<myAudio.store.publisher>' -FriendlyName 'My Audio MSIX test' `
+  -KeyUsage DigitalSignature -CertStoreLocation Cert:\CurrentUser\My -NotAfter (Get-Date).AddYears(1) `
+  -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3', '2.5.29.19={text}')
+Export-Certificate $cert -FilePath $HOME\.my-audio\msix-test.cer
+.\tools\package_msix.ps1 -SkipBuild -CertificateThumbprint $cert.Thumbprint   # .work\MyAudio-<version>-local.msix
+# Once, in an elevated PowerShell: trust the certificate for package installs.
+Import-Certificate $HOME\.my-audio\msix-test.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+Add-AppxPackage .work\MyAudio-<version>-local.msix
+```
+
+`-CertificatePath` signs with a PFX instead, its password in `MY_AUDIO_MSIX_CERT_PASSWORD`.
+
+**Before installing the Store version,** remove the test package, which has the same identity, and the test certificate. Projects in Documents/My Audio stay:
+
+```powershell
+Get-AppxPackage 58153Martensening.com.MyAudio | Remove-AppxPackage
+Get-ChildItem Cert:\CurrentUser\My | Where-Object FriendlyName -eq 'My Audio MSIX test' | Remove-Item
+# Elevated:
+Get-ChildItem Cert:\LocalMachine\TrustedPeople | Where-Object Subject -eq '<myAudio.store.publisher>' | Remove-Item
+```
+
+Before a submission, run the Windows App Certification Kit in an elevated PowerShell on the signed copy:
+
+```powershell
+& "${env:ProgramFiles(x86)}\Windows Kits\10\App Certification Kit\appcert.exe" test -appxpackagepath .work\MyAudio-<version>-local.msix -reportoutputpath .work\wack-<version>.xml
+```
 
 ## Distribution and licenses
 

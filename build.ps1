@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-Builds Android APKs and/or a Windows MSI from a Windows x64 checkout.
+Builds Android APKs and/or a Windows MSI from a Windows x64 checkout; -Target WindowsStore builds the
+unsigned MSIX for the Microsoft Store instead of the MSI.
 .EXAMPLE
 .\build.ps1 -Target All -InstallTools
 .EXAMPLE
@@ -10,7 +11,7 @@ Builds Android APKs and/or a Windows MSI from a Windows x64 checkout.
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Android', 'Windows', 'All')][string]$Target = 'All',
+    [ValidateSet('Android', 'Windows', 'WindowsStore', 'All')][string]$Target = 'All',
     [ValidateSet('Debug', 'Release')][string]$AndroidConfiguration = 'Debug',
     [switch]$InstallTools,
     [switch]$AcceptLicenses,
@@ -20,7 +21,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'tools/dev_environment.ps1')
-$setupArguments = @{ Target = $Target; InstallTools = $InstallTools; AcceptLicenses = $AcceptLicenses; Check = $Check; JdkHome = $JdkHome; SdkRoot = $SdkRoot }
+$setupArguments = @{ Target = $(if ($Target -eq 'WindowsStore') { 'Windows' } else { $Target }); InstallTools = $InstallTools; AcceptLicenses = $AcceptLicenses; Check = $Check; JdkHome = $JdkHome; SdkRoot = $SdkRoot }
 & (Join-Path $PSScriptRoot 'setup.ps1') @setupArguments
 if ($Check) { return }
 Push-Location $PSScriptRoot
@@ -40,5 +41,6 @@ try {
         }
     }
     if ($Target -in @('Windows', 'All')) { & './tools/release_desktop.ps1' }
+    if ($Target -eq 'WindowsStore') { & './tools/package_msix.ps1' }
     Write-Host 'Build complete. Nothing was installed on a device, committed, pushed or published.'
 } finally { Pop-Location }
