@@ -1,6 +1,6 @@
 # Current work
 
-As of 2026-11-23: **My Audio 0.10.4 / versionCode 38** for Android and Windows, released from `main` with tag `v0.10.4` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.10.4) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
+As of 2026-11-24: **My Audio 0.11.0 / versionCode 39** for Android and Windows, released from `main` with tag `v0.11.0` and the [GitHub release](https://github.com/bmartensen/my-audio/releases/tag/v0.11.0) (APK, MSI, checksums, runtime source). Development continues on `develop`; open work is in [GitHub Issues](https://github.com/bmartensen/my-audio/issues).
 
 ## Release 0.11.0
 
@@ -8,6 +8,7 @@ Milestone [0.11.x](https://github.com/bmartensen/my-audio/milestone/2) sharpens 
 
 - Built from the tagged merge commit with `build.ps1 -Target All -AndroidConfiguration Release`: `MyAudio-0.11.0.apk` (versionCode 39, SHA-256 `6c5bf530…2900de5a`, release key, no `INTERNET` permission; it differs from the candidate only in the commit ID the Android build records) and `MyAudio-0.11.0.msi` (`c5b10f73…62c750`, byte-identical to the candidate). Same Temurin 21.0.13 runtime and source archive as 0.10.4. `prepare_public_repo.py` inspected 2,323 files and Gitleaks found no leaks. The APK is installed on the Pixel 9 as an update over 0.10.4, the MSI on the contributor's Windows computer, where the MSIX test install and its certificate were removed again.
 - Microsoft Store: `MyAudio-0.11.0.msix` from the same source is submission 1 in Partner Center, validated, published manually after certification.
+- Downloads: Pages and martensening.com link the 0.11.0 APK and MSI of the GitHub release. The Windows link moves to the Store once the listing is live.
 
 - Undo/redo of every project change ([#34](https://github.com/bmartensen/my-audio/issues/34)): `ProjectHistory` keeps 50 project states in memory; deleted takes keep their files until the project closes. No confirmation dialogs remain inside a project. Windows: Ctrl+Z, Ctrl+Y/Ctrl+Shift+Z.
 - Start marker ([#35](https://github.com/bmartensen/my-audio/issues/35)): Play and Record start at a tapped position, Stop returns there; the native transports take a start frame, and take processing (click template, bleed alignment, silenced count-in/latency, SoundCraft clip start) uses each take's own start and latency instead of assuming frame 0.
