@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Interview the user to settle decisions on a named question. Use when the user invokes /grill-me or $grill-me with a topic (e.g. "$grill-me which effects do I still need") or asks to be grilled or interviewed about a decision. Builds an informed overview from AGENTS.md, the local wiki, the code and, where useful, comparable products; then asks focused decision questions as radio or checkbox lists with the recommended option first, marked with a localized " (recommended)" label, records agreed decisions in the wiki and opens GitHub issues for the resulting work.
+description: Interview the user to settle decisions on a named question. Use when the user invokes /grill-me or $grill-me with a topic (e.g. "$grill-me which effects do I still need") or asks to be grilled or interviewed about a decision. Builds an informed overview from AGENTS_GUIDE.md, the local wiki, the code and, where useful, comparable products; then asks focused decision questions as radio or checkbox lists with the recommended option first, marked with a localized " (recommended)" label, records agreed decisions in the wiki and opens GitHub issues for the resulting work.
 ---
 
 # Grill Me
@@ -9,7 +9,7 @@ The argument names the question. If none is given, ask for it in one sentence an
 
 ## Overview (read-only)
 
-1. Read `AGENTS.md`, then the wiki pages relevant to the question: `.wiki/app-requirements.md`, `.wiki/decisions.md`, `.wiki/current-work.md`, and technical pages when they matter. Check open GitHub issues on the topic (`gh issue list --search <terms>`).
+1. Read `AGENTS_GUIDE.md`, then the wiki pages relevant to the question: `.wiki/app-requirements.md`, `.wiki/decisions.md`, `.wiki/current-work.md`, and technical pages when they matter. Check open GitHub issues on the topic (`gh issue list --search <terms>`).
 2. Inspect the code only as far as needed to know what exists and what an option would cost.
 3. For features, UX or technology choices, research comparable apps or established practice when web access is available. Keep facts and guesses apart.
 4. Do not edit files, build, change Git state or touch issues in this phase.

@@ -146,11 +146,15 @@ fun ProjectContent(
     // Backgrounding and Activity destruction keep the service-owned session alive.
     // Closing clears the undo history, so a project with history asks first.
     var confirmingClose by rememberSaveable { mutableStateOf(false) }
+    // Back (top bar or system) first closes open notes and stays in the project.
     val leaveProject: () -> Unit = {
-        if (state.canUndo || state.canRedo) confirmingClose = true else viewModel.leave(onBack)
+        when {
+            notesVisible -> notesVisible = false
+            state.canUndo || state.canRedo -> confirmingClose = true
+            else -> viewModel.leave(onBack)
+        }
     }
     PlatformBackHandler(onBack = leaveProject)
-    PlatformBackHandler(enabled = notesVisible && !editingNotes && !state.tunerOpen) { notesVisible = false }
 
     val errorText = state.errorMessage?.let { stringResource(it) }
     LaunchedEffect(errorText) {
@@ -869,13 +873,14 @@ private fun LoopBar(project: Project, playheadFrames: Long?, markerFrames: Long?
 @Composable
 private fun UndoButtons(state: ProjectUiState, onUndo: () -> Unit, onRedo: () -> Unit) {
     val idle = state.mode == TransportMode.Idle && !state.preparingTransport && !state.exporting && !state.importing
-    IconButton(onClick = onUndo, enabled = idle && state.canUndo) {
-        Icon(painterResource(Res.drawable.ic_undo), contentDescription = stringResource(Res.string.action_undo))
-    }
+    // Redo appears to the left, so Undo keeps its place and quick repeated taps never hit Redo.
     if (state.canRedo) {
         IconButton(onClick = onRedo, enabled = idle) {
             Icon(painterResource(Res.drawable.ic_redo), contentDescription = stringResource(Res.string.action_redo))
         }
+    }
+    IconButton(onClick = onUndo, enabled = idle && state.canUndo) {
+        Icon(painterResource(Res.drawable.ic_undo), contentDescription = stringResource(Res.string.action_undo))
     }
 }
 
@@ -994,12 +999,21 @@ private fun TrackWaveform(
             val left = size.width * loop.startFrames / projectFrames
             drawRect(loopShade, Offset(left, 0f), Size(size.width * loop.lengthFrames / projectFrames, size.height))
         }
-        drawLine(baseline, Offset(0f, middle), Offset(size.width, middle), strokeWidth = 1f)
-        if (peaks == null || peaks.isEmpty() || projectFrames <= 0) return@Canvas
+        if (projectFrames <= 0) return@Canvas
+        // The track spans only its audible part, so a later start (recorded at the marker, offset,
+        // SoundCraft clip position) is visible even where the take begins with silence. Display only.
+        val audible = maxOf(track.audibleStartFrames, 0L)
+        val spanLeft = size.width * audible / projectFrames
+        val spanRight = size.width * track.endFrames.coerceAtMost(projectFrames) / projectFrames
+        if (spanRight > spanLeft) {
+            drawRoundRect(color.copy(alpha = color.alpha * 0.08f), Offset(spanLeft, 0f), Size(spanRight - spanLeft, size.height),
+                CornerRadius(2.dp.toPx()))
+            drawLine(baseline, Offset(spanLeft, middle), Offset(spanRight, middle), strokeWidth = 1f)
+        }
+        if (peaks == null || peaks.isEmpty()) return@Canvas
         // A filled, mirrored contour on a dB scale: separate thin bars of the raw level left quiet
         // takes almost invisible. Bins of the count-in and latency (before the take's start) are not drawn.
         val framesPerBin = track.lengthFrames.toFloat() / peaks.size
-        val audible = maxOf(track.audibleStartFrames, 0L)
         val first = peaks.indices.firstOrNull { track.offsetFrames + (it + 0.5f) * framesPerBin >= audible } ?: return@Canvas
         fun xOf(index: Int) = size.width * (track.offsetFrames + (index + 0.5f) * framesPerBin) / projectFrames
         val area = Path().apply {

@@ -29,7 +29,7 @@ permalink: /en/
 
 **Android:** download the APK and open it. Android asks once whether your browser or file manager may install apps. Install updates the same way over the existing app.
 
-**Windows:** download the MSI and run it. The installer is not signed with a code-signing certificate, so Windows SmartScreen may ask (**More info** → **Run anyway**). My Audio is installed for your user only.
+{% if site.microsoft_store_url %}**Windows:** install My Audio from the [Microsoft Store]({{ site.microsoft_store_url }}). The Store keeps the app up to date. If you prefer to install without the Store, the MSI is in the [release]({{ site.repository_url }}/releases/{% if site.release_downloads %}tag/v{{ site.release }}{% else %}latest{% endif %}). It is not signed with a code-signing certificate, so Windows SmartScreen may ask (**More info** → **Run anyway**). Both use the same projects in *Documents/My Audio*.{% else %}**Windows:** download the MSI and run it. The installer is not signed with a code-signing certificate, so Windows SmartScreen may ask (**More info** → **Run anyway**). My Audio is installed for your user only.{% endif %}
 
 If you like, compare the file's SHA-256 checksum with the one {% if site.release_downloads %}in the [release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}on the [download page]({{ site.download_page }}?lang=en){% endif %}.
 

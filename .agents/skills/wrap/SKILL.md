@@ -5,17 +5,17 @@ description: Save a repository work session safely, mid-session or at the end. U
 
 # Wrap
 
-Save the session's work on `develop`: reconcile the wiki, verify, commit and push, each step only within the user's current authorization. Repository rules in `AGENTS.md` and `.wiki/repository-rules.md#branches-and-releases` take precedence over these steps.
+Save the session's work on `develop`: reconcile the wiki, verify, commit and push, each step only within the user's current authorization. Repository rules in `AGENTS_GUIDE.md` and `.wiki/repository-rules.md#branches-and-releases` take precedence over these steps.
 
 ## Workflow
 
-1. **Scope.** Read `AGENTS.md`. Invoking `wrap`, or an explicit request to save, is the permission to commit for this one run; it does not carry over to later work. A no-commit, no-push or preparation-only instruction limits this workflow to wiki reconciliation and verification. Never initialize Git or rewrite history as part of a wrap.
+1. **Scope.** Read `AGENTS_GUIDE.md`. Invoking `wrap`, or an explicit request to save, is the permission to commit for this one run; it does not carry over to later work. A no-commit, no-push or preparation-only instruction limits this workflow to wiki reconciliation and verification. Never initialize Git or rewrite history as part of a wrap.
 2. **Branch.** Commit on `develop`. If the checkout is on `main` or another branch, stop and ask; never commit to `main`, which changes only through a release pull request.
 3. **Wiki and issues.** Compare the session's changes with `.wiki/` and the open issues:
-   - agreed behavior in `app-requirements.md`, durable choices in the newest dated group of `decisions.md`, implemented state and evidence in `current-work.md`;
+   - agreed behavior in `app-requirements.md`, durable choices in the newest dated group of `decisions.md`, the state of the app, its verification approach and known limits in `current-work.md` (the wiki is public: no personal test runs, device or installation state, or session logs);
    - add user-visible changes to `CHANGELOG.md`;
    - fix contradictions, such as a page calling an implemented feature pending;
-   - name the issues this work completes, so the commit message can close them (`Closes #<n>`); new open work found during the session becomes an issue only when the user agrees, and only as a change to the codebase; test results go to `current-work.md` instead.
+   - name the issues this work completes, so the commit message can close them (`Closes #<n>`); new open work found during the session becomes an issue only when the user agrees, and only as a change to the codebase; results of a single test run go into the conversation or the commit message, not the wiki.
 4. **Verify.** Run the documented checks that cover the changes (`.wiki/repository-rules.md`). If a check cannot run, say exactly why.
 5. **Review.** Inspect `git status --short` and the full diff. Mention unrelated pre-existing changes; do not revert them. Stage only intended files and check the staged list for credentials, personal data and build artifacts.
 6. **Commit.** Write a concise English message describing the change, with `Closes #<n>` lines for completed issues. Include wiki updates in the same commit as the implementation they describe. Add no agent/model authorship credits or trailers. Version tags are not created here; they belong on the release merge commit in `main`.

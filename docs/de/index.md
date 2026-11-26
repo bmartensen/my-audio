@@ -29,7 +29,7 @@ permalink: /de/
 
 **Android:** Lade die APK herunter und öffne sie. Android fragt einmalig, ob dein Browser oder Dateimanager Apps installieren darf. Updates installierst du genauso über die vorhandene App.
 
-**Windows:** Lade die MSI herunter und starte sie. Da der Installer nicht mit einem Code-Signing-Zertifikat signiert ist, kann Windows SmartScreen nachfragen (**Weitere Informationen** → **Trotzdem ausführen**). My Audio wird nur für deinen Benutzer installiert.
+{% if site.microsoft_store_url %}**Windows:** Installiere My Audio aus dem [Microsoft Store]({{ site.microsoft_store_url }}). Der Store hält die App aktuell. Wer lieber ohne Store installiert, findet die MSI im [Release]({{ site.repository_url }}/releases/{% if site.release_downloads %}tag/v{{ site.release }}{% else %}latest{% endif %}). Sie ist nicht mit einem Code-Signing-Zertifikat signiert, daher kann Windows SmartScreen nachfragen (**Weitere Informationen** → **Trotzdem ausführen**). Beide Varianten nutzen dieselben Projekte im Ordner *Dokumente/My Audio*.{% else %}**Windows:** Lade die MSI herunter und starte sie. Da der Installer nicht mit einem Code-Signing-Zertifikat signiert ist, kann Windows SmartScreen nachfragen (**Weitere Informationen** → **Trotzdem ausführen**). My Audio wird nur für deinen Benutzer installiert.{% endif %}
 
 Prüfe bei Bedarf die SHA-256-Prüfsumme der Datei mit den Angaben {% if site.release_downloads %}im [Release]({{ site.repository_url }}/releases/tag/v{{ site.release }}){% else %}auf der [Download-Seite]({{ site.download_page }}){% endif %}.
 

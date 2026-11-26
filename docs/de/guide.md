@@ -62,7 +62,7 @@ Kopfhörer sind beim Überspielen und Mithören immer die beste Wahl.
 
 <img class="shot" src="{{ '/images/project.png' | relative_url }}" alt="Projektansicht">
 
-Oben stehen **Zurück**, der Projektname, **Rückgängig**, **Notizen**, **Teilen** und **Projekteinstellungen**. **Rückgängig** nimmt jede Änderung im Projekt zurück, auch eine Aufnahme oder eine gelöschte Spur, solange das Projekt offen ist. Danach erscheint **Wiederholen**. Darunter folgen:
+Oben stehen **Zurück**, der Projektname, **Rückgängig**, **Notizen**, **Teilen** und **Projekteinstellungen**. **Rückgängig** nimmt jede Änderung im Projekt zurück, auch eine Aufnahme oder eine gelöschte Spur, solange das Projekt offen ist. Danach erscheint links daneben **Wiederholen**. Darunter folgen:
 
 - **Hinweis zur Einmessung**, falls die gewählten Geräte noch nicht eingemessen sind.
 - **Übungsschleife:** Ziehe auf der Leiste einen Bereich auf. Ein kurzes Tippen setzt die [Startmarke](#aufnehmen-und-abspielen). Der Knopf links schaltet die Schleife ein und aus, der Text zeigt ihren Bereich. Ist sie aktiv, beginnt **Abspielen** am Schleifenanfang und wiederholt den Bereich nahtlos.
@@ -85,6 +85,8 @@ Jede Karte zeigt eine Aufnahme auf der gemeinsamen Zeitachse:
 - **Papierkorb:** löscht die Spur.
 - **Effektzeile:** die eingeschalteten Effekte in Reihenfolge.
 - **Ohne Einmessung aufgenommen:** Diese Spur entstand ohne Latenzausgleich und kann leicht hinter den anderen liegen. Unter **Timing** in den [Spur-Einstellungen](#spur-einstellungen) trägst du ihre Latenz nach.
+
+Die Wellenform steht auf der gemeinsamen Zeitachse des Projekts. Ihre leicht hinterlegte Fläche reicht vom Einsatz der Spur bis zu ihrem Ende, so siehst du auch einen verschobenen Beginn.
 
 Ein langer Druck auf die Karte öffnet die [Spur-Einstellungen](#spur-einstellungen). Während der Wiedergabe springst du durch Tippen auf eine Wellenform an diese Stelle. Im Stillstand setzt Tippen die Startmarke.
 
@@ -205,7 +207,7 @@ Mit dem Kurvensymbol einer Spur zeichnest du ein Ein- oder Ausblenden oder einze
 Das Notizsymbol oben zeigt den Songtext des Projekts anstelle der Spuren.
 
 - Akkorde werden automatisch hervorgehoben – deutsche und englische Namen, Erweiterungen und Slash-Akkorde wie *Am/G*.
-- **Lupen** ändern die Schriftgröße, der **Stift** öffnet den Editor, das **X** zeigt wieder die Spuren.
+- **Lupen** ändern die Schriftgröße, der **Stift** öffnet den Editor, das **X**, das Notizsymbol oder **Zurück** zeigen wieder die Spuren.
 - Mit **Notizen mitlaufen lassen** in den [Projekteinstellungen](#projekteinstellungen) rollt der Text beim Spielen wie ein Teleprompter mit.
 
 ## Metronom

@@ -2,9 +2,13 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
-## 0.11.1
+## 0.11.2
 
 - **Back** in a project asks for confirmation once something can be undone, so a stray tap no longer discards the undo history.
+- **Back** with the notes open closes the notes and stays in the project.
+- **Undo** keeps its place in the top bar. **Redo** appears to its left, so tapping Undo twice in a row no longer hits Redo.
+- A track is drawn from where it starts to where it ends, so a track that starts later, for example after an **Offset** or from a SoundCraft session, is visible at a glance.
+- Windows: My Audio is available in the Microsoft Store.
 
 ## 0.11.0
 

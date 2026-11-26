@@ -3,9 +3,15 @@
     <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.apk">
       <span class="title">Android</span><span class="sub">APK · {% if page.lang == 'de' %}ab Android 10 · signiert{% else %}Android 10+ · signed{% endif %}</span>
     </a>
+    {% if site.microsoft_store_url %}
+    <a class="btn" href="{{ site.microsoft_store_url }}">
+      <span class="title">Windows</span><span class="sub">Microsoft Store · Windows 10/11</span>
+    </a>
+    {% else %}
     <a class="btn" href="{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.msi">
       <span class="title">Windows</span><span class="sub">MSI · Windows 10/11</span>
     </a>
+    {% endif %}
   </div>
   <p class="meta">Version {{ site.release }} ·
     <a href="{{ site.repository_url }}/releases/tag/v{{ site.release }}">{% if page.lang == 'de' %}Prüfsummen und Versionshinweise{% else %}Checksums and release notes{% endif %}</a>
@@ -14,8 +20,13 @@
   <div class="buttons download-page">
     <a class="btn" href="{{ site.repository_url }}/releases/latest">
       <span class="title">{% if page.lang == 'de' %}Zu den Downloads{% else %}Get My Audio{% endif %}</span>
-      <span class="sub">Android · Windows</span>
+      <span class="sub">{% if site.microsoft_store_url %}Android{% else %}Android · Windows{% endif %}</span>
     </a>
+    {% if site.microsoft_store_url %}
+    <a class="btn" href="{{ site.microsoft_store_url }}">
+      <span class="title">Windows</span><span class="sub">Microsoft Store · Windows 10/11</span>
+    </a>
+    {% endif %}
   </div>
   <p class="meta">{% if page.lang == 'de' %}Aktuelle Version mit SHA-256-Prüfsummen auf GitHub.{% else %}Latest version with SHA-256 checksums on GitHub.{% endif %}</p>
 {% endif %}

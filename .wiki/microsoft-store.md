@@ -12,6 +12,8 @@ Reserved name **My Audio**. The package identity lives in `gradle.properties` an
 | Package/Identity/Publisher | `CN=95F712C4-BF0B-424B-BFD9-2B54E79107E3` |
 | Package/Properties/PublisherDisplayName | `Martensening.com` |
 
+The listing is live with Store ID **9N3X8S3HC311**: [apps.microsoft.com/detail/9N3X8S3HC311](https://apps.microsoft.com/detail/9N3X8S3HC311). Partner Center shows it under *Product identity*, and `winget search "My Audio" --source msstore` finds it. `docs/_config.yml` (`microsoft_store_url`) and martensening.com link this address for Windows.
+
 ## Pricing and availability
 
 | Field | Value |
