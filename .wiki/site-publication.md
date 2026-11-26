@@ -1,6 +1,6 @@
 # GitHub Pages and releases
 
-`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published only as GitHub releases, each with the source archive of the bundled Java runtime; no other site hosts them, because GPLv2 counts source access only from the same place as the binaries. The martensening.com product page links the release assets.
+`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published only as GitHub releases, each with the source archive of the bundled Java runtime; no other site hosts them, because GPLv2 counts source access only from the same place as the binaries. For Windows, the download buttons lead to the [Microsoft Store](microsoft-store.md) listing; the MSI stays on the GitHub release. The martensening.com product page links the APK asset and the Store.
 
 ## Site structure
 
@@ -19,7 +19,7 @@ The guide describes current behavior and how to use it, never earlier behavior o
 
 ## Download links
 
-`_config.yml` holds `release` (the documented version) and `release_downloads`:
+`_config.yml` holds `release` (the documented version), `release_downloads` and `microsoft_store_url`. With a Store URL, the Windows button leads to the Store listing and the MSI is linked from the release page; without one (a fork), the Windows button links the MSI:
 
 - `false`: the landing pages link the repository's `releases/latest` without advertising a version.
 - `true`: the buttons link the assets of the GitHub release `v<release>` directly, with its release page as a secondary link.
@@ -42,7 +42,7 @@ Only when the contributor explicitly authorizes it; preparing, building or commi
 3. Complete the [publication audit](publication-checks.md) on `develop` and push it. Open the release pull request `develop` → `main` (`gh pr create --base main --head develop --title "Release <version>"`, changelog entry as body), merge it with a merge commit, then create the annotated tag `v<version>` on the merge commit in `main` and push the tag (see [branches and releases](repository-rules.md#branches-and-releases)).
 4. `.\tools\publish_github_release.ps1 -DryRun`, then without `-DryRun`: verifies tag, checksums and runtime source, creates a **draft** release with notes from the changelog and uploads APK, MSI, `.sha256` files and the runtime source. Review the draft, then publish it (`-Publish` or `gh release edit v<version> --draft=false --latest`).
 5. `.\tools\check_site_downloads.ps1 -RequireGitHubRelease` must pass. Then set `release_downloads: true` and `release`/`released` in `docs/_config.yml` on `develop`, run both checks again and bring the change to `main` with a second pull request (`Link <version> downloads`). Check both languages and both installer links on the live site.
-6. martensening.com: set the version and date in its `html/myaudio/index.php` (the buttons link this release's assets) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
+6. martensening.com: set the version and date in its `html/myaudio/index.php` (Android links this release's APK, Windows the Store) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
 7. Microsoft Store: `build.ps1 -Target WindowsStore` from the tagged merge commit, then in Partner Center start a new submission, upload `.work/MyAudio-<version>.msix` under Packages and put the changelog entry into *What's new in this version* of both listings ([Microsoft Store](microsoft-store.md)). The GitHub release carries the runtime source the package bundles.
 
 ## Guide screenshots

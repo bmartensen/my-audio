@@ -62,7 +62,7 @@ Headphones are always the best choice when overdubbing or monitoring.
 
 <img class="shot" src="{{ '/images/project.png' | relative_url }}" alt="Project view">
 
-At the top are **Back**, the project name, **Undo**, **Notes**, **Share** and **Project settings**. **Undo** reverts any change to the project, including a take or a deleted track, as long as the project is open. **Redo** then appears next to it. Below that:
+At the top are **Back**, the project name, **Undo**, **Notes**, **Share** and **Project settings**. **Undo** reverts any change to the project, including a take or a deleted track, as long as the project is open. **Redo** then appears to its left. Below that:
 
 - **Calibration notice**, if the selected devices have not been calibrated yet.
 - **Practice loop:** drag a region on the bar. A short tap sets the [start marker](#recording-and-playback). The button on the left enables or disables the loop. The text shows its range. When active, **Play** starts at the loop start and repeats the region seamlessly.
@@ -85,6 +85,8 @@ Each card shows a recording on the shared timeline:
 - **Trash:** deletes the track.
 - **Effect row:** the enabled effects in order.
 - **Recorded without calibration:** this track was recorded without latency compensation and may sit slightly behind the others. Enter its latency under **Timing** in the [track settings](#track-settings).
+
+The waveform sits on the project's shared timeline. Its lightly shaded area runs from where the track starts to where it ends, so a moved start is visible too.
 
 A long press on the card opens the [track settings](#track-settings). During playback, tapping a waveform jumps to that position. While stopped, a tap sets the start marker.
 
@@ -205,7 +207,7 @@ The curve icon on a track lets you draw a fade-in, fade-out or quieter passages:
 The notes icon at the top shows the project's lyrics in place of the tracks.
 
 - Chords are highlighted automatically – German and English names, extensions and slash chords like *Am/G*.
-- **Magnifiers** change the font size, the **pencil** opens the editor, the **X** shows the tracks again.
+- **Magnifiers** change the font size, the **pencil** opens the editor, the **X**, the notes icon or **Back** show the tracks again.
 - With **Scroll notes during playback** in the [project settings](#project-settings) the text scrolls like a teleprompter while playing.
 
 ## Metronome

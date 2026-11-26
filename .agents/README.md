@@ -1,14 +1,14 @@
 # Shared skills
 
-`AGENTS.md` is the shared policy, `.wiki/` the project memory and `skills/<name>/SKILL.md` the canonical workflows. Edit workflows only here.
+`AGENTS_GUIDE.md` is the shared policy (`AGENTS.md`, `CLAUDE.md` and `GEMINI.md` only point to it), `.wiki/` the project memory and `skills/<name>/SKILL.md` the canonical workflows. Edit workflows only here.
 
 | Client | Policy | Skill discovery | Invocation |
 |---|---|---|---|
-| Antigravity | Reads `AGENTS.md` (and `GEMINI.md`) | `.agents/skills/` | `/start`, `/wrap`, `/grill-me <question>` |
-| Gemini CLI | `GEMINI.md` imports `AGENTS.md` | `.agents/skills/` (workspace alias) | Ask for the skill by name; `/skills list` shows discovery |
-| OpenAI Codex | Reads `AGENTS.md` | `.agents/skills/` | `$start`, `$wrap`, `$grill-me <question>` or `/skills` |
-| Claude Code | `CLAUDE.md` imports `AGENTS.md` | `.claude/skills/` adapters delegate here | `/start`, `/wrap`, `/grill-me <question>` |
-| Other clients | Read `AGENTS.md` explicitly | — | Read and follow the desired `SKILL.md` |
+| Antigravity | Reads `AGENTS.md` (and `GEMINI.md`), which point to `AGENTS_GUIDE.md` | `.agents/skills/` | `/start`, `/wrap`, `/grill-me <question>` |
+| Gemini CLI | `GEMINI.md` imports `AGENTS_GUIDE.md` | `.agents/skills/` (workspace alias) | Ask for the skill by name; `/skills list` shows discovery |
+| OpenAI Codex | Reads `AGENTS.md`, which points to `AGENTS_GUIDE.md` | `.agents/skills/` | `$start`, `$wrap`, `$grill-me <question>` or `/skills` |
+| Claude Code | `CLAUDE.md` imports `AGENTS_GUIDE.md` | `.claude/skills/` adapters delegate here | `/start`, `/wrap`, `/grill-me <question>` |
+| Other clients | Read `AGENTS_GUIDE.md` explicitly | — | Read and follow the desired `SKILL.md` |
 
 Claude Code adapters repeat the canonical `name` and `description`; update them when a description changes. No symlinks, credentials or global configuration are required.
 

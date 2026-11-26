@@ -10,6 +10,9 @@ released: 2026-11-24
 # Enable direct GitHub downloads only after tools/check_site_downloads.ps1 -RequireGitHubRelease passes.
 # Otherwise the landing pages link the repository's releases page without claiming a version.
 release_downloads: true
+# Microsoft Store listing of the Windows app. When set, the Windows button leads there and the MSI stays
+# on the release page. Forks without a listing leave it empty to link their MSI.
+microsoft_store_url: https://apps.microsoft.com/detail/9N3X8S3HC311
 markdown: kramdown
 kramdown:
   auto_ids: true

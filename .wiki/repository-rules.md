@@ -1,10 +1,10 @@
 # Repository commands and working conventions
 
-Policy is in [AGENTS.md](../AGENTS.md); setup and optional signing are in [developer builds](developer-builds.md).
+Policy is in [AGENTS_GUIDE.md](../AGENTS_GUIDE.md); setup and optional signing are in [developer builds](developer-builds.md).
 
 ## Git and project memory
 
-Commit and push permission rules are in [AGENTS.md](../AGENTS.md). Update the wiki alongside meaningful changes: decisions newest-first, current work with evidence and limitations. User-visible changes go into CHANGELOG.md. Shared workflows: [.agents](../.agents/README.md).
+Commit and push permission rules are in [AGENTS_GUIDE.md](../AGENTS_GUIDE.md). Update the wiki alongside meaningful changes: decisions newest-first, current work as the state of the app with its verification approach and known limits, never a log of individual test runs. User-visible changes go into CHANGELOG.md. Shared workflows: [.agents](../.agents/README.md).
 
 ## Branches and releases
 
@@ -15,7 +15,7 @@ Commit and push permission rules are in [AGENTS.md](../AGENTS.md). Update the wi
 
 ## Issues
 
-Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests or measurements to perform; tests belong to the work on an issue, and their results go to [current work](current-work.md). A deviation from agreed behavior noticed while using the app is a bug issue. Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
+Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests or measurements to perform; tests belong to the work on an issue, and lasting findings (coverage, known limits) go to [current work](current-work.md), never logs of single runs. A deviation from agreed behavior noticed while using the app is a bug issue. Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
 
 ## Build and automated checks
 

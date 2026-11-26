@@ -19,4 +19,4 @@ Product knowledge and durable decisions for My Audio. Open work, feature request
 | [Pages and releases](site-publication.md) | Site structure, publishing a version, download checks and guide screenshots |
 | [Microsoft Store](microsoft-store.md) | Every Partner Center field, listing texts and images of the Windows app |
 
-Policy: [AGENTS.md](../AGENTS.md). Shared skills: [.agents](../.agents/README.md). Version history: [changelog](../CHANGELOG.md). Licenses: [inventory](../licenses/THIRD_PARTY_NOTICES.md).
+Policy: [AGENTS_GUIDE.md](../AGENTS_GUIDE.md). Shared skills: [.agents](../.agents/README.md). Version history: [changelog](../CHANGELOG.md). Licenses: [inventory](../licenses/THIRD_PARTY_NOTICES.md).

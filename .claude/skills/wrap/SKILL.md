@@ -4,4 +4,4 @@ description: Save a repository work session safely, mid-session or at the end. U
 ---
 
 Read and follow the repository-root `.agents/skills/wrap/SKILL.md` in full.
-It is the canonical workflow. Follow `AGENTS.md` and the user's current scope.
+It is the canonical workflow. Follow `AGENTS_GUIDE.md` and the user's current scope.
