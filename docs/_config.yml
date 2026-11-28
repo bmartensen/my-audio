@@ -5,8 +5,8 @@ title: My Audio
 description: Mehrspur-Recorder für Musikdemos · Multitrack recorder for music demos
 repository_url: https://github.com/bmartensen/my-audio
 # Current app/guide version. A tag alone does not provide downloadable installers.
-release: 0.11.2
-released: 2026-11-26
+release: 0.11.3
+released: 2026-11-28
 # Enable direct GitHub downloads only after tools/check_site_downloads.ps1 -RequireGitHubRelease passes.
 # Otherwise the landing pages link the repository's releases page without claiming a version.
 release_downloads: true
