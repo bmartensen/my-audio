@@ -63,7 +63,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 >
 > Alles bleibt auf deinem Rechner. Du brauchst kein Konto und keine Internetverbindung. My Audio gibt es auch für Android, und Projekte lassen sich zwischen beiden austauschen. My Audio ist Open Source unter der MIT-Lizenz.
 
-**What's new in this version:** leave empty for the first submission. Later the changelog entry of the version.
+**What's new in this version:** leave empty for the first submission. Later only the few relevant changes since the previous Store version, as short phrases (e.g. "MP3 export in addition to OGG"), not the full changelog; see [interface text](interface-text.md).
 
 **Product features:**
 
@@ -97,7 +97,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 
 **Copyright and trademark info:** © 2026 Björn Martensen
 
-**Additional license terms:** Open Source unter der MIT-Lizenz. Quellcode und Lizenzen auf https://github.com/bmartensen/my-audio
+**Additional license terms:** Open Source unter der MIT-Lizenz. Komponenten anderer Autoren wie LAME (LGPL) behalten ihre eigenen Lizenzen. Quellcode und Lizenzen auf https://github.com/bmartensen/my-audio
 
 **Developed by:** Björn Martensen
 
@@ -119,7 +119,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 >
 > Everything stays on your computer. No account and no internet connection needed. My Audio is also available for Android, and projects move between both. My Audio is open source under the MIT license.
 
-**What's new in this version:** leave empty for the first submission. Later the changelog entry of the version.
+**What's new in this version:** leave empty for the first submission. Later only the few relevant changes since the previous Store version, as short phrases (e.g. "MP3 export in addition to OGG"), not the full changelog; see [interface text](interface-text.md).
 
 **Product features:**
 
@@ -151,7 +151,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 
 **Copyright and trademark info:** © 2026 Björn Martensen
 
-**Additional license terms:** Open source under the MIT license. Source code and licenses at https://github.com/bmartensen/my-audio
+**Additional license terms:** Open source under the MIT license. Components by other authors, such as LAME (LGPL), keep their own licenses. Source code and licenses at https://github.com/bmartensen/my-audio
 
 **Developed by:** Björn Martensen
 
