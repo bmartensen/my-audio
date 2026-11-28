@@ -241,17 +241,17 @@ Play an open string. The tuner detects the string automatically (standard tuning
 
 <img class="shot wide" src="{{ '/images/share.png' | relative_url }}" alt="Share menu">
 
-- **Share mix:** exactly what **Play** lets you hear, as stereo Ogg/Opus – small enough for messengers.
-- **Mix as MP3:** the same mix as an MP3 that every player and upload form accepts.
+- **Share OGG:** exactly what **Play** lets you hear, as stereo Ogg/Opus – small enough for messengers.
+- **Share MP3:** the same mix as an MP3 that every player and upload form accepts.
 - **Stems:** each track as a cleaned WAV file from the project start, without effects, volume or panning, in a ZIP – for further work in a DAW.
 - **Back up project:** the whole project with all original recordings and settings as a ZIP. **Import project** on the home screen restores it, also on a different device.
-- **SoundCraft session:** the project as a session for the desktop DAW SoundCraft, as a ZIP (see [SoundCraft](#soundcraft)).
+- **SoundCraft:** the project as a session for the desktop DAW SoundCraft, as a ZIP (see [SoundCraft](#soundcraft)).
 
 ## SoundCraft
 
 [SoundCraft](https://github.com/storytold/soundcraft) is an open-source DAW for the PC. Use it to move and cut tracks you recorded on the go, then take the session back to your phone.
 
-- **Share → SoundCraft session** creates a ZIP. Unzip it on the PC and open the *.scraft* file in SoundCraft.
+- **Share → SoundCraft** creates a ZIP. Unzip it on the PC and open the *.scraft* file in SoundCraft.
 - Every track sits at its place in the song there, with volume, panning, mute and volume envelope.
 - **EQ (My Audio)** with **Compressor** and **Reverb (My Audio)** become the matching SoundCraft effects and stay adjustable. They sound similar there, but not exactly the same.
 - Airwindows effects, amp models and cabinets do not exist in SoundCraft. They are rendered into the track, and the untouched take is next to it in the playlist “Dry”.
