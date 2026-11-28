@@ -84,6 +84,9 @@ object NativeAudio {
     /** Exactly what playback would output (mix plus audible click); empty while a stream runs. */
     external fun renderedMix(): FloatArray
 
+    /** Interleaved float [samples] as an MP3 file's bytes (LAME, VBR about 190 kbit/s); null on failure. */
+    external fun encodeMp3(samples: FloatArray, channels: Int, sampleRate: Int): ByteArray?
+
     /** Jumps a running playback to [frame]; ignored while recording. */
     external fun seekPlayback(frame: Long)
 

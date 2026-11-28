@@ -1,0 +1,32 @@
+---
+layout: null
+permalink: /download/android/
+---
+<!DOCTYPE html>
+{%- comment -%}
+  Stable address of the current Android download, for pages outside this site (the martensening.com product
+  page) that should not change with every release. It follows the same switch as the landing pages: with
+  release_downloads the APK of release v<release>, otherwise the repository's latest release page.
+{%- endcomment -%}
+{%- if site.release_downloads -%}
+  {%- capture target -%}{{ site.repository_url }}/releases/download/v{{ site.release }}/MyAudio-{{ site.release }}.apk{%- endcapture -%}
+{%- else -%}
+  {%- capture target -%}{{ site.repository_url }}/releases/latest{%- endcapture -%}
+{%- endif %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{{ site.title }} – Android</title>
+  <meta http-equiv="refresh" content="0; url={{ target }}">
+  <script>location.replace('{{ target }}');</script>
+  <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+</head>
+<body>
+  <main class="content">
+    <h1>My Audio</h1>
+    <p><a href="{{ target }}">{{ target }}</a></p>
+  </main>
+</body>
+</html>

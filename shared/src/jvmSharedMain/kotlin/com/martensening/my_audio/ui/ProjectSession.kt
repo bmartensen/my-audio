@@ -530,12 +530,13 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
     private fun publishHistory() = _state.update { it.copy(canUndo = history.canUndo, canRedo = history.canRedo) }
 
     /**
-     * Exports and requests the share sheet: the mix exactly as Play outputs it (Ogg/Opus), the
+     * Exports and requests the share sheet: the mix exactly as Play outputs it (Ogg/Opus or MP3), the
      * cleaned stems (ZIP of WAVs), a project backup (ZIP) or a SoundCraft session (ZIP).
      */
     fun share(kind: ProjectArchive.Kind) {
         val project = _state.value.project ?: return
-        val content = if (kind == ProjectArchive.Kind.Mix) project.audibleTracks else project.tracks
+        val mix = kind == ProjectArchive.Kind.Mix || kind == ProjectArchive.Kind.Mp3
+        val content = if (mix) project.audibleTracks else project.tracks
         if (_state.value.mode != TransportMode.Idle || _state.value.exporting || _state.value.importing ||
             (kind != ProjectArchive.Kind.Backup && content.isEmpty())) return
         _state.update { it.copy(exporting = true, errorMessage = null) }
@@ -551,6 +552,7 @@ class ProjectSession(private val platform: ProjectPlatform, val projectId: Long)
             val exported = runCatching {
                 when (kind) {
                     ProjectArchive.Kind.Mix -> AudioEngine.exportPlayback(project, repository, file, platform::encodeMix)
+                    ProjectArchive.Kind.Mp3 -> AudioEngine.exportPlayback(project, repository, file, AudioEngine::encodeMp3)
                     ProjectArchive.Kind.Stems -> exportStems(project, file)
                     ProjectArchive.Kind.Backup -> withContext(Dispatchers.IO) { repository.exportBackup(project.id, file) }
                     ProjectArchive.Kind.SoundCraft -> SoundCraftExport.export(project, repository, file)

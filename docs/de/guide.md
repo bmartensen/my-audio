@@ -106,6 +106,7 @@ Du kannst auch ohne vorbereitete Spur direkt auf **Aufnehmen** tippen. Dann übe
 - **Aufnehmen** startet einen Take an der Startmarke. Alle hörbaren Spuren laufen mit, die neue Spur wird gleichzeitig aufgenommen. Ist ein **Vorlauf** eingestellt, zählt erst ein stiller Countdown herunter. Ist das Metronom an, zählt es einen Takt vor.
 - **Metronom** öffnet die [Metronom-Einstellungen](#metronom).
 - Mit einem USB-Interface mit zwei Eingängen erscheint unter der Zeit die Wahl **Eingang 1**, **Eingang 2** oder **Eingang 1 und 2 gemischt**. Aufnahmen sind immer mono.
+- Manche Interfaces geben trotz mehrerer Eingänge nur den ersten an My Audio weiter, dann wird nur dieser aufgenommen. Bleibt eine Aufnahme über einen anderen Eingang still, prüfe, ob dein Interface eine „Combine“-Funktion hat, die die Eingänge auf den ersten legt – oft in der Software des Herstellers am Computer.
 
 Aufnahmen werden immer ohne Effekte gespeichert. Effekte, Lautstärke und Verlauf wirken nur beim Abspielen und Teilen – du kannst sie jederzeit ändern. Auf Android laufen Wiedergabe und Aufnahme mit Benachrichtigung auch im Hintergrund und bei ausgeschaltetem Bildschirm weiter.
 
@@ -241,6 +242,7 @@ Schlage eine leere Saite an. Das Stimmgerät erkennt die Saite automatisch (Stan
 <img class="shot wide" src="{{ '/images/share.png' | relative_url }}" alt="Teilen-Menü">
 
 - **Mix teilen:** genau das, was **Abspielen** hören lässt, als Stereo-Ogg/Opus – klein genug für Messenger.
+- **Mix als MP3:** derselbe Mix als MP3, für jeden Player und jedes Upload-Formular.
 - **Einzelspuren:** jede Spur als bereinigte WAV-Datei ab Projektanfang, ohne Effekte, Lautstärke und Panorama, in einem ZIP – zum Weiterarbeiten in einer DAW.
 - **Projekt sichern:** das ganze Projekt mit allen Originalaufnahmen und Einstellungen als ZIP. **Projekt importieren** auf der Startseite stellt es wieder her, auch auf einem anderen Gerät.
 - **SoundCraft-Sitzung:** das Projekt als Sitzung für die Desktop-DAW SoundCraft, als ZIP (siehe [SoundCraft](#soundcraft)).

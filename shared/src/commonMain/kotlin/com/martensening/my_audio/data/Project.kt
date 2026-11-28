@@ -384,6 +384,10 @@ data class Project(
 
     fun isAudible(track: Track) = if (anySolo) track.solo else !track.muted
 
+    /** Whether a chain holds an effect only a newer app version knows; it is kept but makes no sound here. */
+    val hasNewerEffects get() = (tracks.map { it.effects.chain } + listOfNotNull(recordTrack?.effects?.chain) + listOf(masterChain))
+        .any { chain -> chain.any { it.effect is ChainEffect.Unknown } }
+
     /** The loop when it is switched on and still lies within the project. */
     val activeLoop get() = loop?.takeIf { it.enabled && it.startFrames >= 0 && it.endFrames <= lengthFrames && it.lengthFrames > 0 }
 }

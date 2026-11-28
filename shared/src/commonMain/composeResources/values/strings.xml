@@ -82,6 +82,7 @@
     <string name="audio_buffer_long">Long</string>
     <string name="audio_buffer_automatic">Automatic</string>
     <string name="project_recording_take">%1$s is being recorded …</string>
+    <string name="project_newer_effects_hint">This project contains effects from a newer version of My Audio. They stay stored but make no sound here.</string>
     <string name="project_calibration_hint">This playback and microphone combination is not calibrated and may be delayed.</string>
     <string name="project_calibration_action">Calibrate now</string>
     <string name="project_error_missing">The project could not be loaded.</string>
@@ -210,6 +211,8 @@
     <string name="action_share">Share</string>
     <string name="share_mix">Share mix</string>
     <string name="share_mix_summary">As Play sounds, Ogg/Opus</string>
+    <string name="share_mp3">Mix as MP3</string>
+    <string name="share_mp3_summary">As Play sounds, for any player</string>
     <string name="share_stems">Stems</string>
     <string name="share_stems_summary">Cleaned WAVs for a DAW (ZIP)</string>
     <string name="share_backup">Back up project</string>
@@ -312,7 +315,7 @@
     <string name="effect_audition_source_track">Playing an excerpt of this track in a loop</string>
     <string name="effect_audition_source_mix">Playing an excerpt of the mix in a loop</string>
     <string name="effect_audition_source_sample">Playing the sample sound in a loop</string>
-    <string name="about_community_credit">With thanks to the people behind Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, Skia and OpenJDK. Full credits and notices are available below.</string>
+    <string name="about_community_credit">With thanks to the people behind Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, LAME, Skia and OpenJDK. Full credits and notices are available below.</string>
     <string name="library_section_tones">Amp models and cabinets</string>
     <string name="tones_import">Import</string>
     <string name="tones_hint">Import NAM profiles (.nam) and cabinet IRs (.wav) you downloaded, also as ZIP.</string>

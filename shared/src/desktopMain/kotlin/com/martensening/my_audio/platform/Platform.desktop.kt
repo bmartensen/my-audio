@@ -17,13 +17,17 @@ actual object Log {
 }
 
 /**
- * The packaged app keeps the library in its resources directory; `gradlew :desktop:run` points
- * `myaudio.native.dir` at the CMake output. Loading twice is harmless.
+ * The packaged app keeps the libraries in its resources directory; `gradlew :desktop:run` points
+ * `myaudio.native.dir` at the CMake output. The LAME library (mp3lame) is loaded first, because Windows
+ * resolves the engine's dependency from loaded modules, not from the engine's own directory. Loading twice is
+ * harmless.
  */
 actual fun loadNativeEngine() {
-    val name = System.mapLibraryName("myaudio")
-    val library = listOf("compose.application.resources.dir", "myaudio.native.dir")
-        .mapNotNull { System.getProperty(it)?.let { dir -> java.io.File(dir, name) } }
-        .firstOrNull { it.isFile }
-    if (library != null) System.load(library.absolutePath) else System.loadLibrary("myaudio")
+    for (library in listOf("mp3lame", "myaudio")) {
+        val name = System.mapLibraryName(library)
+        val file = listOf("compose.application.resources.dir", "myaudio.native.dir")
+            .mapNotNull { System.getProperty(it)?.let { dir -> java.io.File(dir, name) } }
+            .firstOrNull { it.isFile }
+        if (file != null) System.load(file.absolutePath) else System.loadLibrary(library)
+    }
 }

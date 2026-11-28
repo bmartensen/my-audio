@@ -17,6 +17,8 @@ Commit and push permission rules are in [AGENTS_GUIDE.md](../AGENTS_GUIDE.md). U
 
 Open work, feature requests and bug reports are [GitHub Issues](https://github.com/bmartensen/my-audio/issues). Forms exist for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`). Issues describe changes to the codebase and its state (features, bugs, technical work), never tests or measurements to perform; tests belong to the work on an issue, and lasting findings (coverage, known limits) go to [current work](current-work.md), never logs of single runs. A deviation from agreed behavior noticed while using the app is a bug issue. Labels: `bug`, `enhancement`, `android`, `windows`, `audio`, `effects`, `development`. A milestone per minor version (e.g. `0.10.x`, since every build raises the patch version) groups its issues and summarizes its agreed decisions in its description. Agreed behavior still goes to [requirements](app-requirements.md) and decisions to [decisions](decisions.md); an issue links them instead of repeating them.
 
+**Ticket first.** Every larger change is motivated by an issue before it is implemented: new or changed behavior, a new dependency or license, a change to the project format, the build or the release process, or work across several modules. The issue says why the change is made and what it covers; its commits reference it (`Closes #<n>` when they complete it). Small things go without an issue: wording and typos, comments, documentation fixes, minor UI polish and obvious one-line fixes. When in doubt, open the issue; it costs a minute and keeps the history traceable.
+
 ## Build and automated checks
 
 ```powershell

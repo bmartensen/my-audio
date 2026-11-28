@@ -401,6 +401,9 @@ private fun TrackList(
         if (state.latencyFrames == null) {
             item { CalibrationHint(onOpenCalibration) }
         }
+        if (project.hasNewerEffects) {
+            item(key = "newer-effects") { NewerEffectsHint() }
+        }
         val playhead = state.positionFrames.takeIf { state.mode == TransportMode.Playing }
         if (project.tracks.isNotEmpty() && state.mode != TransportMode.Recording) {
             item(key = "loop") { LoopBar(project, playhead, marker, onLoopChange, seek) }
@@ -620,6 +623,18 @@ private fun CalibrationHint(onOpenCalibration: () -> Unit) {
                 Text(stringResource(Res.string.project_calibration_action))
             }
         }
+    }
+}
+
+/** Explains a missing sound before any track is opened: some effects need a newer app version. */
+@Composable
+private fun NewerEffectsHint() {
+    PanelCard(border = null, containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+        Text(
+            stringResource(Res.string.project_newer_effects_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
+        )
     }
 }
 
@@ -902,6 +917,7 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             listOf(
                 Triple(ProjectArchive.Kind.Mix, Res.string.share_mix, Res.string.share_mix_summary),
+                Triple(ProjectArchive.Kind.Mp3, Res.string.share_mp3, Res.string.share_mp3_summary),
                 Triple(ProjectArchive.Kind.Stems, Res.string.share_stems, Res.string.share_stems_summary),
                 Triple(ProjectArchive.Kind.Backup, Res.string.share_backup, Res.string.share_backup_summary),
                 Triple(ProjectArchive.Kind.SoundCraft, Res.string.share_soundcraft, Res.string.share_soundcraft_summary)
@@ -918,7 +934,7 @@ private fun ShareMenu(enabled: Boolean, exporting: Boolean, mixAvailable: Boolea
                         }
                     },
                     enabled = when (kind) {
-                        ProjectArchive.Kind.Mix -> mixAvailable
+                        ProjectArchive.Kind.Mix, ProjectArchive.Kind.Mp3 -> mixAvailable
                         ProjectArchive.Kind.Stems -> stemsAvailable
                         ProjectArchive.Kind.Backup -> true
                         ProjectArchive.Kind.SoundCraft -> stemsAvailable

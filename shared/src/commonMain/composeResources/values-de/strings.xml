@@ -81,6 +81,7 @@
     <string name="audio_buffer_long">Lang</string>
     <string name="audio_buffer_automatic">Automatisch</string>
     <string name="project_recording_take">%1$s wird aufgenommen …</string>
+    <string name="project_newer_effects_hint">Dieses Projekt enthält Effekte einer neueren Version von My Audio. Sie bleiben gespeichert, klingen hier aber nicht.</string>
     <string name="project_calibration_hint">Diese Kombination aus Wiedergabe und Mikrofon ist nicht eingemessen und kann verzögert sein.</string>
     <string name="project_calibration_action">Jetzt einmessen</string>
     <string name="project_error_missing">Das Projekt konnte nicht geladen werden.</string>
@@ -209,6 +210,8 @@
     <string name="action_share">Teilen</string>
     <string name="share_mix">Mix teilen</string>
     <string name="share_mix_summary">Wie Play, als Ogg/Opus</string>
+    <string name="share_mp3">Mix als MP3</string>
+    <string name="share_mp3_summary">Wie Play, für jeden Player</string>
     <string name="share_stems">Einzelspuren</string>
     <string name="share_stems_summary">Bereinigte WAVs für eine DAW (ZIP)</string>
     <string name="share_backup">Projekt sichern</string>
@@ -307,7 +310,7 @@
     <string name="effect_audition_source_track">Ein Ausschnitt dieser Spur läuft in Schleife</string>
     <string name="effect_audition_source_mix">Ein Ausschnitt des Mixes läuft in Schleife</string>
     <string name="effect_audition_source_sample">Der Beispielklang läuft in Schleife</string>
-    <string name="about_community_credit">Mit Dank an die Menschen hinter Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, Skia und OpenJDK. Vollständige Credits und Lizenzhinweise stehen unten.</string>
+    <string name="about_community_credit">Mit Dank an die Menschen hinter Kotlin, Compose, AndroidX, Material Icons, Oboe, Airwindows, miniaudio, Opus, LAME, Skia und OpenJDK. Vollständige Credits und Lizenzhinweise stehen unten.</string>
     <string name="library_section_tones">Amp-Modelle und Boxen</string>
     <string name="tones_import">Importieren</string>
     <string name="tones_hint">Importiere heruntergeladene NAM-Profile (.nam) und Box-IRs (.wav), auch als ZIP.</string>

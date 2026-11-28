@@ -214,7 +214,7 @@ object AudioEngine {
 
     /**
      * Writes exactly what Play would output (audible tracks with their effects, plus the click if
-     * the metronome is audible during playback) to [target] as Ogg/Opus, encoded by [encode].
+     * the metronome is audible during playback) to [target], encoded by [encode] (Ogg/Opus or MP3).
      */
     suspend fun exportPlayback(
         project: Project, repository: ProjectRepository, target: File,
@@ -226,10 +226,16 @@ object AudioEngine {
             withContext(Dispatchers.Default) { NativeAudio.renderedMix() }
         }
         if (output.isEmpty()) return false
-        // The encoder drops the last partial Opus frame; 100 ms of silence keep the true ending.
+        // The Opus encoder drops the last partial frame; 100 ms of silence keep the true ending.
         val padded = output.copyOf(output.size + NativeAudio.SAMPLE_RATE / 10 * MIX_CHANNELS)
         withContext(Dispatchers.Default) { encode(padded, NativeAudio.SAMPLE_RATE, MIX_CHANNELS, target) }
         return true
+    }
+
+    /** "Mix as MP3" on both platforms: LAME in the shared native code, see [NativeAudio.encodeMp3]. */
+    suspend fun encodeMp3(samples: FloatArray, sampleRate: Int, channels: Int, target: File) {
+        val mp3 = checkNotNull(NativeAudio.encodeMp3(samples, channels, sampleRate)) { "MP3 encoding failed" }
+        withContext(Dispatchers.IO) { target.writeBytes(mp3) }
     }
 
     /**

@@ -92,7 +92,8 @@ public:
 
 private:
     DesktopEngine() = default;
-    bool openDevice(bool duplex);
+    /** [inputChannel] other than Device opens the microphone in stereo and records that channel. */
+    bool openDevice(bool duplex, InputChannel inputChannel = InputChannel::Device);
     void closeDevice();
     void mix(float *output, int channels, int numFrames, float *mixOnly, bool looping);
     void writerLoop();
@@ -105,6 +106,8 @@ private:
     void *mDevice = nullptr;  // ma_device, owned
     bool mRecording = false;
     bool mMonitorOnly = false;  // live audition: no mix, no take
+    InputChannel mInputChannel = InputChannel::Device;
+    std::vector<float> mInputScratch;  // the chosen channel of a stereo microphone, as mono
     LiveMonitor mMonitor;
 
     std::atomic<int64_t> mPosition{0};

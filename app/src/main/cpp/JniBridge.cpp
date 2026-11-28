@@ -10,6 +10,7 @@
 #include "EffectPreview.h"
 #include "LiveChain.h"
 #include "Log.h"
+#include "Mp3Encoder.h"
 #include "TransportEngine.h"
 
 namespace {
@@ -211,6 +212,22 @@ Java_com_martensening_my_1audio_audio_NativeAudio_renderedMix(JNIEnv *env, jobje
     const std::vector<float> mix = engine().renderPlayback();
     jfloatArray array = env->NewFloatArray(static_cast<jsize>(mix.size()));
     if (array != nullptr) env->SetFloatArrayRegion(array, 0, static_cast<jsize>(mix.size()), mix.data());
+    return array;
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_martensening_my_1audio_audio_NativeAudio_encodeMp3(JNIEnv *env, jobject /* this */, jfloatArray samples,
+                                                             jint channels, jint sampleRate) {
+    const jsize count = env->GetArrayLength(samples);
+    if (channels < 1 || count % channels != 0) return nullptr;
+    std::vector<float> values(count);
+    env->GetFloatArrayRegion(samples, 0, count, values.data());
+    const std::vector<unsigned char> mp3 = myaudio::encodeMp3(values.data(), values.size() / channels, channels, sampleRate);
+    if (mp3.empty()) return nullptr;
+    jbyteArray array = env->NewByteArray(static_cast<jsize>(mp3.size()));
+    if (array != nullptr) {
+        env->SetByteArrayRegion(array, 0, static_cast<jsize>(mp3.size()), reinterpret_cast<const jbyte *>(mp3.data()));
+    }
     return array;
 }
 

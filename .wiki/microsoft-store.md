@@ -59,7 +59,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 >
 > Ideen festhalten. Songtext und Akkorde stehen in den Notizen jedes Projekts, auf Wunsch als mitlaufender Teleprompter. Ein Stimmgerät für Gitarre ist eingebaut.
 >
-> Teilen. Exportiere den Mix als Ogg/Opus, die Einzelspuren als WAV, das ganze Projekt als Sicherung oder als Sitzung für SoundCraft.
+> Teilen. Exportiere den Mix als Ogg/Opus oder MP3, die Einzelspuren als WAV, das ganze Projekt als Sicherung oder als Sitzung für SoundCraft.
 >
 > Alles bleibt auf deinem Rechner. Du brauchst kein Konto und keine Internetverbindung. My Audio gibt es auch für Android, und Projekte lassen sich zwischen beiden austauschen. My Audio ist Open Source unter der MIT-Lizenz.
 
@@ -74,7 +74,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 - Live mithören durch die Effekte
 - Notizen mit Akkorden und Teleprompter
 - Metronom mit Einzähler und Stimmgerät
-- Export als Ogg/Opus, WAV-Einzelspuren, Projektsicherung und SoundCraft-Sitzung
+- Export als Ogg/Opus oder MP3, WAV-Einzelspuren, Projektsicherung und SoundCraft-Sitzung
 - Ohne Konto und ohne Internet
 
 **Screenshots** (`branding/microsoft-store/screenshots/de-DE/`, in this order, with captions):
@@ -115,7 +115,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 >
 > Keep your ideas. Lyrics and chords live in the notes of each project, as a scrolling teleprompter if you like. A guitar tuner is built in.
 >
-> Share. Export the mix as Ogg/Opus, the individual tracks as WAV, the whole project as a backup or as a session for SoundCraft.
+> Share. Export the mix as Ogg/Opus or MP3, the individual tracks as WAV, the whole project as a backup or as a session for SoundCraft.
 >
 > Everything stays on your computer. No account and no internet connection needed. My Audio is also available for Android, and projects move between both. My Audio is open source under the MIT license.
 
@@ -130,7 +130,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 - Live monitoring through the effects
 - Notes with chords and a teleprompter
 - Metronome with count-in and a tuner
-- Export as Ogg/Opus, WAV stems, project backup and SoundCraft session
+- Export as Ogg/Opus or MP3, WAV stems, project backup and SoundCraft session
 - No account and no internet
 
 **Screenshots** (`branding/microsoft-store/screenshots/en-US/`, in this order, with captions):

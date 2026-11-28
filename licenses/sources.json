@@ -50,6 +50,16 @@
     "sha256": "669fddf2a0fd14d16e0a6a1d0c3b01ae9cb90c3ff23a9d4f49b98be8323181e3"
   },
   {
+    "file": "lame-COPYING.txt",
+    "source": "app/src/main/cpp/third_party/lame/COPYING (LAME 3.100, lame-3.100.tar.gz SHA-256 ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e)",
+    "sha256": "bfe4a52dc4645385f356a8e83cc54216a293e3b6f1cb4f79f5fc0277abf937fd"
+  },
+  {
+    "file": "lame-LICENSE.txt",
+    "source": "app/src/main/cpp/third_party/lame/LICENSE (LAME 3.100)",
+    "sha256": "7a40cbd8818c57e5285e83c772a459a996d1662c824a879836b97b473c07cae4"
+  },
+  {
     "file": "libjpeg-turbo-LICENSE.md.txt",
     "source": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/e14cbfaa85529d47f9f55b0f104a579c1061f9ad/LICENSE.md?format=TEXT",
     "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430"

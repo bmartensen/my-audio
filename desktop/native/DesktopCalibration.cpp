@@ -37,6 +37,8 @@ struct DuplexRecorder {
     std::vector<float> recording;
     int64_t outputPosition = 0;
     int64_t inputPosition = 0;
+    /** Device: a mono microphone; otherwise the recorded channel of a stereo one, as in a take. */
+    InputChannel inputChannel = InputChannel::Device;
     std::atomic<bool> done{false};
     std::atomic<bool> lost{false};
 };
@@ -52,8 +54,9 @@ void dataCallback(ma_device *device, void *outputData, const void *inputData, ma
     if (recorder.done.load(std::memory_order_relaxed)) return;
     const auto *input = static_cast<const float *>(inputData);
     const auto capacity = static_cast<int64_t>(recorder.recording.size());
+    const int channels = recorder.inputChannel == InputChannel::Device ? 1 : 2;
     for (ma_uint32 frame = 0; frame < frames && recorder.inputPosition < capacity; ++frame) {
-        recorder.recording[recorder.inputPosition++] = input[frame];
+        recorder.recording[recorder.inputPosition++] = monoInputSample(input + frame * channels, channels, recorder.inputChannel);
     }
     if (recorder.inputPosition >= capacity) recorder.done.store(true, std::memory_order_release);
 }
@@ -74,11 +77,12 @@ double median(std::vector<double> values) {
 }  // namespace
 
 SessionResult runCalibrationSession(int /* outputDeviceId */, int /* inputDeviceId */, bool /* bluetooth */,
-                                    bool /* handsFreeInput */, InputChannel /* inputChannel */) {
+                                    bool /* handsFreeInput */, InputChannel inputChannel) {
     const int sampleRate = kProjectSampleRate;
     SessionResult result;
     result.sampleRate = sampleRate;
     DuplexRecorder recorder;
+    recorder.inputChannel = inputChannel;
 
     const std::vector<float> sweep = makeSweep(sampleRate, kSweepSeconds, 500.0, 10000.0, 0.6f);
     const int preRoll = static_cast<int>(kPreRollSeconds * sampleRate);
@@ -97,7 +101,8 @@ SessionResult runCalibrationSession(int /* outputDeviceId */, int /* inputDevice
     config.playback.format = ma_format_f32;
     config.playback.channels = kChannels;
     config.capture.format = ma_format_f32;
-    config.capture.channels = 1;
+    // Opened like a take (DesktopEngine::openDevice): stereo for a two-channel interface.
+    config.capture.channels = inputChannel == InputChannel::Device ? 1 : 2;
     config.performanceProfile = ma_performance_profile_low_latency;
     // The same global buffer choice as takes and live monitoring (DesktopEngine::openDevice).
     if (bufferSetting() > 0) config.periodSizeInFrames = static_cast<ma_uint32>(128 * bufferSetting());

@@ -1,5 +1,6 @@
 package com.martensening.my_audio.desktop
 
+import com.martensening.my_audio.audio.InputChannel
 import com.martensening.my_audio.audio.TransportRoute
 import com.martensening.my_audio.data.EffectLibrary
 import com.martensening.my_audio.data.ProjectRepository
@@ -10,8 +11,14 @@ import java.io.File
 /**
  * Playback and recording device of a desktop transport by name ("" = system default). The ids
  * the engine sees are always 0; the native side opens the devices selected in [DesktopDevices].
+ * [inputChannel] is set for an input with two or more channels, as on Android.
  */
-data class DesktopRoute(val output: String, val input: String, override val hasInput: Boolean = true) : TransportRoute {
+data class DesktopRoute(
+    val output: String,
+    val input: String,
+    override val hasInput: Boolean = true,
+    override val inputChannel: InputChannel? = null
+) : TransportRoute {
     override val outputId = 0
     override val inputId = 0
     override val outputBluetooth = false
@@ -20,18 +27,18 @@ data class DesktopRoute(val output: String, val input: String, override val hasI
     override val ready = true
     override val hasOutput = true
 
-    /** Calibration key of the pair. */
-    val key get() = "$output\u0000$input"
+    /** Calibration key of the pair; a stereo microphone stream is measured anew, as on Android. */
+    val key get() = "$output\u0000$input" + if (inputChannel != null) "\u00002ch" else ""
 
-    override fun samePorts(other: TransportRoute) = other is DesktopRoute && other.output == output && other.input == input
+    override fun samePorts(other: TransportRoute) = other is DesktopRoute && other.key == key
     override fun sameOutput(other: TransportRoute) = other is DesktopRoute && other.output == output
-    override fun withoutInput() = copy(hasInput = false)
+    override fun withoutInput() = copy(hasInput = false, inputChannel = null)
 }
 
 /** Desktop side of a [ProjectSession]: no background service or routing, calibrations per device pair. */
 class DesktopProjectPlatform(
     override val repository: ProjectRepository,
-    private val devices: DesktopDevices,
+    val devices: DesktopDevices,
     private val calibration: DesktopCalibrationStore,
     root: File
 ) : ProjectPlatform {
@@ -55,5 +62,5 @@ class DesktopProjectPlatform(
         DesktopOggExporter.write(samples, sampleRate, channels, target)
 
     override suspend fun runTuner(onInterrupted: () -> Unit, onReady: (String) -> Unit, onPitch: (Double?, Float, Boolean) -> Unit) =
-        DesktopTuner.run(onReady, onPitch)
+        DesktopTuner.run(devices.route().inputChannel, onReady, onPitch)
 }

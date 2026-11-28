@@ -31,4 +31,4 @@ $output = Join-Path $root 'desktop/build/native'
 Assert-DevExit 'Native CMake configuration' $LASTEXITCODE
 & (Join-Path $cmakeBin 'cmake.exe') --build $build
 Assert-DevExit 'Native build' $LASTEXITCODE
-Get-Item -LiteralPath (Join-Path $output 'myaudio.dll')
+Get-Item -LiteralPath (Join-Path $output 'myaudio.dll'), (Join-Path $output 'mp3lame.dll')

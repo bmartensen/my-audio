@@ -10,6 +10,7 @@ object ProjectArchive {
     /** What "Share" hands out; each has its own file name suffix and MIME type. */
     enum class Kind(val suffix: String, val extension: String, val mimeType: String) {
         Mix("", "ogg", "audio/ogg"),
+        Mp3("", "mp3", "audio/mpeg"),
         Stems(" - Spuren", "zip", "application/zip"),
         Backup(" - Projekt", "zip", "application/zip"),
         SoundCraft(" - SoundCraft", "zip", "application/zip")

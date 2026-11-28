@@ -1,6 +1,7 @@
 package com.martensening.my_audio.desktop
 
 import com.martensening.my_audio.audio.ImportedAudioWriter
+import com.martensening.my_audio.audio.InputChannel
 import com.martensening.my_audio.audio.OggOpusWriter
 import com.martensening.my_audio.audio.PitchDetector
 import com.martensening.my_audio.audio.PitchSmoother
@@ -30,8 +31,14 @@ object DesktopNative {
     /** Opus packets (20 ms) of interleaved 48 kHz [samples]; [preSkip] receives the encoder delay. Null on failure. */
     external fun encodeOpus(samples: FloatArray, channels: Int, bitrate: Int, preSkip: IntArray): Array<ByteArray>?
 
-    /** Opens the selected microphone for the tuner; returns its name, or null if it cannot be opened. */
-    external fun startCapture(sampleRate: Int): String?
+    /** Channel count of the microphone a transport opens now; two or more offer the input channel choice. */
+    external fun inputChannels(): Int
+
+    /**
+     * Opens the selected microphone for the tuner; [inputChannel] is an [InputChannel.code] or
+     * [InputChannel.DEVICE_CODE]. Returns its name, or null if it cannot be opened.
+     */
+    external fun startCapture(sampleRate: Int, inputChannel: Int): String?
 
     /** Copies waiting tuner samples into [buffer]; returns the count, or -1 if the device was lost. */
     external fun readCapture(buffer: FloatArray): Int
@@ -43,8 +50,11 @@ object DesktopNative {
 object DesktopTuner {
     private const val SAMPLE_RATE = 16_000
 
-    suspend fun run(onReady: (String) -> Unit, onPitch: (Double?, Float, Boolean) -> Unit) = withContext(Dispatchers.Default) {
-        val name = DesktopNative.startCapture(SAMPLE_RATE) ?: throw IllegalStateException("Cannot open the microphone")
+    /** [inputChannel]: the channel of a two-channel interface that takes record; null for a mono microphone. */
+    suspend fun run(inputChannel: InputChannel?, onReady: (String) -> Unit, onPitch: (Double?, Float, Boolean) -> Unit) =
+        withContext(Dispatchers.Default) {
+        val name = DesktopNative.startCapture(SAMPLE_RATE, inputChannel?.code ?: InputChannel.DEVICE_CODE)
+            ?: throw IllegalStateException("Cannot open the microphone")
         try {
             onReady(name)
             val block = FloatArray(512)
