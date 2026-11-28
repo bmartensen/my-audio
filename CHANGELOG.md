@@ -2,6 +2,10 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.11.4
+
+- The share menu has shorter names: **Share OGG**, **Share MP3** and **SoundCraft**, each with a one-line description.
+
 ## 0.11.3
 
 - **Mix as MP3** in the share menu: the same mix as **Share mix**, as an MP3 for any player and upload form.

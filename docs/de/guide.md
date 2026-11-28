@@ -241,17 +241,17 @@ Schlage eine leere Saite an. Das Stimmgerät erkennt die Saite automatisch (Stan
 
 <img class="shot wide" src="{{ '/images/share.png' | relative_url }}" alt="Teilen-Menü">
 
-- **Mix teilen:** genau das, was **Abspielen** hören lässt, als Stereo-Ogg/Opus – klein genug für Messenger.
-- **Mix als MP3:** derselbe Mix als MP3, für jeden Player und jedes Upload-Formular.
+- **OGG teilen:** genau das, was **Abspielen** hören lässt, als Stereo-Ogg/Opus – klein genug für Messenger.
+- **MP3 teilen:** derselbe Mix als MP3, für jeden Player und jedes Upload-Formular.
 - **Einzelspuren:** jede Spur als bereinigte WAV-Datei ab Projektanfang, ohne Effekte, Lautstärke und Panorama, in einem ZIP – zum Weiterarbeiten in einer DAW.
 - **Projekt sichern:** das ganze Projekt mit allen Originalaufnahmen und Einstellungen als ZIP. **Projekt importieren** auf der Startseite stellt es wieder her, auch auf einem anderen Gerät.
-- **SoundCraft-Sitzung:** das Projekt als Sitzung für die Desktop-DAW SoundCraft, als ZIP (siehe [SoundCraft](#soundcraft)).
+- **SoundCraft:** das Projekt als Sitzung für die Desktop-DAW SoundCraft, als ZIP (siehe [SoundCraft](#soundcraft)).
 
 ## SoundCraft
 
 [SoundCraft](https://github.com/storytold/soundcraft) ist eine quelloffene DAW für den PC. Mit ihr verschiebst und schneidest du Spuren, die du unterwegs aufgenommen hast, und nimmst die Sitzung danach wieder mit aufs Telefon.
 
-- **Teilen → SoundCraft-Sitzung** erzeugt ein ZIP. Entpacke es am PC und öffne die *.scraft*-Datei in SoundCraft.
+- **Teilen → SoundCraft** erzeugt ein ZIP. Entpacke es am PC und öffne die *.scraft*-Datei in SoundCraft.
 - Jede Spur liegt dort an ihrer Stelle im Song, mit Lautstärke, Panorama, Stummschaltung und Lautstärkeverlauf.
 - **EQ (My Audio)** mit **Kompressor** und **Hall (My Audio)** werden zu den passenden SoundCraft-Effekten und bleiben einstellbar. Sie klingen dort ähnlich, aber nicht exakt gleich.
 - Airwindows-Effekte, Amp-Modelle und Boxen gibt es in SoundCraft nicht. Sie sind in die Spur eingerechnet, die unbearbeitete Aufnahme liegt in der Playlist „Dry“ daneben.
