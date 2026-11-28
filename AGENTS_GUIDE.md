@@ -30,6 +30,7 @@ Shared policy for every contributor and every assistant client. `AGENTS.md`, `CL
 
 ## Engineering Defaults
 - Keep changes small, intentional, and documented. Prefer repository-local documentation over scattered notes.
+- Interface text is clean and sparse: before writing any label, menu entry or dialog text, draft all siblings in both languages and check them against `.wiki/interface-text.md`; propose new texts as a table before implementing them.
 - Preserve user changes; do not rewrite unrelated work.
 - Report verification with its scope: builds, tests, listening checks, signature checks and secret scans answer different questions.
 
