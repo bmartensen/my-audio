@@ -4,13 +4,13 @@ The current state of the app and the repository. Open work is in [GitHub Issues]
 
 ## Release
 
-**My Audio 0.11.3 / versionCode 42** for Android and Windows, tag `v0.11.3` on `main`. Milestone [0.11.x](https://github.com/bmartensen/my-audio/milestone/2) sharpens the direct recording workflow: undo/redo instead of confirmations, a start marker for Play and Record, per-track latency and offset by value.
+**My Audio 0.11.4 / versionCode 43** for Android and Windows, tag `v0.11.4` on `main`. Milestone [0.11.x](https://github.com/bmartensen/my-audio/milestone/2) sharpens the direct recording workflow: undo/redo instead of confirmations, a start marker for Play and Record, per-track latency and offset by value.
 
 - Android: signed APK on the GitHub release, no `INTERNET` permission.
 - Windows: the [Microsoft Store](microsoft-store.md) listing [9N3X8S3HC311](https://apps.microsoft.com/detail/9N3X8S3HC311) (MSIX, signed by Microsoft) and the unsigned MSI on the GitHub release, which also carries the source of the bundled Temurin 21.0.13 runtime. Both share the projects in *Documents/My Audio*.
 - Pages links the APK of the release and the Store for Windows; martensening.com links the stable Pages address `/download/android/` and the Store ([Pages and releases](site-publication.md)).
 
-0.11.3 adds the mix as MP3 (LAME, [#42](https://github.com/bmartensen/my-audio/issues/42)), the input channel choice on Windows ([#16](https://github.com/bmartensen/my-audio/issues/16)), a project hint for effects of newer versions ([#3](https://github.com/bmartensen/my-audio/issues/3)) and the stable download address ([#43](https://github.com/bmartensen/my-audio/issues/43)). 0.11.2 brought the confirmation before closing a project with undo history, Back closing the notes first, Redo left of Undo and track spans.
+0.11.4 shortens the share menu labels (Share OGG, Share MP3, SoundCraft). 0.11.3 added the mix as MP3 (LAME, [#42](https://github.com/bmartensen/my-audio/issues/42)), the input channel choice on Windows ([#16](https://github.com/bmartensen/my-audio/issues/16)), a project hint for effects of newer versions ([#3](https://github.com/bmartensen/my-audio/issues/3)) and the stable download address ([#43](https://github.com/bmartensen/my-audio/issues/43)). 0.11.2 brought the confirmation before closing a project with undo history, Back closing the notes first, Redo left of Undo and track spans.
 
 ## Implemented state
 
