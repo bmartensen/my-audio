@@ -51,7 +51,7 @@ On Windows x64, in PowerShell from the checkout:
 
 The helper finds or installs JDK 21, the pinned Android SDK/NDK/CMake packages and the Visual Studio C++ Build Tools. Android Studio and Python are optional. Use `-Target Android` or `-Target Windows` for one platform; artifacts and checksums go to `.work/`.
 
-No publisher credentials are needed: debug APKs use Android's local debug key and development installers are unsigned. Signing with your own key, distribution notes and test commands are in [developer builds](.wiki/developer-builds.md) and [repository commands](.wiki/repository-rules.md).
+No publisher credentials are needed: debug APKs use Android's local debug key and development installers are unsigned. Signing with your own key, distribution notes and test commands are in [development](.wiki/development.md).
 
 ## Architecture
 
@@ -72,7 +72,7 @@ Kotlin and Compose Multiplatform share the UI, project model and session logic. 
 
 Ideas, bug reports and pull requests are welcome. Report bugs and request features as [issues](https://github.com/bmartensen/my-audio/issues/new/choose); open work is tracked there too. A larger change starts from an issue that explains why it is made; small fixes can go straight to a pull request. Pull requests target `develop`, where development happens; `main` holds the latest release. Project knowledge lives in the [wiki](.wiki/README.md): agreed behavior in [requirements](.wiki/app-requirements.md) and choices in [decisions](.wiki/decisions.md). Please read the [collaboration principles](.wiki/collaboration.md) first.
 
-[`AGENTS_GUIDE.md`](AGENTS_GUIDE.md) is the shared policy for contributors and coding assistants (`AGENTS.md`, `CLAUDE.md` and `GEMINI.md` point to it); three shared workflows (`start`, `grill-me`, `wrap`) live in [`.agents/`](.agents/README.md).
+[`AGENTS_GUIDE.md`](AGENTS_GUIDE.md) is the shared policy for contributors and coding assistants and [`PROJECT_GUIDE.md`](PROJECT_GUIDE.md) what is specific to My Audio (`AGENTS.md`, `CLAUDE.md` and `GEMINI.md` point to both); three shared workflows (`start`, `grill-me`, `wrap`) live in [`.agents/`](.agents/README.md). The policy, the workflows and the wiki rule pages come from the [harness](https://github.com/bmartensen/harness) at the version recorded in [`.agents/harness.md`](.agents/harness.md).
 
 ## License and credits
 

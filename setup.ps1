@@ -97,7 +97,7 @@ if ($WithPython -and -not $SkipPython) {
         Assert-DevExit 'Optional Python requirements' $LASTEXITCODE
     }
 }
-if ($missing.Count) { throw "Missing prerequisites:`n - $($missing -join "`n - ")`nRun .\setup.ps1 -Target $Target -InstallTools, or install the listed tools manually. See .wiki/developer-builds.md." }
+if ($missing.Count) { throw "Missing prerequisites:`n - $($missing -join "`n - ")`nRun .\setup.ps1 -Target $Target -InstallTools, or install the listed tools manually. See .wiki/development.md." }
 if ($Check) { Write-Host 'Prerequisite check passed. No files, environment or installed software changed.'; return }
 if (-not $SkipAndroid) {
     $env:JAVA_HOME = $jdk

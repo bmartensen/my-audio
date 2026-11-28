@@ -1,4 +1,6 @@
-# Developer builds
+# Development
+
+How to set up, build, test and publish My Audio. Rules for branches, releases and verification are in [repository rules](repository-rules.md).
 
 Supported build host: Windows x64, 64-bit PowerShell 5.1 or newer. The helper builds Android APKs and a Windows MSI; it does not install either application. No publisher credentials are needed.
 
@@ -46,9 +48,71 @@ An explicit SDK path conflicting with `local.properties` fails with instructions
 
 Manual fallback: install [Temurin 21](https://adoptium.net/temurin/releases/?version=21), [Android command-line tools](https://developer.android.com/studio#command-tools) and [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/), select the C++ workload, and rerun `-Check`.
 
+## Build and test
+
+```powershell
+.\setup.ps1 -Target All
+.\tools\test_dev_environment.ps1
+.\gradlew.bat :app:assembleDebug :shared:desktopTest :app:testDebugUnitTest :app:lintDebug
+.\build.ps1 -Target Windows
+```
+
+Setup selects JAVA_HOME and ANDROID_HOME in the current process. Keep IDE/JDK selections consistent; `.idea/`, `.vscode/` and `local.properties` are local. `gradle.properties` is the shared source of versionName/versionCode for Android and Windows; raise the patch version and versionCode before every distributed build.
+
+```powershell
+.\tools\build_desktop_native.ps1
+.\tools\release_apk.ps1
+.\tools\release_desktop.ps1
+.\gradlew.bat :desktop:run "-PmyAudio.openProject=<id>"
+```
+
+Outputs, logs, screenshots and personal test projects stay in ignored `.work/`. APK release packaging verifies its configured signing certificate. MSI redistribution requires the matching runtime notices and corresponding source described under [distribution and licenses](#distribution-and-licenses).
+
+For Pages, guide or download-link changes, also run `tools/test_site_downloads.ps1` and `tools/check_site_downloads.ps1`; verify images, internal links and redirects in German and English at phone and desktop widths ([Pages and releases](site-publication.md)).
+
+### Device checks
+
+Only run installation/device commands when authorized for that device. Replacement installs preserve data only when signatures are compatible; never resolve a mismatch by automatic uninstall.
+
+```powershell
+.\tools\debug_launch.ps1 -Target emulator
+.\tools\debug_launch.ps1 -Target phone -Device <serial>
+.\tools\debug_launch.ps1 -NoBuild -Screen calibration
+.\tools\debug_launch.ps1 -ScreenshotPath .work/home.png
+.\tools\native_tests.ps1 -Device <serial>
+.\tools\native_tests.ps1 -Test stereo_mix -Device <serial>
+```
+
+The launch helper waits for the token-specific `Ready` marker under `MyAudioDebug` and reports AndroidRuntime failures. Native tests compile through the pinned NDK and run in `/data/local/tmp`, without changing app projects. Effect tests compile the large Airwindows catalogue. Latency measurements need real hardware; emulator audio timing says nothing about real devices.
+
+Native tests cover envelopes, sample-accurate loops, EQ/compression/pan, BS.1770 loudness, limiting, warmup boundaries, bleed removal, stereo compatibility and effect catalogue defaults. Logcat tags include `MyAudioProject`, `MyAudioEngine`, `MyAudioService`, `MyAudioCalibration` and `MyAudioPreview`.
+
+### UI refinement and release candidates
+
+1. Iterate on layout and interaction with debug builds in the emulator. Rebuild and replace the debug app there without incrementing the release version for each visual adjustment. Check screenshots with representative multitrack projects, portrait/landscape, light/dark themes and relevant navigation modes. Keep destructive actions to disposable demo data.
+2. Prepare a release candidate with the next shared versionName/versionCode and build the Android release APK and Windows installer. Preserve every previously distributed package; further changes after a candidate has been installed require a new version.
+3. Install the release build as an update on the contributor's connected smartphone when they ask for it. Any contributor's compatible phone can serve this role; select the intended device explicitly, no model or serial is a prerequisite. Use the contributor's configured signing identity, verify update compatibility and preserve their projects. Never substitute a debug installation over their release app.
+
+Package preparation and installation do not authorize a commit, push or publication.
+
+### Optional Python tools
+
+```powershell
+.\setup.ps1 -SkipAndroid -WithPython -InstallTools
+.venv\Scripts\python.exe tools\generate_icon.py
+.venv\Scripts\python.exe tools\desktop_icon.py
+.venv\Scripts\python.exe -m pip install -r tools\requirements-analysis.txt
+.venv\Scripts\python.exe tools\analyze_bleed.py .work/<project> --output .work/<comparison> --cross-validate
+.venv\Scripts\python.exe tools\test_prepare_public_repo.py
+```
+
+Keep analysis input/output directories distinct. The Python bleed comparison does not model the entire effect/master chain and only inventories takes with a recorded metronome. Never commit personal recordings or analysis artifacts.
+
+Shared app resources live under `shared/src/commonMain/composeResources`. Airwindows English/German descriptions are maintained in `tools/airwindows_texts.tsv`, then generated with `tools/airwindows_texts.py`. Updating vendored effects with `tools/vendor_airwindows.py <external checkout>` requires reviewing provenance, notices and catalogue/native tests. Do not remove upstream authorship/license headers.
+
 ## Android development
 
-Use the [UI refinement and release candidate workflow](repository-rules.md#ui-refinement-and-release-candidates): iterate with debug builds in the emulator, then install the release build as an update on the contributor's connected smartphone. A Pixel is not required.
+Iterate with debug builds in the emulator, then install the release build as an update on the contributor's connected smartphone ([UI refinement and release candidates](#ui-refinement-and-release-candidates)). A Pixel is not required.
 
 ```powershell
 .\build.ps1 -Target Android
@@ -140,10 +204,25 @@ Before a submission, run the Windows App Certification Kit in an elevated PowerS
 & "${env:ProgramFiles(x86)}\Windows Kits\10\App Certification Kit\appcert.exe" test -appxpackagepath .work\MyAudio-<version>-local.msix -reportoutputpath .work\wack-<version>.xml
 ```
 
+## Publishing a version
+
+The release itself follows [branches and releases](repository-rules.md#branches-and-releases). Building the candidate, the runtime source, the GitHub release, the download links on Pages and the Microsoft Store submission are in [publishing a version](site-publication.md#publishing-a-version); the Store fields are in [Microsoft Store](microsoft-store.md).
+
+### Publication audit
+
+In addition to the [publication checks](publication-checks.md), `tools/prepare_public_repo.py` (Python 3.10+, Git) inventories tracked and non-ignored files, rejects private names, unexpected binaries, symlinks/junctions and common secret patterns, and writes a SHA-256 manifest. With `--destination` it copies the reviewed files into an empty directory.
+
+```powershell
+python tools/prepare_public_repo.py --manifest .work/public-manifest.json
+python tools/prepare_public_repo.py --manifest .work/public-manifest.json --destination .work/public-candidate
+```
+
 ## Distribution and licenses
 
 The MIT license covers original project work. Preserve the third-party texts and About license view when distributing builds. LAME, the MP3 encoder, is LGPL-2.0-or-later: keep it a separate shared library (`libmp3lame.so`, `mp3lame.dll`) and distribute its source, `app/src/main/cpp/third_party/lame`, with the binaries; a repository release carries it in its source archive. The MSI carries the selected Java runtime's `runtime/legal` directory; do not strip it. OpenJDK is GPLv2 with the Classpath Exception, and distributing its binary also requires a corresponding-source distribution route under those terms. An upstream link alone is not a substitute for meeting those obligations.
 
 For Temurin, obtain the **matching full source archive** from the release in [temurin21-binaries](https://github.com/adoptium/temurin21-binaries/releases), check its published checksum, and provide it with the binary distribution (including runtime build scripts/configuration from that release). Keep the exact JDK version, source archive and checksums with release records outside Git; `tools/publish_github_release.ps1` attaches the verified archive to each GitHub release (see [Pages and releases](site-publication.md#publishing-a-version)). The JDK's `src.zip` alone is not the complete corresponding source. A different JDK distribution requires reviewing its own notices and source terms.
+
+`LICENSE` licenses original work. `licenses/THIRD_PARTY_NOTICES.md` inventories contributors and licenses; `licenses/` carries full upstream texts and source hashes. The About view is generated from these sources. When dependencies/media change, update provenance and credits alongside the code. Preserve shipped runtime legal files and fulfill source obligations before distribution.
 
 See [license inventory](../licenses/THIRD_PARTY_NOTICES.md) and [license provenance](../licenses/README.md). Android SDK/Visual Studio tool installers retain their vendor terms and are downloaded locally, not redistributed in this repository.

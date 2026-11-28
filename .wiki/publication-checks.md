@@ -1,21 +1,23 @@
 # Publication checks
 
-Run these checks before publishing source, for example a fork's first export or the source for a release. Publishing requires explicit authorization; preparing files does not grant it.
+Run these checks before publishing source, for example a fork's first export, a new public repository or the source for a release. Publishing requires explicit authorization; preparing files does not grant it. This page belongs to the [harness](../.agents/harness.md); a project may add its own audit tooling in [development](development.md).
 
 ## What may be published
 
-Source, build scripts, tests, public artwork, license texts, wiki and harness files. Never local IDE/SDK settings, signing material, credentials, recordings, analysis results, session transcripts or build artifacts. Public author/contact details and the application ID are intentional.
+Source, build scripts, tests, public artwork, license texts, wiki and harness files. Never local IDE/SDK settings, signing material, credentials, personal data or recordings, analysis results, session transcripts or build artifacts. Public author/contact details and public product identifiers (application or package IDs) are intentional.
 
 ## Audit
 
-`tools/prepare_public_repo.py` (Python 3.10+, Git) inventories tracked and non-ignored files, rejects private names, unexpected binaries, symlinks/junctions and common secret patterns, and writes a SHA-256 manifest. With `--destination` it copies the reviewed files into an empty directory.
+1. **Inventory.** List what would be published: `git ls-files` for tracked files and `git status --short --ignored` for anything else in the tree. Every file must be intended; look in particular for local configuration, keys and certificates, archives, executables, logs, databases and symlinks.
+2. **Secret scan.** Run [Gitleaks](https://github.com/gitleaks/gitleaks) on the candidate, both on the history and on the working tree:
 
-```powershell
-python tools/prepare_public_repo.py --manifest .work/public-manifest.json
-python tools/prepare_public_repo.py --manifest .work/public-manifest.json --destination .work/public-candidate
-```
+   ```sh
+   gitleaks git --redact .
+   gitleaks dir --redact .
+   ```
 
-Also run a dedicated secret scanner such as Gitleaks on the candidate, then review the manifest, documentation and image metadata. `.gitignore` does not protect files that are already tracked, and no scanner proves the absence of every secret. Repeat the checks after every change to the candidate.
+   A finding is fixed in the candidate, never suppressed without review. A secret that was ever pushed is revoked and replaced, not only deleted.
+3. **Review.** Read the documentation and wiki for personal state (private paths, devices, test runs) and check image metadata of new images. `.gitignore` does not protect files that are already tracked, and no scanner proves the absence of every secret. Repeat the checks after every change to the candidate.
 
 ## Before pushing
 
@@ -23,4 +25,4 @@ Also run a dedicated secret scanner such as Gitleaks on the candidate, then revi
 2. A new public history starts from reviewed source; never import or force-push an older history to create it.
 3. Inspect every push URL of the intended remote and the destination branch.
 
-Binary distribution has further obligations, notably the Java runtime's corresponding source; see [developer builds](developer-builds.md).
+Binary distribution can carry further obligations, such as providing the source of bundled components; the project documents them in [development](development.md).

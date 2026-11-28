@@ -38,7 +38,7 @@ Build source revision: https://github.com/adoptium/temurin-build/tree/1cf43d7a3e
 
 Every published MSI from 0.8.4 to 0.9.18 bundles this same Temurin 21.0.13+9 runtime. Its complete source archive (OpenJDK21U-jdk-sources_21.0.13_9.tar.gz) is attached to the GitHub release v0.9.18 of My Audio, which also covers the installers distributed earlier: https://github.com/bmartensen/my-audio/releases/tag/v0.9.18
 
-Redistributors must provide a compliant corresponding-source route for their selected runtime. See .wiki/developer-builds.md; do not treat this upstream reference or the JDK src.zip as fulfillment by itself. Other JDK selections require checking their exact notices and distribution terms. Local build preparation does not publish installers.
+Redistributors must provide a compliant corresponding-source route for their selected runtime. See .wiki/development.md; do not treat this upstream reference or the JDK src.zip as fulfillment by itself. Other JDK selections require checking their exact notices and distribution terms. Local build preparation does not publish installers.
 
 ## Preview music
 

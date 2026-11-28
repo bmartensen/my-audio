@@ -34,7 +34,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
     $taskApk = 'app/build/outputs/apk/release/app-release.apk'
     if (-not (Test-Path -LiteralPath $taskApk)) {
-        throw 'Release APK is unsigned. Configure a complete local signing profile; see .wiki/developer-builds.md.'
+        throw 'Release APK is unsigned. Configure a complete local signing profile; see .wiki/development.md.'
     }
     $taskCerts = & (Join-Path $taskBuildTools.FullName 'apksigner.bat') verify --print-certs $taskApk
     if ($LASTEXITCODE -ne 0) { throw 'Signature verification failed.' }

@@ -1,6 +1,6 @@
 # Collaboration principles
 
-These rules apply to everyone working on My Audio, with or without an assistant.
+These rules apply to everyone working on this project, with or without an assistant. This page belongs to the [harness](../.agents/harness.md).
 
 ## People
 
@@ -10,8 +10,8 @@ These rules apply to everyone working on My Audio, with or without an assistant.
 
 ## Credit
 
-- Credit the people and communities whose work the app uses. Preserve their copyright and license notices verbatim.
-- Adding or upgrading a dependency, vendored code, icon, sound or image requires updating [`licenses/THIRD_PARTY_NOTICES.md`](../licenses/THIRD_PARTY_NOTICES.md), the full texts and provenance in [`licenses/`](../licenses/README.md) and, where relevant, the About credits in the same change.
+- Credit the people and communities whose work the project uses. Preserve their copyright and license notices verbatim.
+- Adding or upgrading a dependency, vendored code, icon, sound or image requires updating the project's license inventory, the full license texts and, where the product shows credits, those credits in the same change.
 - Do not add material whose license is unclear.
 
 ## Assistants
@@ -22,5 +22,6 @@ These rules apply to everyone working on My Audio, with or without an assistant.
 
 ## Privacy and honesty
 
-- Personal recordings, private paths, credentials and other people's contact details stay out of the repository. Public author and product contact details are intentional.
-- Report what was verified and how. A build is not a listening test; an emulator is not a real device.
+- Personal data, private paths, credentials and other people's contact details stay out of the repository. Public author and product contact details are intentional.
+- The wiki is public and describes the product and the repository, never the state of a contributor's devices, installations or test runs.
+- Report what was verified and how. A build is not a manual check; an emulator is not a real device.

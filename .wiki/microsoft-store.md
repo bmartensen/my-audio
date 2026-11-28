@@ -43,7 +43,7 @@ IARC questionnaire, app category *All other app types*. Every question about vio
 
 ## Packages
 
-`.work/MyAudio-<version>.msix` from `build.ps1 -Target WindowsStore` ([developer builds](developer-builds.md#microsoft-store-package)), unsigned, architecture x64, Windows 10 version 1809 or newer. Device family availability: only Windows 10/11 Desktop ticked, and Microsoft does not decide about future device families, because the app is an x64 desktop app with its own Java runtime.
+`.work/MyAudio-<version>.msix` from `build.ps1 -Target WindowsStore` ([developer builds](development.md#microsoft-store-package)), unsigned, architecture x64, Windows 10 version 1809 or newer. Device family availability: only Windows 10/11 Desktop ticked, and Microsoft does not decide about future device families, because the app is an x64 desktop app with its own Java runtime.
 
 ## Store listing de-DE
 
