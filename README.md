@@ -70,7 +70,7 @@ Kotlin and Compose Multiplatform share the UI, project model and session logic. 
 
 ## Contributing
 
-Ideas, bug reports and pull requests are welcome. Report bugs and request features as [issues](https://github.com/bmartensen/my-audio/issues/new/choose); open work is tracked there too. Pull requests target `develop`, where development happens; `main` holds the latest release. Project knowledge lives in the [wiki](.wiki/README.md): agreed behavior in [requirements](.wiki/app-requirements.md) and choices in [decisions](.wiki/decisions.md). Please read the [collaboration principles](.wiki/collaboration.md) first.
+Ideas, bug reports and pull requests are welcome. Report bugs and request features as [issues](https://github.com/bmartensen/my-audio/issues/new/choose); open work is tracked there too. A larger change starts from an issue that explains why it is made; small fixes can go straight to a pull request. Pull requests target `develop`, where development happens; `main` holds the latest release. Project knowledge lives in the [wiki](.wiki/README.md): agreed behavior in [requirements](.wiki/app-requirements.md) and choices in [decisions](.wiki/decisions.md). Please read the [collaboration principles](.wiki/collaboration.md) first.
 
 [`AGENTS_GUIDE.md`](AGENTS_GUIDE.md) is the shared policy for contributors and coding assistants (`AGENTS.md`, `CLAUDE.md` and `GEMINI.md` point to it); three shared workflows (`start`, `grill-me`, `wrap`) live in [`.agents/`](.agents/README.md).
 

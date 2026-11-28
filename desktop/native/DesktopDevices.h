@@ -16,6 +16,12 @@ std::vector<std::string> deviceNames(bool capture);
 
 void selectDevices(const std::string &playback, const std::string &capture);
 
+/**
+ * Channel count of the microphone a transport opens now (the selection if connected, else the default):
+ * the most any of its native formats offers, 1 if unknown. Two or more offer the input channel choice.
+ */
+int captureChannels();
+
 /** The shared miniaudio context (lazily initialised), used by every device the app opens. */
 ma_context *audioContext();
 

@@ -29,6 +29,8 @@ find_package(JNI REQUIRED)
 add_subdirectory(${SHARED_DIR}/third_party/airwindows ${CMAKE_CURRENT_BINARY_DIR}/airwindows)
 # Neural Amp Modeler inference for imported amp models (shared with Android).
 add_subdirectory(${SHARED_DIR}/third_party/nam ${CMAKE_CURRENT_BINARY_DIR}/nam)
+# LAME encodes "Mix as MP3" (shared with Android); its own mp3lame.dll under the LGPL, loaded before myaudio.dll.
+add_subdirectory(${SHARED_DIR}/third_party/lame ${CMAKE_CURRENT_BINARY_DIR}/lame)
 
 add_library(myaudio SHARED
         ${SHARED_DIR}/AirwindowsEffects.cpp
@@ -38,6 +40,7 @@ add_library(myaudio SHARED
         ${SHARED_DIR}/DawExport.cpp
         ${SHARED_DIR}/JniBridge.cpp
         ${SHARED_DIR}/Metronome.cpp
+        ${SHARED_DIR}/Mp3Encoder.cpp
         ${SHARED_DIR}/EffectPreview.cpp
         ${SHARED_DIR}/LiveChain.cpp
         ${SHARED_DIR}/ProjectMix.cpp
@@ -72,4 +75,4 @@ endif()
 set_source_files_properties(${SHARED_DIR}/AmpCabinet.cpp ${SHARED_DIR}/Correlation.cpp ${SHARED_DIR}/TrackProcessing.cpp ${SHARED_DIR}/BleedRemoval.cpp
         ${SHARED_DIR}/LiveChain.cpp PROPERTIES COMPILE_OPTIONS "${FAST_MATH}")
 
-target_link_libraries(myaudio PRIVATE opus airwindows nam)
+target_link_libraries(myaudio PRIVATE opus airwindows nam mp3lame)

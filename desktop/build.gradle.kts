@@ -24,7 +24,7 @@ kotlin {
     }
 }
 
-// Native engine (myaudio.dll): MSVC build of desktop/native, see tools/build_desktop_native.ps1.
+// Native engine (myaudio.dll with mp3lame.dll): MSVC build of desktop/native, see tools/build_desktop_native.ps1.
 val nativeDir = layout.buildDirectory.dir("native")
 val buildNative by tasks.registering(Exec::class) {
     group = "build"
@@ -39,7 +39,7 @@ val buildNative by tasks.registering(Exec::class) {
     outputs.dir(nativeDir)
 }
 
-// The packaged app carries myaudio.dll as an app resource (compose.application.resources.dir).
+// The packaged app carries myaudio.dll and mp3lame.dll as app resources (compose.application.resources.dir).
 val appResources = layout.buildDirectory.dir("appResources")
 val stageNativeResources by tasks.registering(Copy::class) {
     dependsOn(buildNative)

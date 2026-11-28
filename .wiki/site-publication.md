@@ -1,6 +1,6 @@
 # GitHub Pages and releases
 
-`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published only as GitHub releases, each with the source archive of the bundled Java runtime; no other site hosts them, because GPLv2 counts source access only from the same place as the binaries. For Windows, the download buttons lead to the [Microsoft Store](microsoft-store.md) listing; the MSI stays on the GitHub release. The martensening.com product page links the APK asset and the Store.
+`docs/` is the GitHub Pages site (deployed from `main` → `/docs`): landing page, user guide, privacy policy and legal notice in German and English. Installers are published only as GitHub releases, each with the source archive of the bundled Java runtime; no other site hosts them, because GPLv2 counts source access only from the same place as the binaries. For Windows, the download buttons lead to the [Microsoft Store](microsoft-store.md) listing; the MSI stays on the GitHub release. The martensening.com product page links the stable `/download/android/` address, the Store and `releases/latest`, so it needs no change for a release.
 
 ## Site structure
 
@@ -12,6 +12,7 @@
 | `/de/legal/`, `/en/legal/` | Legal notice |
 | `/` | Chooses `/de/` or `/en/` from the browser language, with visible links as fallback |
 | `/anleitung/` | Redirect to `/de/guide/`, keeping the `#section` anchor (earlier address) |
+| `/download/android/` | Stable address of the current Android download for other sites: forwards to the APK of `release` (or to `releases/latest` while `release_downloads` is off) |
 
 Both languages use identical slugs; `_layouts/default.html` derives navigation, footer and the language switch from `page.lang` and `page.url`, so a new page only needs `lang` and `permalink`. Redirect pages use `_layouts/redirect.html`. `repository_url` in `_config.yml` identifies the repository, so forks can publish their own site.
 
@@ -42,7 +43,7 @@ Only when the contributor explicitly authorizes it; preparing, building or commi
 3. Complete the [publication audit](publication-checks.md) on `develop` and push it. Open the release pull request `develop` → `main` (`gh pr create --base main --head develop --title "Release <version>"`, changelog entry as body), merge it with a merge commit, then create the annotated tag `v<version>` on the merge commit in `main` and push the tag (see [branches and releases](repository-rules.md#branches-and-releases)).
 4. `.\tools\publish_github_release.ps1 -DryRun`, then without `-DryRun`: verifies tag, checksums and runtime source, creates a **draft** release with notes from the changelog and uploads APK, MSI, `.sha256` files and the runtime source. Review the draft, then publish it (`-Publish` or `gh release edit v<version> --draft=false --latest`).
 5. `.\tools\check_site_downloads.ps1 -RequireGitHubRelease` must pass. Then set `release_downloads: true` and `release`/`released` in `docs/_config.yml` on `develop`, run both checks again and bring the change to `main` with a second pull request (`Link <version> downloads`). Check both languages and both installer links on the live site.
-6. martensening.com: set the version and date in its `html/myaudio/index.php` (Android links this release's APK, Windows the Store) and let its operator deploy (that repository's `.wiki/server.md`). Never copy installers there.
+6. martensening.com needs no change: its product page links `/download/android/`, which follows step 5, the Store and `releases/latest`. Check that `https://bmartensen.github.io/my-audio/download/android/` forwards to the new APK. Never copy installers there.
 7. Microsoft Store: `build.ps1 -Target WindowsStore` from the tagged merge commit, then in Partner Center start a new submission, upload `.work/MyAudio-<version>.msix` under Packages and put the changelog entry into *What's new in this version* of both listings ([Microsoft Store](microsoft-store.md)). The GitHub release carries the runtime source the package bundles.
 
 ## Guide screenshots

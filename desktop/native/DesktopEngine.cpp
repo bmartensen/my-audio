@@ -88,7 +88,7 @@ std::vector<float> DesktopEngine::renderPlayback() {
     return output;
 }
 
-bool DesktopEngine::openDevice(bool duplex) {
+bool DesktopEngine::openDevice(bool duplex, InputChannel inputChannel) {
     auto device = std::make_unique<ma_device>();
     // Same configuration as the calibration (DesktopCalibration.cpp), so its latency applies.
     ma_device_config config = ma_device_config_init(duplex ? ma_device_type_duplex : ma_device_type_playback);
@@ -96,7 +96,8 @@ bool DesktopEngine::openDevice(bool duplex) {
     config.playback.format = ma_format_f32;
     config.playback.channels = kChannels;
     config.capture.format = ma_format_f32;
-    config.capture.channels = 1;
+    // A two-channel interface opens in stereo, whichever channel is recorded, as in the calibration.
+    config.capture.channels = inputChannel == InputChannel::Device ? 1 : 2;
     config.performanceProfile = ma_performance_profile_low_latency;
     // The global buffer choice (Settings); the calibration applies the same, so its latency fits.
     if (bufferSetting() > 0) config.periodSizeInFrames = static_cast<ma_uint32>(kPeriodFrames * bufferSetting());
@@ -108,6 +109,8 @@ bool DesktopEngine::openDevice(bool duplex) {
         MYAUDIO_LOGW(kTag, "Cannot open the %s device", duplex ? "duplex" : "playback");
         return false;
     }
+    mInputChannel = duplex ? inputChannel : InputChannel::Device;
+    if (mInputChannel != InputChannel::Device) mInputScratch.assign(kScratchFrames, 0.0f);
     mDevice = device.release();
     return true;
 }
@@ -140,7 +143,7 @@ bool DesktopEngine::startPlayback(int64_t startFrame, int /* outputDeviceId */, 
 bool DesktopEngine::startRecording(const std::string &path, const std::string &referencePath, int64_t startFrame,
                                    int64_t countInFrames,
                                    int /* outputDeviceId */, int /* inputDeviceId */, bool /* handsFreeInput */,
-                                   bool /* bluetooth */, InputChannel /* miniaudio mixes all channels */) {
+                                   bool /* bluetooth */, InputChannel inputChannel) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mDevice != nullptr) return false;
     mPosition = std::max<int64_t>(0, startFrame) - std::max<int64_t>(0, countInFrames);
@@ -154,7 +157,7 @@ bool DesktopEngine::startRecording(const std::string &path, const std::string &r
         mReferenceFifo = std::make_unique<SpscFifo>(static_cast<size_t>(kFifoSeconds * kSampleRate));
         mReferenceScratch.assign(kScratchFrames, 0.0f);
     }
-    if (!openDevice(true)) {
+    if (!openDevice(true, inputChannel)) {
         mWav.finish();
         mReferenceWav.finish();
         return false;
@@ -177,11 +180,11 @@ bool DesktopEngine::startRecording(const std::string &path, const std::string &r
 }
 
 bool DesktopEngine::startMonitoring(int /* outputDeviceId */, int /* inputDeviceId */, bool /* handsFreeInput */,
-                                    bool /* bluetooth */, InputChannel /* miniaudio mixes all channels */) {
+                                    bool /* bluetooth */, InputChannel inputChannel) {
     std::lock_guard<std::mutex> guard(mLock);
     if (mDevice != nullptr) return false;
     mInputPeak = 0.0f;
-    if (!openDevice(true)) return false;
+    if (!openDevice(true, inputChannel)) return false;
     mMonitorOnly = true;
     mActive = true;
     if (ma_device_start(static_cast<ma_device *>(mDevice)) != MA_SUCCESS) {
@@ -236,6 +239,18 @@ void DesktopEngine::process(float *output, const float *input, uint32_t frames) 
         mix(output, kChannels, static_cast<int>(frames), nullptr, true);
         if (mPosition.load(std::memory_order_relaxed) >= mixFrames()) mActive.store(false, std::memory_order_relaxed);
         return;
+    }
+    if (mInputChannel != InputChannel::Device) {
+        // Everything below sees the chosen channel as a mono microphone, as on Android.
+        if (frames > mInputScratch.size()) {
+            std::fill_n(output, frames * kChannels, 0.0f);
+            mDroppedFrames.fetch_add(frames, std::memory_order_relaxed);
+            return;
+        }
+        for (uint32_t frame = 0; frame < frames; ++frame) {
+            mInputScratch[frame] = monoInputSample(input + frame * 2, 2, mInputChannel);
+        }
+        input = mInputScratch.data();
     }
     if (mMonitorOnly) {
         std::fill_n(output, frames * kChannels, 0.0f);

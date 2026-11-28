@@ -1,7 +1,9 @@
 // Microphone input for the guitar tuner on the desktop (Android uses AudioRecord). Delivers mono
 // samples at the requested rate through a lock-free queue; the shared Kotlin PitchDetector analyses them.
+// A two-channel interface is opened in stereo and the tuner hears the channel the takes record.
 #include <jni.h>
 
+#include <algorithm>
 #include <atomic>
 #include <memory>
 #include <mutex>
@@ -20,9 +22,21 @@ std::mutex gLock;
 ma_device *gDevice = nullptr;
 std::unique_ptr<myaudio::SpscFifo> gFifo;
 std::atomic<bool> gLost{false};
+myaudio::InputChannel gInputChannel = myaudio::InputChannel::Device;
 
 void dataCallback(ma_device * /* device */, void * /* output */, const void *input, ma_uint32 frames) {
-    if (gFifo) gFifo->write(static_cast<const float *>(input), frames);  // a full queue drops the block
+    if (!gFifo) return;
+    const auto *samples = static_cast<const float *>(input);
+    if (gInputChannel == myaudio::InputChannel::Device) {
+        gFifo->write(samples, frames);  // a full queue drops the block
+        return;
+    }
+    float mono[1024];
+    for (ma_uint32 start = 0; start < frames; start += 1024) {
+        const ma_uint32 count = std::min<ma_uint32>(1024, frames - start);
+        for (ma_uint32 i = 0; i < count; ++i) mono[i] = myaudio::monoInputSample(samples + (start + i) * 2, 2, gInputChannel);
+        gFifo->write(mono, count);
+    }
 }
 
 void notificationCallback(const ma_device_notification *notification) {
@@ -42,18 +56,23 @@ void closeLocked() {
 
 }  // namespace
 
-/** Opens the selected microphone at [sampleRate]; returns its name, or null if it cannot be opened. */
+/**
+ * Opens the selected microphone at [sampleRate]; [inputChannel] as for a take (InputChannel code, -1 = mono).
+ * Returns its name, or null if it cannot be opened.
+ */
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_martensening_my_1audio_desktop_DesktopNative_startCapture(JNIEnv *env, jobject /* this */, jint sampleRate) {
+Java_com_martensening_my_1audio_desktop_DesktopNative_startCapture(JNIEnv *env, jobject /* this */, jint sampleRate,
+                                                                    jint inputChannel) {
     std::lock_guard<std::mutex> guard(gLock);
     closeLocked();
+    gInputChannel = myaudio::toInputChannel(inputChannel);
     gFifo = std::make_unique<myaudio::SpscFifo>(static_cast<size_t>(sampleRate) * 2);
     gLost = false;
     auto *device = new ma_device;
     ma_device_config config = ma_device_config_init(ma_device_type_capture);
     config.sampleRate = static_cast<ma_uint32>(sampleRate);
     config.capture.format = ma_format_f32;
-    config.capture.channels = 1;
+    config.capture.channels = gInputChannel == myaudio::InputChannel::Device ? 1 : 2;
     config.dataCallback = dataCallback;
     config.notificationCallback = notificationCallback;
     config.wasapi.noAutoStreamRouting = MA_TRUE;

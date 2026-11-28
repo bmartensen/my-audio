@@ -106,6 +106,7 @@ You can also press **Record** without preparing a track. The new track then take
 - **Record** starts a take at the start marker. All audible tracks play along while the new track is recorded. If a **pre-roll** is set, a silent countdown runs first. If the metronome is on, it counts one bar in.
 - **Metronome** opens the [metronome settings](#metronome).
 - With a USB interface with two inputs, the choice **Input 1**, **Input 2** or **Input 1 and 2 mixed** appears below the time. Recordings are always mono.
+- Some interfaces pass only their first input to My Audio even though they have several, so only that one is recorded. If a recording through another input stays silent, check whether your interface has a “Combine” function that routes the inputs to the first one – often in the manufacturer's software on a computer.
 
 Recordings are always saved without effects. Effects, volume and envelope only apply during playback and sharing – you can change them any time. On Android, playback and recording continue in the background with a notification, even with the screen off.
 
@@ -241,6 +242,7 @@ Play an open string. The tuner detects the string automatically (standard tuning
 <img class="shot wide" src="{{ '/images/share.png' | relative_url }}" alt="Share menu">
 
 - **Share mix:** exactly what **Play** lets you hear, as stereo Ogg/Opus – small enough for messengers.
+- **Mix as MP3:** the same mix as an MP3 that every player and upload form accepts.
 - **Stems:** each track as a cleaned WAV file from the project start, without effects, volume or panning, in a ZIP – for further work in a DAW.
 - **Back up project:** the whole project with all original recordings and settings as a ZIP. **Import project** on the home screen restores it, also on a different device.
 - **SoundCraft session:** the project as a session for the desktop DAW SoundCraft, as a ZIP (see [SoundCraft](#soundcraft)).

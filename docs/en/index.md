@@ -19,7 +19,7 @@ permalink: /en/
   <div class="card"><h3>Live effects</h3><p>Monitor through reverb, EQ or amp effects while recording – the take stays dry.</p></div>
   <div class="card"><h3>Mix</h3><p>Volume, panning, envelopes and up to six effects per track.</p></div>
   <div class="card"><h3>Practice</h3><p>Metronome, practice loop, guitar tuner and lyrics with chords.</p></div>
-  <div class="card"><h3>Share</h3><p>Mix as Ogg/Opus, stems as WAV, whole projects as ZIP.</p></div>
+  <div class="card"><h3>Share</h3><p>Mix as Ogg/Opus or MP3, stems as WAV, whole projects as ZIP.</p></div>
   <div class="card"><h3>Open</h3><p>MIT licensed, with 478 Airwindows effects. Everything stays local on your device.</p></div>
 </div>
 

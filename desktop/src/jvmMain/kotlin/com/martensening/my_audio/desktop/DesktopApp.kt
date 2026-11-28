@@ -2,6 +2,7 @@ package com.martensening.my_audio.desktop
 
 import com.martensening.my_audio.data.ToneLibrary
 import com.martensening.my_audio.audio.AudioSettings
+import com.martensening.my_audio.audio.InputChannel
 import com.martensening.my_audio.platform.PreviewOutput
 import com.martensening.my_audio.ui.LiveInputs
 import com.martensening.my_audio.ui.PlatformLiveInput
@@ -35,6 +36,7 @@ import com.martensening.my_audio.ui.ProjectContent
 import com.martensening.my_audio.ui.ProjectSessions
 import com.martensening.my_audio.ui.ShareRequest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
@@ -224,6 +226,15 @@ private fun DesktopProjectScreen(
             session.onEnter()
         }
     }
+    // A two-channel interface offers input 1, 2 or both, as on Android; plugging one in shows the choice.
+    val devices = platform.devices
+    var inputChannel by remember { mutableStateOf<InputChannel?>(null) }
+    LaunchedEffect(devices) {
+        while (true) {
+            inputChannel = withContext(Dispatchers.Default) { devices.route().inputChannel }
+            delay(DEVICE_POLL_MILLIS)
+        }
+    }
     LaunchedEffect(session) {
         session.shareRequests.collect { request ->
             val saved = saveAs(window, request) ?: return@collect
@@ -244,6 +255,11 @@ private fun DesktopProjectScreen(
             onImportTrack = {
                 chooseFile(window, AUDIO_PATTERN) { name -> name.substringAfterLast('.', "").lowercase() in DesktopAudioImport.EXTENSIONS }
                     ?.let { session.importTrack(FileImportSource(it)) }
+            },
+            inputChannel = inputChannel,
+            onInputChannel = { channel ->
+                devices.selectInputChannel(devices.route().input, channel)
+                inputChannel = channel
             }
         )
     }
@@ -274,6 +290,9 @@ private fun chooseFile(window: Frame, pattern: String, accept: (String) -> Boole
     val name = dialog.file ?: return null
     return File(dialog.directory, name)
 }
+
+/** How often the project checks whether the microphone offers two channels. */
+private const val DEVICE_POLL_MILLIS = 2_000L
 
 private const val ZIP_PATTERN = "*.zip;*."
 private const val TONE_PATTERN = "*.nam;*.wav;*.zip"

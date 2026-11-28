@@ -2,6 +2,7 @@
 
 #include <jni.h>
 
+#include <algorithm>
 #include <mutex>
 
 #include "Log.h"
@@ -106,6 +107,26 @@ void applySelectedDevices(ma_device_config &config, ma_device_id &playbackId, ma
     }
 }
 
+int captureChannels() {
+    ma_context *context = audioContext();
+    if (context == nullptr) return 1;
+    ma_device_id id{};
+    bool selected = false;
+    {
+        std::lock_guard<std::mutex> guard(gLock);
+        const Found capture = find(true, gCapture);
+        if (capture.found) {
+            id = capture.id;
+            selected = true;
+        }
+    }
+    ma_device_info info;
+    if (ma_context_get_device_info(context, ma_device_type_capture, selected ? &id : nullptr, &info) != MA_SUCCESS) return 1;
+    ma_uint32 channels = 0;
+    for (ma_uint32 i = 0; i < info.nativeDataFormatCount; ++i) channels = std::max(channels, info.nativeDataFormats[i].channels);
+    return channels > 0 ? static_cast<int>(channels) : 1;
+}
+
 bool initDevice(ma_device_config &config, ma_device *device, const char *tag) {
     ma_device_id playbackId;
     ma_device_id captureId;
@@ -143,4 +164,9 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_martensening_my_1audio_desktop_DesktopNative_selectDevices(JNIEnv *env, jobject /* this */, jstring playback,
                                                                      jstring capture) {
     myaudio::selectDevices(myaudio::toString(env, playback), myaudio::toString(env, capture));
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_martensening_my_1audio_desktop_DesktopNative_inputChannels(JNIEnv * /* env */, jobject /* this */) {
+    return myaudio::captureChannels();
 }

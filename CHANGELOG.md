@@ -2,6 +2,13 @@
 
 User-visible changes by released version, newest first. Intermediate test builds are folded into the next listed version. Current behavior is documented in the [user guide](https://bmartensen.github.io/my-audio/en/guide/) and the [wiki](.wiki/README.md).
 
+## 0.11.3
+
+- **Mix as MP3** in the share menu: the same mix as **Share mix**, as an MP3 for any player and upload form.
+- A project with effects from a newer version of My Audio says so at the top, before you open a track.
+- Windows: an interface with two inputs offers **Input 1**, **Input 2** or **Input 1 and 2 mixed**, as on Android.
+- The guide explains what to check when an interface passes only its first input to My Audio.
+
 ## 0.11.2
 
 - **Back** in a project asks for confirmation once something can be undone, so a stray tap no longer discards the undo history.

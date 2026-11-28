@@ -112,7 +112,8 @@ class DesktopCalibration(
                 for (index in 1..LatencyCalibration.SESSION_COUNT) {
                     runningSession = index
                     val session = withContext(Dispatchers.Default) {
-                        SessionMeasurement.fromNative(NativeAudio.runCalibrationSession(0, 0, false, false, InputChannel.DEVICE_CODE))
+                        SessionMeasurement.fromNative(NativeAudio.runCalibrationSession(0, 0, false, false,
+                            route.inputChannel?.code ?: InputChannel.DEVICE_CODE))
                     }
                     Log.i(TAG, "Calibration session $index: $session")
                     if (!route.samePorts(devices.route())) {
