@@ -8,6 +8,7 @@ Product knowledge and durable decisions for My Audio. Open work, feature request
 | [Requirements](app-requirements.md) | Agreed product behavior and explicit exclusions |
 | [Decisions](decisions.md) | Durable choices and reasons, newest first |
 | [Collaboration](collaboration.md) | Conduct, credits, assistants and privacy |
+| [Interface text](interface-text.md) | Checklist for labels, menus and dialogs |
 | [Developer builds](developer-builds.md) | Tool setup, Android/Windows builds and optional signing |
 | [Repository commands](repository-rules.md) | Branches, releases, issues, verification and working conventions |
 | [Modeling](modeling.md) | Domain concepts and implementation boundaries |

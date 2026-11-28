@@ -67,7 +67,10 @@ try {
     if (((Get-Content $sourceSum -Raw).Trim() -split '\s+')[0].ToLowerInvariant() -ne $sourceHash) { throw "Checksum mismatch for $source." }
     $assets += $source
 
-    # Release notes: the CHANGELOG section of this version plus checksums.
+    # Release notes: the CHANGELOG section of this version plus checksums. The guide links point to the GitHub Pages
+    # site of the repository the release goes to, so a fork links its own guide.
+    $owner, $name = $repository -split '/', 2
+    $pages = "https://$($owner.ToLowerInvariant()).github.io/$name"
     $changelog = Get-Content CHANGELOG.md -Raw -Encoding UTF8
     $section = [regex]::Match($changelog, "(?ms)^## $([regex]::Escape($version))\b[^\n]*\n(.*?)(?=^## |\z)")
     if (-not $section.Success) { throw "CHANGELOG.md has no section for $version." }
@@ -87,7 +90,7 @@ $($section.Groups[1].Value.Trim())
 SHA-256:
 $($hashes -join "`n")
 
-User guide: https://bmartensen.github.io/my-audio/en/guide/ · Anleitung: https://bmartensen.github.io/my-audio/de/guide/
+User guide: $pages/en/guide/ · Anleitung: $pages/de/guide/
 "@
     $notesFile = Join-Path $WorkDir "release-notes-$version.md"
     Set-Content -LiteralPath $notesFile -Value $notes -Encoding utf8

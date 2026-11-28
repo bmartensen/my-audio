@@ -63,7 +63,7 @@ Debug and release share `com.martensening.my_audio`. A debug APK cannot replace 
 
 ## Optional developer-owned Android signing
 
-Keep the keystore outside the checkout. Configure all four neutral values, using process environment variables or `%USERPROFILE%\.gradle\gradle.properties`:
+Keep the keystore outside the checkout and outside any other repository, for example in `%USERPROFILE%\.gradle\signing\` next to the user Gradle properties, and keep a backup elsewhere: without it, installed apps cannot be updated. Configure all four neutral values, using process environment variables or `%USERPROFILE%\.gradle\gradle.properties`:
 
 | Environment variable | User Gradle property |
 |---|---|
